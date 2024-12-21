@@ -8,9 +8,10 @@ import {
 } from "react-native";
 import { ScrollView } from "react-native";
 import logo from "../assets/images/logo12.png";
-import pet from "../assets/images/welcome.jpg";
-
+import pet from "../assets/images/welcome2.jpg";
+import { useRouter } from "expo-router";
 export default function Welcome() {
+  const router = useRouter();
   return (
     <ScrollView style={styles.container}>
       <StatusBar hidden={true} />
@@ -35,7 +36,7 @@ export default function Welcome() {
       </View>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/signup")}
+        onPress={() => router.push("/home")}
       >
         <Text style={styles.textbutton}>Xem trước</Text>
       </TouchableOpacity>
