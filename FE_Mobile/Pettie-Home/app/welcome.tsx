@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { ScrollView } from "react-native";
 import logo from "../assets/images/logo12.png";
-import pet from "../assets/images/welcome.jpg";
+import pet from "../assets/images/bg.jpg";
 import { useRouter } from "expo-router";
 export default function Welcome() {
   const router = useRouter();
@@ -46,7 +46,7 @@ export default function Welcome() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#699BF4",
+    backgroundColor: "#01b9bb",
     flex: 1,
   },
   centerContent1: {
@@ -62,8 +62,6 @@ const styles = StyleSheet.create({
     justifyContent: "center", // Căn giữa theo chiều dọc
   },
   logo: {
-    marginTop: 1,
-
     marginLeft: 1,
     width: 200,
     height: 120,

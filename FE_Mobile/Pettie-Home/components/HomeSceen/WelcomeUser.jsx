@@ -3,6 +3,7 @@ import React from "react";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { LinearGradient } from "expo-linear-gradient";
 export default function welcomeUser() {
   return (
     <View style={styles.container}>
@@ -50,9 +51,14 @@ export default function welcomeUser() {
 }
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#699BF4",
+    backgroundColor: "#1ed0d0",
     paddingTop: 50,
     paddingBottom: 0,
+    position: "absolute", // Đặt vị trí tuyệt đối
+    top: 0, // Căn trên màn hình
+    left: 0,
+    right: 0,
+    zIndex: 10, // Đặt layer cao hơn các thành phần khác
   },
   location: {
     flexDirection: "row",
