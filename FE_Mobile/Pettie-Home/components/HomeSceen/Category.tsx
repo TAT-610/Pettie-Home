@@ -41,9 +41,11 @@ const styles = StyleSheet.create({
   container: {
     // backgroundColor: "rgb(229, 235, 241)",
     backgroundColor: "white",
-    paddingTop: 100,
-    padding: 20,
-    marginTop: 60,
+
+    paddingBottom: 20,
+
+    paddingHorizontal: 10,
+
     flexDirection: "row",
     justifyContent: "space-around",
   },
@@ -58,34 +60,34 @@ const styles = StyleSheet.create({
   iconCategory: {
     backgroundColor: "#699BF4", // Màu nền đỏ
     borderRadius: 100, // Bo tròn góc
-    width: 50, // Chiều rộng của item
-    height: 50, // Chiều cao của item
+    width: 48,
+    height: 48,
     justifyContent: "center", // Căn giữa nội dung theo trục dọc
     alignItems: "center", // Căn giữa nội dung theo trục ngang
   },
   iconCategory2: {
     backgroundColor: "#FE5977", // Màu nền đỏ
     borderRadius: 100, // Bo tròn góc
-    width: 50, // Chiều rộng của item
-    height: 50, // Chiều cao của item
+    width: 48,
+    height: 48,
     justifyContent: "center", // Căn giữa nội dung theo trục dọc
     alignItems: "center", // Căn giữa nội dung theo trục ngang
   },
   iconCategory3: {
-    backgroundColor: "#1ec2c9", // Màu nền đỏ
+    backgroundColor: "#FBBE28", // Màu nền đỏ
     borderRadius: 100, // Bo tròn góc
-    width: 50, // Chiều rộng của item
-    height: 50, // Chiều cao của item
+    width: 48,
+    height: 48,
     justifyContent: "center", // Căn giữa nội dung theo trục dọc
     alignItems: "center", // Căn giữa nội dung theo trục ngang
   },
   iconCategory4: {
-    backgroundColor: "#ed7c44", // Màu nền đỏ
-    borderRadius: 100, // Bo tròn góc
-    width: 50, // Chiều rộng của item
-    height: 50, // Chiều cao của item
-    justifyContent: "center", // Căn giữa nội dung theo trục dọc
-    alignItems: "center", // Căn giữa nội dung theo trục ngang
+    backgroundColor: "#ed7c44",
+    borderRadius: 100,
+    width: 48,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
   },
   TextCategory: {
     marginTop: 5,

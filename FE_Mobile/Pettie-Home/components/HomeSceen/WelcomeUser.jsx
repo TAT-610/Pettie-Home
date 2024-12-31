@@ -30,7 +30,7 @@ export default function welcomeUser() {
           backgroundColor: "#fff",
           height: 45,
           paddingHorizontal: 15,
-          marginHorizontal: 15,
+          marginHorizontal: 10,
           borderRadius: 100,
           elevation: 5,
         }}
@@ -51,7 +51,8 @@ export default function welcomeUser() {
 }
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#1ed0d0",
+    // backgroundColor: "#1ed0d0",
+    backgroundColor: "#699BF4",
     paddingTop: 50,
     paddingBottom: 0,
     position: "absolute", // Đặt vị trí tuyệt đối
@@ -74,6 +75,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
   },
 });
