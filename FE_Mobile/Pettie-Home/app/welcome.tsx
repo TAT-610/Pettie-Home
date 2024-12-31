@@ -5,13 +5,41 @@ import {
   Image,
   StatusBar,
   TouchableOpacity,
+  TextInput,
+  Alert,
 } from "react-native";
 import { ScrollView } from "react-native";
+import { useState } from "react";
+import { useRouter } from "expo-router";
 import logo from "../assets/images/logo12.png";
 import pet from "../assets/images/bg.jpg";
-import { useRouter } from "expo-router";
+
+const accounts = [
+  { username: "user123", password: "123456", type: "user" },
+  { username: "shop123", password: "123456", type: "shop" },
+];
+
 export default function Welcome() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
+
+  const handleLogin = () => {
+    const account = accounts.find(
+      (acc) => acc.username === username && acc.password === password
+    );
+
+    if (account) {
+      if (account.type === "user") {
+        router.push("/(tabs)/home"); // Điều hướng đến trang Home của người dùng
+      } else if (account.type === "shop") {
+        router.push("/(tabsShop)/homeShop"); // Điều hướng đến trang HomeShop của shop
+      }
+    } else {
+      Alert.alert("Lỗi đăng nhập", "Tên đăng nhập hoặc mật khẩu không đúng.");
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <StatusBar hidden={true} />
@@ -26,16 +54,32 @@ export default function Welcome() {
           Nơi cung cấp các dịch vụ cho thú cưng tại nhà
         </Text>
       </View>
-      <View style={styles.contentbutton}>
-        <TouchableOpacity
-          style={styles.button}
-          // onPress={() => router.push("/signup")}
-        >
+
+      {/* Form Đăng Nhập */}
+      <View style={styles.form}>
+        <TextInput
+          style={styles.input}
+          placeholder="Tên đăng nhập"
+          placeholderTextColor="#aaa"
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Mật khẩu"
+          placeholderTextColor="#aaa"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
           <Text style={styles.textbutton}>Đăng nhập</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Nút Xem Trước */}
       <TouchableOpacity
-        style={styles.button}
+        style={[styles.button, styles.previewButton]}
         onPress={() => router.push("/(tabs)/home")}
       >
         <Text style={styles.textbutton}>Xem trước</Text>
@@ -58,8 +102,8 @@ const styles = StyleSheet.create({
   },
   centerContent: {
     flex: 1,
-    alignItems: "center", // Căn giữa theo chiều ngang
-    justifyContent: "center", // Căn giữa theo chiều dọc
+    alignItems: "center",
+    justifyContent: "center",
   },
   logo: {
     marginLeft: 1,
@@ -79,27 +123,35 @@ const styles = StyleSheet.create({
     marginHorizontal: 30,
     textAlign: "center",
   },
+  form: {
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  input: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 15,
+    fontSize: 16,
+    color: "#333",
+  },
   button: {
     backgroundColor: "#ed7c44",
-    width: "78%",
-    marginHorizontal: "auto",
-    borderRadius: 25, // Bo góc
-    paddingVertical: 10, // Thêm khoảng cách trên dưới
-    alignItems: "center", // Căn chữ ở giữa
-    borderWidth: 1, // Độ dày viền
-    borderColor: "#fff", // Màu viền trắng
+    borderRadius: 25,
+    paddingVertical: 10,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#fff",
+    marginHorizontal: 40,
+  },
+  previewButton: {
+    marginTop: 15,
+    backgroundColor: "#4caf50",
   },
   textbutton: {
     fontFamily: "sans-serif",
-
     fontSize: 16,
-    color: "#ffff",
+    color: "#fff",
     fontWeight: "bold",
-    marginHorizontal: 20,
-    textAlign: "center",
-  },
-  contentbutton: {
-    marginTop: 50,
-    marginBottom: 15,
   },
 });
