@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaChartBar, FaUsers, FaStore, FaSignOutAlt } from "react-icons/fa";
 import { TbShoppingCartCopy } from "react-icons/tb";
 
@@ -17,8 +17,8 @@ const SidebarData: SidebarDataType[] = [
   },
   {
     icon: FaUsers,
-    heading: "Khách Hàng",
-    href: "/admin/khachhang",
+    heading: "Người dùng",
+    href: "/admin/nguoidung",
   },
   {
     icon: FaStore,
@@ -26,29 +26,36 @@ const SidebarData: SidebarDataType[] = [
     href: "/admin/cuahang",
     children: [
       {
-        icon: TbShoppingCartCopy ,
+        icon: TbShoppingCartCopy,
         heading: "Xét Duyệt Cửa Hàng",
         href: "/admin/xetduyetCuahang",
       },
     ],
   },
-  
 ];
 
 const Sidebar = () => {
+  const [active, setActive] = useState<string>(window.location.pathname);
+
+  useEffect(() => {
+    // Update active link on page load or URL change
+    setActive(window.location.pathname);
+  }, []);
+
+  const handleNavigation = (href: string) => {
+    setActive(href);
+    window.location.href = href; // Navigate to the clicked page
+  };
+
   return (
-    <div className="w-64 h-screen bg-white shadow-md flex flex-col">
+    <div className="w-64 h-screen bg-[#699BF4] shadow-md flex flex-col">
       {/* Logo Section */}
-      <div className="flex items-center px-6 py-4 border-b border-gray-200">
+      <div className="m-auto px-6 py-5">
         <img
-          src="src/assets/pawprint.png" 
+          src="/src/assets/logotest.png"
           alt="Logo"
-          className="w-10 h-10"
+          className="w-45 h-20"
         />
-        <div className="ml-4">
-          <h1 className="text-lg font-bold">Petite Home</h1>
-          <p className="text-sm text-gray-500">Tiện lợi cho bạn, thoải mái cho pet</p>
-        </div>
       </div>
 
       {/* Navigation Section */}
@@ -57,30 +64,38 @@ const Sidebar = () => {
           {SidebarData.map((item) => (
             <li key={item.heading}>
               {/* Main Navigation Link */}
-              <a
-                href={item.href}
-                className="flex items-center text-sm font-medium text-gray-600 hover:text-green-900 hover:bg-[#37cecc] rounded-lg px-4 py-2"
+              <div
+                onClick={() => handleNavigation(item.href)}
+                className={`flex items-center text-sm font-medium rounded-lg px-4 py-2 cursor-pointer ${
+                  active === item.href
+                    ? "bg-white text-green-900"
+                    : "text-white hover:text-green-900 hover:bg-white"
+                }`}
               >
                 <div className="mr-3 text-lg">
                   <item.icon />
                 </div>
                 {item.heading}
-              </a>
+              </div>
 
               {/* Sub-navigation (if any) */}
               {item.children && (
                 <ul className="pl-6 space-y-2 mt-2">
                   {item.children.map((subItem) => (
                     <li key={subItem.heading}>
-                      <a
-                        href={subItem.href}
-                        className="flex items-center text-sm font-medium text-gray-600 hover:text-green-900 hover:bg-[#37cecc] rounded-lg px-4 py-2"
+                      <div
+                        onClick={() => handleNavigation(subItem.href)}
+                        className={`flex items-center text-sm font-medium rounded-lg px-4 py-2 cursor-pointer ${
+                          active === subItem.href
+                            ? "bg-white text-green-900"
+                            : "text-white hover:text-green-900 hover:bg-white"
+                        }`}
                       >
                         <div className="mr-3 text-lg">
                           <subItem.icon />
                         </div>
                         {subItem.heading}
-                      </a>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -92,7 +107,7 @@ const Sidebar = () => {
 
       {/* Logout Section */}
       <div className="px-4 py-6">
-        <button className="flex items-center text-sm font-medium text-[#00b9bb] hover:text-red-500 hover:bg-[#37cecc] rounded-lg px-4 py-2 w-full">
+        <button className="flex items-center text-sm font-medium text-white hover:text-red-500 hover:bg-[#37cecc] rounded-lg px-4 py-2 w-full">
           <div className="mr-3 text-lg">
             <FaSignOutAlt />
           </div>

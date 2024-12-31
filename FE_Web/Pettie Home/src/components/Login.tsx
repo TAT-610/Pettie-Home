@@ -6,7 +6,7 @@ export default function Login() {
 
   const handleLogin = async () => {
     console.log("CHuyen trang");
-    navigate('/admin');
+    navigate('/admin/thongke');
   }
 
   return (
