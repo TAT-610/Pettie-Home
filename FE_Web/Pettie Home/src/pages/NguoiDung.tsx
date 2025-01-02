@@ -1,5 +1,4 @@
 import React from "react";
-import { FaEdit, FaTrashAlt } from "react-icons/fa";
 
 const customers = [
   { id: 50, username: "zekix", name: "Clarke Pitts", email: "zekix@mailinator.com", role: "editor", createdAt: "Jul 19, 2020" },
@@ -15,6 +14,12 @@ const customers = [
 ];
 
 const KhachHang = () => {
+  const handleActionChange = (customerId:any, action: any) => {
+    if (action === "lock") {
+      alert(`Khóa tài khoản người dùng có ID: ${customerId}`);
+    }
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen relative">
       {/* Header */}
@@ -59,13 +64,14 @@ const KhachHang = () => {
                 <td className="px-4 py-3">{customer.username}</td>
                 <td className="px-4 py-3">{customer.name}</td>
                 <td className="px-4 py-3">{customer.email}</td>
-                <td className="px-4 py-3 flex items-center space-x-4">
-                  <button className="text-blue-500 hover:text-blue-700">
-                    <FaEdit />
-                  </button>
-                  <button className="text-red-500 hover:text-red-700">
-                    <FaTrashAlt />
-                  </button>
+                <td className="px-4 py-3">
+                  <select
+                    className="border border-gray-300 rounded-lg px-2 py-1"
+                    onChange={(e) => handleActionChange(customer.id, e.target.value)}
+                  >
+                    <option value="">Chọn hành động</option>
+                    <option value="lock">Khóa tài khoản</option>
+                  </select>
                 </td>
               </tr>
             ))}
