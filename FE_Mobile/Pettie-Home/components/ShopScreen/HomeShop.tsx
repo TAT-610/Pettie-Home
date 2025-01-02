@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: '#a6c2f3',
-    padding: 25,
+    padding: 30,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -97,11 +97,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
+    padding: 10,
+    marginTop: 25
   },
   notificationIcon: {
     backgroundColor: '#0056b3',
     padding: 10,
     borderRadius: 20,
+    marginTop: 25
+
   },
   statsContainer: {
     flexDirection: 'column',
