@@ -1,30 +1,21 @@
 import { useState } from "react";
-import { FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 const stores = [
   { id: 1, shopName: "Clarke Pitts", status: "Pending", price: 50 },
-  { id: 2, shopName: "Haven Essentials", status: "Pending", price: 75 },
+  { id: 2, shopName: "Haven Essentials", status: "Chấp nhận", price: 75 },
   { id: 3, shopName: "Paws & Claws", status: "Pending", price: 120 },
-  { id: 4, shopName: "Pets Paradise", status: "Pending", price: 95 },
+  { id: 4, shopName: "Pets Paradise", status: "Không chấp nhận", price: 95 },
 ];
 
 const XetDuyetCuaHang = () => {
   const [storeData, setStoreData] = useState(stores);
 
-  const handleApprove = (id: number) => {
-    setStoreData(prevState =>
-      prevState.map(store =>
-        store.id === id ? { ...store, status: "Approved" } : store
-      )
-    );
-  };
-
-  const handleReject = (id: number) => {
-    setStoreData(prevState =>
-      prevState.map(store =>
-        store.id === id ? { ...store, status: "Rejected" } : store
-      )
-    );
+  const handleActionChange = (storeId: any, action: any) => {
+    if (action === "approve") {
+      alert(`Chấp nhận cửa hàng có ID: ${storeId}`);
+    } else if (action === "reject") {
+      alert(`Không chấp nhận cửa hàng có ID: ${storeId}`);
+    }
   };
 
   return (
@@ -69,37 +60,26 @@ const XetDuyetCuaHang = () => {
                 <td className="px-4 py-3">
                   {/* Conditional styling for status */}
                   <span
-                    className={`${
-                      store.status === "Approved"
+                    className={`${store.status === "Chấp nhận"
                         ? "text-green-500"
-                        : store.status === "Rejected"
-                        ? "text-red-500"
-                        : "text-yellow-500"
-                    }`}
+                        : store.status === "Không chấp nhận"
+                          ? "text-red-500"
+                          : "text-yellow-500"
+                      }`}
                   >
                     {store.status}
                   </span>
                 </td>
                 <td className="px-4 py-3">{store.price} USD</td>
                 <td className="px-4 py-3 flex items-center space-x-4">
-                  {/* Approve Button */}
-                  {store.status === "Pending" && (
-                    <button
-                      onClick={() => handleApprove(store.id)}
-                      className="text-green-500 hover:text-green-700 text-lg"
-                    >
-                      <FaCheckCircle />
-                    </button>
-                  )}
-                  {/* Reject Button */}
-                  {store.status === "Pending" && (
-                    <button
-                      onClick={() => handleReject(store.id)}
-                      className="text-red-500 hover:text-red-700  text-lg"
-                    >
-                      <FaTimesCircle />
-                    </button>
-                  )}
+                  <select
+                    className="border border-gray-300 rounded-lg px-2 py-1"
+                    onChange={(e) => handleActionChange(store.id, e.target.value)}
+                  >
+                    <option value="">Chọn hành động</option>
+                    <option value="approve">Chấp nhận</option>
+                    <option value="reject">Không chấp nhận</option>
+                  </select>
                 </td>
               </tr>
             ))}
