@@ -15,7 +15,7 @@ const shopData = [
     id: 1,
     name: "Pet Shop Thủ Đức",
     image:
-      "https://i.pinimg.com/736x/e1/71/00/e171000e8992a4eb0b9e9bb66c826940.jpg",
+      "https://i.pinimg.com/736x/a3/66/d4/a366d46152f124b245b633283f027ecf.jpg",
     rate: 4.5,
     distance: "2.3 km",
   },
@@ -23,7 +23,7 @@ const shopData = [
     id: 2,
     name: "Tiệm Spa nhà Bụp",
     image:
-      "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
+      "https://i.pinimg.com/736x/7f/78/37/7f783761231551f96aadbaece6e7e1d9.jpg",
     rate: 4.0,
     distance: "1.8 km",
   },
@@ -91,7 +91,7 @@ export default function Suggestion() {
           name="arrowright"
           size={24}
           color="gray"
-          style={{ marginRight: 14, marginTop: 10 }}
+          style={{ marginTop: 10 }}
         />
       </View>
       <FlatList
@@ -116,6 +116,7 @@ const styles = StyleSheet.create({
   contentheader: {
     flexDirection: "row",
     justifyContent: "space-between",
+    paddingRight: 15,
   },
   header: {
     fontWeight: "700",

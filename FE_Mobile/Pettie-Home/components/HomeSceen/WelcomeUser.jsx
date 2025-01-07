@@ -10,7 +10,7 @@ export default function welcomeUser() {
       <View style={styles.header}>
         <View style={styles.location}>
           <FontAwesome6 name="location-dot" size={18} color="white" />
-          <Text style={styles.location_text}>
+          <Text style={styles.location_text} ellipsizeMode="tail">
             BS16, Vinhome Grand Park, ...
           </Text>
         </View>
@@ -33,6 +33,10 @@ export default function welcomeUser() {
           marginHorizontal: 10,
           borderRadius: 100,
           elevation: 5,
+          // shadowColor: "#000", // Màu bóng
+          // shadowOffset: { width: 0, height: 2 }, // Độ lệch của bóng
+          // shadowOpacity: 0.3, // Độ mờ của bóng
+          // shadowRadius: 4, // Đường kính của bóng
         }}
       >
         <FontAwesome name="search" size={16} color="gray" />
@@ -75,6 +79,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
   },
 });

@@ -15,7 +15,7 @@ const shopData = [
     id: 1,
     name: "Pet Shop Thủ Đức",
     image:
-      "https://i.pinimg.com/736x/de/23/10/de2310e8894dc8ede2694c110e3764ba.jpg",
+      "https://i.pinimg.com/736x/22/45/9a/22459a91602795a4dd42ad53baa25a9f.jpg",
     rate: 4.5,
     distance: "2.3 km",
   },
@@ -23,7 +23,7 @@ const shopData = [
     id: 2,
     name: "Tiệm Spa nhà Bụp",
     image:
-      "https://i.pinimg.com/736x/ab/52/1d/ab521d5f94b0d391bf9018c4eefd297d.jpg",
+      "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
     rate: 4.0,
     distance: "1.8 km",
   },
@@ -86,12 +86,12 @@ export default function Location() {
   return (
     <View style={styles.container}>
       <View style={styles.contentheader}>
-        <Text style={styles.header}>Đề xuất cho bạn :</Text>
+        <Text style={styles.header}>Dịch vụ gần bạn :</Text>
         <AntDesign
           name="arrowright"
           size={24}
           color="gray"
-          style={{ marginRight: 14, marginTop: 10 }}
+          style={{ marginTop: 10 }}
         />
       </View>
       <FlatList
@@ -155,5 +155,7 @@ const styles = StyleSheet.create({
   contentheader: {
     flexDirection: "row",
     justifyContent: "space-between",
+
+    paddingRight: 15,
   },
 });
