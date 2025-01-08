@@ -1,10 +1,26 @@
-import { View, Text, StyleSheet, TextInput } from "react-native";
-import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
+import React, { useState } from "react";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { LinearGradient } from "expo-linear-gradient";
-export default function welcomeUser() {
+import { useNavigation } from "@react-navigation/native";
+
+export default function WelcomeUser() {
+  const [searchText, setSearchText] = useState(""); // Lưu nội dung trong TextInput
+  const navigation = useNavigation(); // Sử dụng navigation
+
+  const handleSearch = () => {
+    if (searchText.trim()) {
+      navigation.navigate("SearchResults", { query: searchText }); // Chuyển sang trang khác kèm nội dung
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -18,52 +34,34 @@ export default function welcomeUser() {
           <Ionicons name="notifications" size={25} color="white" />
         </View>
       </View>
-      <View
-        style={{
-          top: 20,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: "#fff",
-          height: 45,
-          paddingHorizontal: 15,
-          marginHorizontal: 10,
-          borderRadius: 100,
-          elevation: 5,
-          // shadowColor: "#000", // Màu bóng
-          // shadowOffset: { width: 0, height: 2 }, // Độ lệch của bóng
-          // shadowOpacity: 0.3, // Độ mờ của bóng
-          // shadowRadius: 4, // Đường kính của bóng
-        }}
-      >
-        <FontAwesome name="search" size={16} color="gray" />
+
+      <View style={styles.searchContainer}>
+        {/* <FontAwesome name="search" size={16} color="gray" /> */}
         <TextInput
-          placeholder="Tìm kiếm dịch vụ, ..."
-          style={{
-            fontFamily: "outfit",
-            fontSize: 14,
-            flex: 1,
-            marginLeft: 5,
-          }}
+          placeholder="Tìm kiếm dịch vụ, cửa hàng ..."
+          style={styles.searchInput}
+          value={searchText}
+          onChangeText={setSearchText}
+          onSubmitEditing={handleSearch} // Tự động tìm khi nhấn Enter
         />
+        <TouchableOpacity onPress={handleSearch}>
+          <Ionicons name="search" size={20} color="#699BF4" />
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
-    // backgroundColor: "#1ed0d0",
     backgroundColor: "#699BF4",
     paddingTop: 50,
     paddingBottom: 0,
-    position: "absolute", // Đặt vị trí tuyệt đối
-    top: 0, // Căn trên màn hình
+    position: "absolute",
+    top: 0,
     left: 0,
     right: 0,
-    zIndex: 10, // Đặt layer cao hơn các thành phần khác
+    zIndex: 10,
   },
   location: {
     flexDirection: "row",
@@ -72,13 +70,28 @@ const styles = StyleSheet.create({
   location_text: {
     marginLeft: 10,
     color: "white",
-    fontWeight: 700,
+    fontWeight: "700",
   },
-  notification: {},
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
     paddingHorizontal: 20,
+  },
+  searchContainer: {
+    top: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    height: 45,
+    paddingHorizontal: 15,
+    marginHorizontal: 10,
+    borderRadius: 100,
+    elevation: 5,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    marginLeft: 5,
   },
 });

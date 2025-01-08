@@ -1,7 +1,14 @@
-import { View, Text, Image, FlatList, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import React from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
-
+import { useRouter } from "expo-router";
 import Octicons from "@expo/vector-icons/Octicons";
 interface Shop {
   id: number;
@@ -63,26 +70,31 @@ const shopData = [
 
 export default function Suggestion() {
   const renderItem = ({ item }: { item: Shop }) => (
-    <View style={styles.shopItem}>
-      <Image source={{ uri: item.image }} style={styles.shopImage} />
-      <Text style={styles.shopName} numberOfLines={2} ellipsizeMode="tail">
-        {item.name}
-      </Text>
+    <TouchableOpacity onPress={() => handleProductPress(item.id)}>
+      <View style={styles.shopItem}>
+        <Image source={{ uri: item.image }} style={styles.shopImage} />
+        <Text style={styles.shopName} numberOfLines={2} ellipsizeMode="tail">
+          {item.name}
+        </Text>
 
-      <View style={styles.contentshop}>
-        <Text style={styles.shopDetails}>
-          <AntDesign name="star" size={15} color="#ecc41c" />
-          <Text style={styles.shopDetails2}> {item.rate}</Text>
-        </Text>
-        {/* <Text>-</Text> */}
-        <Text style={styles.shopDetails}>
-          <Octicons name="location" size={14} color="#FE5977" />
-          <Text style={styles.shopDetails2}> {item.distance}</Text>
-        </Text>
+        <View style={styles.contentshop}>
+          <Text style={styles.shopDetails}>
+            <AntDesign name="star" size={15} color="#ecc41c" />
+            <Text style={styles.shopDetails2}> {item.rate}</Text>
+          </Text>
+          {/* <Text>-</Text> */}
+          <Text style={styles.shopDetails}>
+            <Octicons name="location" size={14} color="#FE5977" />
+            <Text style={styles.shopDetails2}> {item.distance}</Text>
+          </Text>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
-
+  const router = useRouter();
+  const handleProductPress = (shopId: number) => {
+    router.push(`/ViewShop/${shopId}`); // Navigate to ProductDetail page
+  };
   return (
     <View style={styles.container}>
       <View style={styles.contentheader}>
@@ -123,6 +135,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingTop: 12,
     paddingBottom: 15,
+    color: "#ed7c44",
   },
   shopItem: {
     width: 145,
