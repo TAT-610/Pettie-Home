@@ -118,6 +118,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     paddingTop: 12,
     paddingBottom: 15,
+    color: "#ed7c44",
   },
   shopItem: {
     width: 145,

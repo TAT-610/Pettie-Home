@@ -1,11 +1,25 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  Dimensions,
+} from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import Octicons from "@expo/vector-icons/Octicons";
+import { TabView, SceneMap, TabBar } from "react-native-tab-view";
+// import ServicesOfOthers from "../../components/DetailShop/Services";
+// import ServicesOfCat from "../../components/DetailShop/ServicesOfCat";
+// import ServiceOfDog from "../../components/DetailShop/ServiceOfDog";
+import Product from "../../components/DetailShop/Product";
+import AllService from "../../components/DetailShop/AllService";
+
 export default function ShopDetail() {
   const router = useRouter();
   const { shopId } = useLocalSearchParams();
@@ -18,11 +32,13 @@ export default function ShopDetail() {
     const scrollY = event.nativeEvent.contentOffset.y;
     // Change the color based on scroll position
     if (scrollY > 200) {
-      setNavBarColor("white"); // Change to white when scrolled down
+      setNavBarColor("#ed7c44"); // Change to white when scrolled down
     } else {
       setNavBarColor("rgba(0, 0, 0, 0)"); // Original color
     }
   };
+
+  const initialLayout = { width: Dimensions.get("window").width };
 
   return (
     <View style={styles.container}>
@@ -53,12 +69,15 @@ export default function ShopDetail() {
             <Text style={styles.shopname}>Tiệm Spa nhà Bụp</Text>
           </View>
           <View style={styles.inforshop}>
-            <Text style={styles.texttitle}>
+            <Text
+              style={styles.texttitle}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
               Giới thiệu:{" "}
               <Text style={styles.text}>
                 Nhà Bụp với 2 năm kinh nghiệm trong việc spa thú cưng, tụi mình
-                tin chắc là sẽ đem lại những dịch vụ giúp thú cưng và bạn hài
-                lòng.
+                luôn muốn bạn và thú cưng có trãi nghiệm tốt nhất.
               </Text>
             </Text>
           </View>
@@ -83,8 +102,7 @@ export default function ShopDetail() {
             </View>
           </View>
         </View>
-        <View></View>
-
+        <AllService />
         <Text>Product ID: {shopId}</Text>
       </ScrollView>
 
@@ -92,14 +110,14 @@ export default function ShopDetail() {
       <View style={[styles.navigation, { backgroundColor: navBarColor }]}>
         <AntDesign
           name="arrowleft"
-          size={32}
+          size={28}
           color="white"
           onPress={() => router.back()}
           style={styles.backButton}
         />
         <Feather
           name="more-vertical"
-          size={32}
+          size={27}
           color="white"
           style={styles.backButton}
         />
@@ -145,15 +163,15 @@ const styles = StyleSheet.create({
   },
   shopImage: {
     width: "100%",
-    height: 200,
+    height: 180,
   },
   aboutshop: {
     backgroundColor: "white",
-    paddingVertical: 15,
+    paddingVertical: 12,
     paddingHorizontal: 15,
   },
   shopname: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -162,23 +180,23 @@ const styles = StyleSheet.create({
     flexDirection: "row", // Đặt icon và tên shop trên cùng một dòng
     alignItems: "center", // Căn giữa icon và tên theo chiều dọc
     justifyContent: "center", // Căn chúng bắt đầu từ bên trái
-    marginBottom: 12, // Khoảng cách bên dưới hàng
+    marginBottom: 8, // Khoảng cách bên dưới hàng
   },
   inforshop: {
     alignItems: "flex-start",
-    marginBottom: 8,
+    marginBottom: 5,
   },
   texttitle: {
     fontWeight: "800",
     color: "#666",
-    fontSize: 14.5,
-    lineHeight: 18,
+    fontSize: 12.5,
+    lineHeight: 16,
     textAlign: "left",
   },
   text: {
     fontWeight: "400",
     color: "#666",
-    fontSize: 14.5,
+    fontSize: 12.5,
   },
   contentshop: {
     flexDirection: "row",
@@ -193,10 +211,10 @@ const styles = StyleSheet.create({
   shopDetails: {
     fontWeight: "800",
     color: "#666",
-    fontSize: 14.5,
+    fontSize: 12.5,
   },
   shopDetails2: {
-    fontSize: 14,
+    fontSize: 12.5,
     color: "#666",
     paddingRight: 20,
     fontWeight: "400",
