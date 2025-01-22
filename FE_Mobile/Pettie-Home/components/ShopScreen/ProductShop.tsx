@@ -15,51 +15,51 @@ interface Product {
 const products: Product[] = [
     {
         id: "1730168662752790989",
-        name: "Bình giữ nhiệt Kaiyo 600ml màu xanh mint và màu trắng",
-        price: "457.000đ",
+        name: "Hạt mèo trưởng thành Zoi Cat",
+        price: "232.000đ",
         stock: 0,
         status: "2",
-        imageUrl: "https://photo.znews.vn/w660/Uploaded/wyhktpu/2020_10_01/119699855_632062647492864_4372496523093910298_n.jpg",
+        imageUrl: require("../../assets/images/hat-meo-zoi-cat-1kg-thuc-an-cho-meo-truong-thanh-cutepets.webp"),
     },
     {
         id: "1729456466567203477",
-        name: "Bộ thớt gỗ teak NEW M WAY hình chữ nhật có rãnh tay nắm đạt chuẩn châu ...",
-        price: "689.000đ",
+        name: "Pate Mèo Snappy Tom 85g",
+        price: "12.000đ",
         stock: 0,
         status: "đã bán hết",
-        imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkY78GmI4SGlwe5AyK-JxxbgDWE7T0h1JzOqKHn539zElZeNs7GRTsRUJW7A2zhsHQ2jg&usqp=CAU",
+        imageUrl: require("../../assets/images/pate.webp"),
     },
     {
         id: "1729456466767203277",
-        name: "Bộ thớt gỗ teak NEW M WAY hình chữ nhật có rãnh tay nắm đạt chuẩn châu ...",
-        price: "689.000đ",
+        name: "Hạt cho mèo SC Mix topping hạt sấy 1.5kg",
+        price: "135.000đ",
         stock: 0,
         status: "1 ",
-        imageUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSV7oM4o_1RL639kdOU9qizEv7teMkO7mOJYQenUhoqVpP3jVmflJHYFLsmVby4CQElKXg&usqp=CAU",
+        imageUrl: require("../../assets/images/hatSCMix.webp"),
     },
     {
         id: "1729456466787203277",
-        name: "Bộ thớt gỗ teak NEW M WAY hình chữ nhật có rãnh tay nắm đạt chuẩn châu ...",
-        price: "689.000đ",
+        name: "Ổ Nệm Hình Thú Dễ Thương Cho Mèo Chất Liệu Mềm Mại",
+        price: "305.000đ",
         stock: 0,
         status: "đã bán hết",
-        imageUrl: "https://standboothvietnam.com/wp-content/uploads/2024/01/spa-thu-cung.jpg",
+        imageUrl: require("../../assets/images/nemchomeo.jpg"),
     },
     {
         id: "1729456434567203277",
-        name: "Bộ thớt gỗ teak NEW M WAY hình chữ nhật có rãnh tay nắm đạt chuẩn châu ...",
+        name: "Nhà vệ sinh cho mèo chống văng cát, chậu cát, gấp gọn tiện lợi",
         price: "689.000đ",
         stock: 0,
         status: "đã bán hết",
-        imageUrl: "https://uniweb-offical.s3-ap-southeast-1.amazonaws.com/y951idub51bkf46zg0ityiif7t0f",
+        imageUrl: require("../../assets/images/hopcat.png"),
     },
     {
         id: "1729456466567456277",
-        name: "Bộ thớt gỗ teak NEW M WAY hình chữ nhật có rãnh tay nắm đạt chuẩn châu ...",
-        price: "689.000đ",
+        name: "Đồ Chơi Mèo Cattyman Thú Bông Lưới Gặm Sạch Răng",
+        price: "5050.000đ",
         stock: 0,
         status: "1 ",
-        imageUrl: "https://petnhasen.com/wp-content/uploads/2023/11/Kham-pha-khong-gian-spa-thu-gian-tuyet-voi-cho-thu-cung-tai-nha-1024x640.jpg",
+        imageUrl: require("../../assets/images/bancaomong.webp"),
     },
 ];
 
@@ -80,7 +80,10 @@ export default function ProductShop() {
         <View style={styles.productCard}>
             <View style={styles.productInfo}>
                 {item.imageUrl && (
-                    <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
+                    <Image 
+                    source={typeof item.imageUrl === "string" ? { uri: item.imageUrl } : item.imageUrl} 
+                    style={styles.productImage} 
+                />
                 )}
                 <View style={styles.productDetails}>
                     <Text style={styles.productName}>{item.name}</Text>
@@ -232,7 +235,7 @@ const styles = StyleSheet.create({
         marginRight: 15,
     },
     addButton: {
-        backgroundColor: "#699BF4",
+        backgroundColor: "#ed7c44",
         padding: 10,
         borderRadius: 8,
         marginRight: 15,
@@ -265,7 +268,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#f0f0f0",
     },
     activeTab: {
-        backgroundColor: "#699BF4", // Màu của tab đang chọn
+        backgroundColor: "#ed7c44", // Màu của tab đang chọn
     },
     tabText: {
         color: "#555",
@@ -275,7 +278,7 @@ const styles = StyleSheet.create({
     },
     menuTrigger: {
         fontSize: 18,
-        color: "#699BF4", // Màu của menu trigger
+        color: "#ed7c44", // Màu của menu trigger
         padding: 5,
         marginLeft: 7,
     },
@@ -303,6 +306,7 @@ const styles = StyleSheet.create({
         marginTop: 10
     },
     productImage: {
+        maxWidth: '100%',
         width: 110,
         height: 120,
         marginRight: 16,
@@ -339,7 +343,7 @@ const styles = StyleSheet.create({
     },
     actionButton: {
         padding: 8,
-        backgroundColor: "#699BF4", // Màu của nút hành động
+        backgroundColor: "#ed7c44", // Màu của nút hành động
         borderRadius: 4,
     },
     actionText: {

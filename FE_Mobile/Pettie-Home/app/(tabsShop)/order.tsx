@@ -1,10 +1,13 @@
-import { View, Text } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import React from "react";
+import OrderShop from "@/components/ShopScreen/OrderShop";
 
 export default function order() {
   return (
     <View>
-      <Text>order</Text>
-    </View>
+          <ScrollView>
+            <OrderShop />
+          </ScrollView>
+        </View>
   );
 }
