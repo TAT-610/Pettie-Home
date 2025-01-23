@@ -1,24 +1,32 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+} from 'react-native';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const App = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Header Section */}
-      <View style={styles.header}>
+      <LinearGradient
+        colors={['#01b9bb', '#ed7c44']}
+        style={styles.header}
+      >
         <Text style={styles.headerTitle}>My Shop</Text>
         <TouchableOpacity style={styles.notificationIcon}>
           <FontAwesome name="bell" size={20} color="#fff" />
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       {/* Statistics Section */}
       <View style={styles.statsContainer}>
-        {/* Tiêu đề Tổng quan hằng ngày */}
         <Text style={styles.statsTitle}>Tổng quan hằng ngày</Text>
-
-        {/* Hiển thị số liệu */}
         <View style={styles.statsList}>
           {stats.map((item, index) => (
             <View key={index} style={styles.statItem}>
@@ -28,6 +36,7 @@ const App = () => {
           ))}
         </View>
       </View>
+
       {/* Menu Items */}
       <FlatList
         data={menuItems}
@@ -35,7 +44,7 @@ const App = () => {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
-              <FontAwesome className={item.icon} size={20} color="#555" />
+              <FontAwesome className={item.icon} size={20} color="#2575fc" />
               <Text style={styles.menuText}>{item.label}</Text>
             </View>
             {item.badge && <Text style={styles.badge}>{item.badge}</Text>}
@@ -45,7 +54,10 @@ const App = () => {
       />
 
       {/* Growth Section */}
-      <View style={styles.growthContainer}>
+      <LinearGradient
+        colors={['#f7971e', '#ffd200']}
+        style={styles.growthContainer}
+      >
         <Text style={styles.growthTitle}>
           Tối ưu hóa sản phẩm để nhận ShopTab Vouchers
         </Text>
@@ -60,7 +72,7 @@ const App = () => {
             <Text style={styles.growthGoText}>Đi</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </LinearGradient>
     </ScrollView>
   );
 };
@@ -87,50 +99,43 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
   },
   header: {
-    backgroundColor: '#a6c2f3',
-    padding: 30,
+    padding: 40,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
-    padding: 10,
-    marginTop: 25
   },
   notificationIcon: {
     backgroundColor: '#0056b3',
     padding: 10,
     borderRadius: 20,
-    marginTop: 25
-
   },
   statsContainer: {
-    flexDirection: 'column',
-    justifyContent: 'space-around',
     backgroundColor: '#fff',
     padding: 16,
     marginVertical: 10,
-    borderRadius: 3,
+    borderRadius: 8,
     elevation: 3,
-    margin: 10
+    margin: 10,
   },
   statsTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 10, 
-    marginLeft: 10
+    marginBottom: 30,
   },
   statsList: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-  },  
+  },
   statItem: {
     alignItems: 'center',
-
   },
   statValue: {
     fontSize: 16,
@@ -146,9 +151,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#fff',
     padding: 16,
-    marginVertical: 10,
-    borderRadius: 3,
-    elevation: 3,
+    marginVertical: 5,
+    borderRadius: 8,
+    elevation: 2,
     margin: 10,
     justifyContent: 'space-between',
   },
@@ -171,7 +176,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   growthContainer: {
-    backgroundColor: '#fff',
     padding: 16,
     margin: 10,
     borderRadius: 8,
@@ -180,12 +184,12 @@ const styles = StyleSheet.create({
   growthTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#d48225',
+    color: '#fff',
     marginBottom: 8,
   },
   growthDescription: {
     fontSize: 14,
-    color: '#555',
+    color: '#fff',
     marginBottom: 12,
   },
   growthActions: {
