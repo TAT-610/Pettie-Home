@@ -1,6 +1,6 @@
 import { View, ScrollView } from "react-native";
 import React from "react";
-import ProfileShop from "@/components/ShopScreen/ProfileShop";
+import ProfileShop from "@/components/ShopScreen/profile/ProfileShop";
 
 export default function profile() {
   return (
