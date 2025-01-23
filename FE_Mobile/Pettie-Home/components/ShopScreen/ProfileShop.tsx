@@ -7,7 +7,7 @@ import {
   FlatList,
   Image,
 } from 'react-native';
-import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const ProfileShop = () => {
@@ -17,7 +17,7 @@ const ProfileShop = () => {
     { label: 'Doanh thu', icon: 'money', value: 'đ 20.250.000' },
     { label: 'Đăng ký mở cửa hàng', icon: 'store', value: null },
     { label: 'Hỗ trợ', icon: 'question-circle', value: null },
-    { label: 'Cài đặt', icon: 'cog', value: null },
+    { label: 'Cài đặt', icon: 'cogs', value: null },
     { label: 'Điều khoản & Chính sách', icon: 'file-text', value: null },
     { label: 'Chỉnh sửa thông tin', icon: 'edit', value: null },
     { label: 'Thêm dịch vụ', icon: 'briefcase', value: null },
@@ -26,10 +26,12 @@ const ProfileShop = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <LinearGradient colors={["#01b9bb", "#ed7c44"]} style={styles.header}>
+      <LinearGradient colors={['#01b9bb', '#ed7c44']} style={styles.header}>
         <View style={styles.headerContent}>
           <Image
-            source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlK35lrkGleTsoX6U_ecq2LcOhdjoXc31O4Q&s' }} 
+            source={{
+              uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlK35lrkGleTsoX6U_ecq2LcOhdjoXc31O4Q&s',
+            }}
             style={styles.avatar}
           />
           <View>
@@ -41,7 +43,7 @@ const ProfileShop = () => {
           </View>
         </View>
         <TouchableOpacity>
-          <MaterialIcons name="edit" size={24} color="#fff" />
+        <Feather name="edit" size={24} color="white" />
         </TouchableOpacity>
       </LinearGradient>
 
@@ -52,7 +54,7 @@ const ProfileShop = () => {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
-              <FontAwesome className={item.icon} size={20} color="#4CAF50" />
+              <FontAwesome name='shopping-cart' size={20} color="#4CAF50" />
               <Text style={styles.menuText}>{item.label}</Text>
             </View>
             {item.value && <Text style={styles.menuValue}>{item.value}</Text>}
@@ -79,7 +81,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-    marginBottom: 18
+    marginBottom: 18,
   },
   headerContent: {
     flexDirection: 'row',
