@@ -81,15 +81,15 @@ export default function ProductShop() {
             <View style={styles.productInfo}>
                 {item.imageUrl && (
                     <Image 
-                    source={typeof item.imageUrl === "string" ? { uri: item.imageUrl } : item.imageUrl} 
-                    style={styles.productImage} 
-                />
+                        source={typeof item.imageUrl === "string" ? { uri: item.imageUrl } : item.imageUrl} 
+                        style={styles.productImage} 
+                    />
                 )}
                 <View style={styles.productDetails}>
-                    <Text style={styles.productName}>{item.name}</Text>
-                    <Text style={styles.productPrice}>Giá: {item.price}</Text>
-                    <Text style={styles.productStock}>Kho: {item.stock}</Text>
-                    <Text style={styles.productStatus}>Số lượng: {item.status}</Text>
+                    <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
+                    <Text style={styles.productPrice} numberOfLines={1}>Giá: {item.price}</Text>
+                    <Text style={styles.productStock} numberOfLines={1}>Kho: {item.stock}</Text>
+                    <Text style={styles.productStatus} numberOfLines={1}>Số lượng: {item.status}</Text>
                 </View>
                 <View style={styles.productActions}>
                     <TouchableOpacity style={styles.actionButton}>
@@ -97,9 +97,9 @@ export default function ProductShop() {
                     </TouchableOpacity>
                 </View>
             </View>
-
         </View>
     );
+    
 
     return (
         <View style={styles.container}>
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     },
     productCard: {
         flexDirection: "row",
-        backgroundColor: "#fff", // Màu của tab đang chọn
+        backgroundColor: "#fff",
         padding: 16,
         marginBottom: 16,
         borderRadius: 8,
@@ -299,6 +299,7 @@ const styles = StyleSheet.create({
         elevation: 2,
         alignItems: "center", // Căn giữa các phần tử theo chiều dọc
         height: 150, // Đặt chiều cao cố định để tạo hình chữ nhật nằm ngang
+        justifyContent: "space-between",
     },
     productInfo: {
         flexDirection: "row",
@@ -306,7 +307,6 @@ const styles = StyleSheet.create({
         marginTop: 10
     },
     productImage: {
-        maxWidth: '100%',
         width: 110,
         height: 120,
         marginRight: 16,
@@ -315,31 +315,39 @@ const styles = StyleSheet.create({
     },
     productDetails: {
         flex: 1,
+        flexDirection:'column',
     },
     productName: {
         fontSize: 15,
         fontWeight: "600",
-        marginBottom: 4,
+        marginBottom: 7,
+        overflow: 'hidden'
     },
     productPrice: {
         fontSize: 14,
-        padding: 4,
         fontWeight: "bold",
-        color: 'green'
+        color: 'green',
+        marginBottom: 7,
+        marginTop: 7,
+        overflow: 'hidden',
+
     },
     productStock: {
         fontSize: 12,
         marginBottom: 6,
         color: "#888",
+        overflow: 'hidden',
     },
     productStatus: {
         fontSize: 12,
         color: "#ff0000",
+        overflow: 'hidden',
     },
     productActions: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignSelf: 'flex-end'
+        alignSelf: 'flex-end',
+        marginBottom: 10
     },
     actionButton: {
         padding: 8,

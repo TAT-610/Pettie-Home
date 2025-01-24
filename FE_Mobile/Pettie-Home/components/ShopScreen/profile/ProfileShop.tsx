@@ -40,7 +40,7 @@ const ProfileShop = () => {
         data={[
           { icon: <FontAwesome name='shopping-cart' size={20} color="#4CAF50" />, label: "Thông tin đơn hàng" },
           { icon: <Ionicons name="add-circle" size={20} color="#4CAF50" />, label: "Thêm sản phẩm" },
-          { icon: <FontAwesome5 name="money-bill-wave" size={20} color="#4CAF50" />, label: "Doanh thu", value: "20.250.000 đ" },
+          { icon: <FontAwesome5 name="money-bill-wave" size={19} style={{marginRight: -2}} color="#4CAF50" />, label: "Doanh thu", value: "20.250.000 đ" },
           { icon: <Ionicons name="storefront-sharp" size={20} color="#4CAF50" />, label: "Đăng ký mở cửa hàng" },
           { icon: <FontAwesome name='question-circle-o' size={20} color="#4CAF50" />, label: "Hỗ trợ" },
           { icon: <FontAwesome name='cogs' size={20} color="#4CAF50" />, label: "Cài đặt" },

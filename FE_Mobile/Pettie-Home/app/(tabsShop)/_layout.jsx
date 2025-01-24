@@ -69,7 +69,7 @@ export default function Layout() {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="message"
         options={{
           tabBarIcon: ({ focused }) => (
@@ -87,7 +87,7 @@ export default function Layout() {
             </Text>
           ),
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="profile"
         options={{
