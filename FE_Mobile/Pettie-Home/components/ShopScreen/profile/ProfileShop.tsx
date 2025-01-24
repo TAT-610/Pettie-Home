@@ -1,29 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, } from 'react-native';
-import { Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
+import { Feather, FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 
 const ProfileShop = () => {
   const router = useRouter();
   const [dropdownVisible, setDropdownVisible] = useState(false);
-
-  const menuItems = [
-    { label: 'Thông tin đơn hàng', icon: 'shopping-cart', value: null },
-    { label: 'Thêm sản phẩm', icon: 'plus-circle', value: null },
-    { label: 'Doanh thu', icon: 'money', value: 'đ 20.250.000' },
-    { label: 'Đăng ký mở cửa hàng', icon: 'store', value: null },
-    { label: 'Hỗ trợ', icon: 'question-circle', value: null },
-    { label: 'Cài đặt', icon: 'cogs', value: null },
-    { label: 'Điều khoản & Chính sách', icon: 'file-text', value: null },
-    { label: 'Chỉnh sửa thông tin', icon: 'edit', value: null },
-    { label: 'Thêm dịch vụ', icon: 'briefcase', value: null },
-  ];
-
   const handleEditProfile = () => {
     router.push("/profileShop/editprofile");
   };
-  
 
   return (
     <View style={styles.container}>
@@ -45,18 +31,28 @@ const ProfileShop = () => {
           </View>
         </View>
         <TouchableOpacity onPress={handleEditProfile}>
-        <Feather name="edit" size={24} color="white" />
+          <Feather name="edit" size={24} color="white" />
         </TouchableOpacity>
       </LinearGradient>
 
       {/* Menu */}
       <FlatList
-        data={menuItems}
-        keyExtractor={(item) => item.label}
+        data={[
+          { icon: <FontAwesome name='shopping-cart' size={20} color="#4CAF50" />, label: "Thông tin đơn hàng" },
+          { icon: <Ionicons name="add-circle" size={20} color="#4CAF50" />, label: "Thêm sản phẩm" },
+          { icon: <FontAwesome5 name="money-bill-wave" size={20} color="#4CAF50" />, label: "Doanh thu", value: "20.250.000 đ" },
+          { icon: <Ionicons name="storefront-sharp" size={20} color="#4CAF50" />, label: "Đăng ký mở cửa hàng" },
+          { icon: <FontAwesome name='question-circle-o' size={20} color="#4CAF50" />, label: "Hỗ trợ" },
+          { icon: <FontAwesome name='cogs' size={20} color="#4CAF50" />, label: "Cài đặt" },
+          { icon: <FontAwesome name='file-text' size={20} color="#4CAF50" />, label: "Điều khoản & Chính sách" },
+          { icon: <FontAwesome name='edit' size={20} color="#4CAF50" />, label: "Chỉnh sửa thông tin" },
+          { icon: <FontAwesome5 name="briefcase-medical" size={20} color="#4CAF50" />, label: "Thêm dịch vụ" },
+        ]}
+        keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.menuItem}>
             <View style={styles.menuItemLeft}>
-              <FontAwesome name='shopping-cart' size={20} color="#4CAF50" />
+              {item.icon}
               <Text style={styles.menuText}>{item.label}</Text>
             </View>
             {item.value && <Text style={styles.menuValue}>{item.value}</Text>}
@@ -92,11 +88,11 @@ const styles = StyleSheet.create({
   avatar: {
     width: 80,
     height: 80,
-    borderRadius: 35,
+    borderRadius: 40,
     marginRight: 18,
   },
   shopName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
   },
@@ -132,7 +128,7 @@ const styles = StyleSheet.create({
   },
   menuValue: {
     fontSize: 14,
-    color: '#4CAF50',
+    color: '#DC143C',
   },
   logoutButton: {
     backgroundColor: '#ed7c44',
@@ -140,6 +136,7 @@ const styles = StyleSheet.create({
     margin: 20,
     borderRadius: 10,
     alignItems: 'center',
+    elevation: 5,
   },
   logoutText: {
     fontSize: 16,
