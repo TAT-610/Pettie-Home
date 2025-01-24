@@ -19,7 +19,7 @@ const products: Product[] = [
         price: "232.000đ",
         stock: 0,
         status: "2",
-        imageUrl: require("../../assets/images/hat-meo-zoi-cat-1kg-thuc-an-cho-meo-truong-thanh-cutepets.webp"),
+        imageUrl: require("../../../assets/images/hat-meo-zoi-cat-1kg-thuc-an-cho-meo-truong-thanh-cutepets.webp"),
     },
     {
         id: "1729456466567203477",
@@ -27,7 +27,7 @@ const products: Product[] = [
         price: "12.000đ",
         stock: 0,
         status: "đã bán hết",
-        imageUrl: require("../../assets/images/pate.webp"),
+        imageUrl: require("../../../assets/images/pate.webp"),
     },
     {
         id: "1729456466767203277",
@@ -35,7 +35,7 @@ const products: Product[] = [
         price: "135.000đ",
         stock: 0,
         status: "1 ",
-        imageUrl: require("../../assets/images/hatSCMix.webp"),
+        imageUrl: require("../../../assets/images/hatSCMix.webp"),
     },
     {
         id: "1729456466787203277",
@@ -43,7 +43,7 @@ const products: Product[] = [
         price: "305.000đ",
         stock: 0,
         status: "đã bán hết",
-        imageUrl: require("../../assets/images/nemchomeo.jpg"),
+        imageUrl: require("../../../assets/images/nemchomeo.jpg"),
     },
     {
         id: "1729456434567203277",
@@ -51,7 +51,7 @@ const products: Product[] = [
         price: "689.000đ",
         stock: 0,
         status: "đã bán hết",
-        imageUrl: require("../../assets/images/hopcat.png"),
+        imageUrl: require("../../../assets/images/hopcat.png"),
     },
     {
         id: "1729456466567456277",
@@ -59,7 +59,7 @@ const products: Product[] = [
         price: "5050.000đ",
         stock: 0,
         status: "1 ",
-        imageUrl: require("../../assets/images/bancaomong.webp"),
+        imageUrl: require("../../../assets/images/bancaomong.webp"),
     },
 ];
 

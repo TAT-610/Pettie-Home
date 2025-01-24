@@ -1,16 +1,13 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  Image,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, } from 'react-native';
 import { Feather, FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
 
 const ProfileShop = () => {
+  const router = useRouter();
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+
   const menuItems = [
     { label: 'Thông tin đơn hàng', icon: 'shopping-cart', value: null },
     { label: 'Thêm sản phẩm', icon: 'plus-circle', value: null },
@@ -22,6 +19,11 @@ const ProfileShop = () => {
     { label: 'Chỉnh sửa thông tin', icon: 'edit', value: null },
     { label: 'Thêm dịch vụ', icon: 'briefcase', value: null },
   ];
+
+  const handleEditProfile = () => {
+    router.push("/profileShop/editprofile");
+  };
+  
 
   return (
     <View style={styles.container}>
@@ -42,7 +44,7 @@ const ProfileShop = () => {
             </View>
           </View>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleEditProfile}>
         <Feather name="edit" size={24} color="white" />
         </TouchableOpacity>
       </LinearGradient>

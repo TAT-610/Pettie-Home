@@ -1,13 +1,19 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, FlatList } from "react-native";
 import React from "react";
 import OrderShop from "@/components/ShopScreen/OrderShop";
 
 export default function order() {
   return (
-    <View>
-          <ScrollView>
+    <FlatList
+      data={[]}
+      renderItem={null}
+      ListFooterComponent={() => (
+        <>
+          <View style={{ backgroundColor: "#f9f9f9" }}>
             <OrderShop />
-          </ScrollView>
-        </View>
+          </View>
+        </>
+      )}
+    />
   );
 }

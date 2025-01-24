@@ -63,7 +63,7 @@ export default function OrderShop() {
                     </View>
                 ))}
             </View>
-            <Text style={styles.orderTotal}>Tổng: {item.total}</Text>
+            <Text style={styles.orderTotal}>Tổng đơn hàng: <Text style={styles.orderPrice}>{item.total}</Text></Text>
     
             {/* Nút Nhận đơn */}
             <TouchableOpacity style={styles.acceptButton}>
@@ -220,9 +220,11 @@ const styles = StyleSheet.create({
     orderTotal: { 
         fontSize: 16, 
         fontWeight: "bold", 
-        color: "#ed7c44", 
         textAlign: "right",
         marginTop: 8 
+    },
+    orderPrice:{
+    color: '#DC143C',
     },
     modalOverlay: {
         flex: 1,

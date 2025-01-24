@@ -95,7 +95,7 @@ export default function Layout() {
             <FontAwesome
               name="user-circle-o"
               size={26}
-              color={focused ? "#ed7c44" : "#b0b0b0"} // Cam khi hoạt động, xám khi không
+              color={focused ? "#ed7c44" : "#b0b0b0"}
             />
           ),
           tabBarLabel: ({ focused }) => (
