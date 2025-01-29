@@ -3,9 +3,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 const ThongKe = () => {
   const fakeData = [
-    { title: "Orders", value: "$35,485", change: "+2.8%" },
-    { title: "Avg. Order Amount", value: "$8,562", change: "-2.1%" },
-    { title: "Unique Customers", value: "15,235", change: "+3.2%" },
+    { title: "Tổng doanh thu", value: "34", change: "+2.8%" },
+    { title: "Tổng đơn hàng", value: "23", change: "-2.1%" },
+    { title: "Người dùng", value: "15,235", change: "+3.2%" },
     { title: "Net Sales", value: "$9,584", change: "-1.5%" },
   ];
 

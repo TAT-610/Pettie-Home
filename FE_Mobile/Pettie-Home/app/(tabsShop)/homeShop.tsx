@@ -1,12 +1,18 @@
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, FlatList } from "react-native";
 import React from "react";
-import HomeShop from '../../components/ShopScreen/HomeShop'
+import ProfileShop from "@/components/ShopScreen/homeShop/ProfileShop";
 export default function home() {
   return (
-    <View>
-      <ScrollView>
-        <HomeShop />
-      </ScrollView>
-    </View>
+    <FlatList
+      data={[]}
+      renderItem={null}
+      ListFooterComponent={() => (
+        <>
+          <View style={{ backgroundColor: "#f9f9f9" }}>
+            <ProfileShop />
+          </View>
+        </>
+      )}
+    />
   );
 }

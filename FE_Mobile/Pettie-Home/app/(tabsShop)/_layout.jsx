@@ -31,25 +31,7 @@ export default function Layout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="product"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <Entypo name="shopping-bag" size={26} color={focused ? "#ed7c44" : "#b0b0b0"} />
-          ),
-          tabBarLabel: ({ focused }) => (
-            <Text
-              style={{
-                fontSize: 9,
-                color: focused ? "#ed7c44" : "#b0b0b0",
-                fontWeight: 700,
-              }}
-            >
-              Sản phẩm 
-            </Text>
-          ),
-        }}
-      />
+      
       <Tabs.Screen
         name="homeShop"
         options={{
@@ -70,10 +52,10 @@ export default function Layout() {
         }}
       />
       <Tabs.Screen
-        name="message"
+        name="product"
         options={{
           tabBarIcon: ({ focused }) => (
-            <AntDesign name="message1" size={26} color={focused ? "#ed7c44" : "#b0b0b0"} />
+            <Entypo name="shopping-bag" size={26} color={focused ? "#ed7c44" : "#b0b0b0"} />
           ),
           tabBarLabel: ({ focused }) => (
             <Text
@@ -83,35 +65,11 @@ export default function Layout() {
                 fontWeight: 700,
               }}
             >
-              Trò chuyện 
+              Sản phẩm 
             </Text>
           ),
         }}
       />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <FontAwesome
-              name="user-circle-o"
-              size={26}
-              color={focused ? "#ed7c44" : "#b0b0b0"} // Cam khi hoạt động, xám khi không
-            />
-          ),
-          tabBarLabel: ({ focused }) => (
-            <Text
-              style={{
-                fontSize: 9,
-                color: focused ? "#ed7c44" : "#b0b0b0",
-                fontWeight: 700,
-              }}
-            >
-              Cá nhân
-            </Text>
-          ),
-        }}
-      />
-      
     </Tabs>
     
   );
