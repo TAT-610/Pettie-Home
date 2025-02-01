@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
     Animated,
@@ -42,14 +43,19 @@ export default function OrderShop() {
     const [isMenuVisible, setMenuVisible] = useState<boolean>(false);
     const scrollX = useRef(new Animated.Value(0)).current;
     const flatListRef = useRef<FlatList<string>>(null);
+    const router = useRouter();
 
     const onTabPress = (index: number) => {
         flatListRef.current?.scrollToOffset({ offset: index * SCREEN_WIDTH, animated: true });
         setActiveTab(tabs[index]);
     };
 
+    const handleOrderDetail = () => {
+        router.push("/orderdetail");
+      };
+
     const renderOrder = ({ item }: { item: typeof orders[0] }) => (
-        <View style={styles.orderCard}>
+        <TouchableOpacity  style={styles.orderCard} onPress={handleOrderDetail}>
             <View style={styles.buttonorder}>
                 <Text style={styles.orderCustomer}>{item.customerName}</Text>
                 <Text style={styles.orderTime}>{item.time}</Text>
@@ -69,7 +75,7 @@ export default function OrderShop() {
             <TouchableOpacity style={styles.acceptButton}>
                 <Text style={styles.acceptButtonText}>Nhận đơn</Text>
             </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
     );
     
 

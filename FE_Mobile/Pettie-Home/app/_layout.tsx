@@ -7,6 +7,7 @@ export default function RootLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="(tabsShop)" />
       <Stack.Screen name="editprofile" />
+      <Stack.Screen name="orderdetail" />
 
     </Stack>
   );

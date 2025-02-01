@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, FlatList } from "react-native";
 import React from "react";
-import OrderShop from "@/components/ShopScreen/order/OrderShop";
+import OrderDetails from "@/components/ShopScreen/order/OrderDetails";
 
 export default function order() {
   return (
@@ -10,7 +10,7 @@ export default function order() {
       ListFooterComponent={() => (
         <>
           <View style={{ backgroundColor: "#f9f9f9" }}>
-            <OrderShop />
+            <OrderDetails />
           </View>
         </>
       )}

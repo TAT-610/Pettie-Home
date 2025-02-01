@@ -220,6 +220,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 20,
+    marginBottom: 30
   },
   saveButtonText: {
     fontSize: 16,
