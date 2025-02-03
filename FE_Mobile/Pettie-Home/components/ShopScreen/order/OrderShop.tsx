@@ -1,16 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
-import {
-    Animated,
-    Dimensions,
-    FlatList,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Animated, Dimensions, FlatList, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -22,8 +12,11 @@ const orders = [
         services: [
             { name: "Cắt tỉa lông (Chó/Mèo) < 3kg", quantity: 1 },
             { name: "Tắm và vệ sinh (Chó/Mèo) < 3kg", quantity: 1 },
+            { name: "Nhuọm lông (Chó/Mèo) < 6kg", quantity: 1 },
+            { name: "Hạt mèo", quantity: 1 },
+            { name: "Nệm nằm cho mèo", quantity: 1 },
         ],
-        total: "400.000 VNĐ",
+        total: "900.000 VNĐ",
     },
     {
         id: "2",
@@ -41,6 +34,7 @@ const tabs = ["Chờ xác nhận", "Chờ ngày hẹn", "Đang diễn ra", "Đã
 export default function OrderShop() {
     const [activeTab, setActiveTab] = useState<string>(tabs[0]);
     const [isMenuVisible, setMenuVisible] = useState<boolean>(false);
+    const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
     const scrollX = useRef(new Animated.Value(0)).current;
     const flatListRef = useRef<FlatList<string>>(null);
     const router = useRouter();
@@ -52,32 +46,61 @@ export default function OrderShop() {
 
     const handleOrderDetail = () => {
         router.push("/orderdetail");
-      };
+    };
 
-    const renderOrder = ({ item }: { item: typeof orders[0] }) => (
-        <TouchableOpacity  style={styles.orderCard} onPress={handleOrderDetail}>
-            <View style={styles.buttonorder}>
-                <Text style={styles.orderCustomer}>{item.customerName}</Text>
-                <Text style={styles.orderTime}>{item.time}</Text>
-            </View>
-    
-            <View style={styles.orderServices}>
-                {item.services.map((service, index) => (
-                    <View key={index} style={styles.orderServiceRow}>
-                        <Text style={styles.serviceQuantity}>x{service.quantity}</Text>
-                        <Text style={styles.serviceName}>{service.name}</Text>
-                    </View>
-                ))}
-            </View>
-            <Text style={styles.orderTotal}>Tổng đơn hàng: <Text style={styles.orderPrice}>{item.total}</Text></Text>
-    
-            {/* Nút Nhận đơn */}
-            <TouchableOpacity style={styles.acceptButton}>
-                <Text style={styles.acceptButtonText}>Nhận đơn</Text>
+    const toggleExpand = (orderId: string) => {
+        const newExpanded = new Set(expandedOrders);
+        if (newExpanded.has(orderId)) {
+            newExpanded.delete(orderId);
+        } else {
+            newExpanded.add(orderId);
+        }
+        setExpandedOrders(newExpanded);
+    };
+
+    const renderOrder = ({ item }: { item: typeof orders[0] }) => {
+        const isExpanded = expandedOrders.has(item.id);
+        const visibleServices = isExpanded ? item.services : item.services.slice(0, 2);
+        const shouldShowToggle = item.services.length > 2;
+
+        return (
+            <TouchableOpacity style={styles.orderCard} onPress={handleOrderDetail}>
+                <View style={styles.buttonorder}>
+                    <Text style={styles.orderCustomer}>{item.customerName}</Text>
+                    <Text style={styles.orderTime}>{item.time}</Text>
+                </View>
+
+                <View style={styles.orderServices}>
+                    {visibleServices.map((service, index) => (
+                        <View key={index} style={styles.orderServiceRow}>
+                            <Text style={styles.serviceQuantity}>x{service.quantity}</Text>
+                            <Text style={styles.serviceName}>{service.name}</Text>
+                        </View>
+                    ))}
+                </View>
+
+                {shouldShowToggle && (
+                    <TouchableOpacity
+                        onPress={(e) => {
+                            e.stopPropagation();
+                            toggleExpand(item.id)
+                        }}
+                        style={styles.expandButton}
+                    >
+                        <Text style={styles.expandButtonText}>
+                            {isExpanded ? 'Thu gọn ▲' : 'Xem thêm ▼'}
+                        </Text>
+                    </TouchableOpacity>
+                )}
+
+                <Text style={styles.orderTotal}>Tổng đơn hàng: <Text style={styles.orderPrice}>{item.total}</Text></Text>
+
+                <TouchableOpacity style={styles.acceptButton}>
+                    <Text style={styles.acceptButtonText}>Nhận đơn</Text>
+                </TouchableOpacity>
             </TouchableOpacity>
-        </TouchableOpacity>
-    );
-    
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -165,9 +188,13 @@ export default function OrderShop() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#f9f9f9" },
-    headerContainer: { flexDirection: "row", justifyContent: "center", marginTop: 40,
+    headerContainer: { 
+        flexDirection: "row", 
+        justifyContent: "center", 
+        marginTop: 40,
         marginLeft: 10,
-        marginBottom: 30, },
+        marginBottom: 30, 
+    },
     header: { fontSize: 24, fontWeight: "bold", color: "#333" },
     stickyHeader: {
         paddingVertical: 8,
@@ -190,7 +217,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#f0f0f0",
     },
     activeTab: {
-        backgroundColor: "#ed7c44", // Màu của tab đang chọn
+        backgroundColor: "#ed7c44",
     },
     tabText: {
         color: "#555",
@@ -200,7 +227,7 @@ const styles = StyleSheet.create({
     },
     menuTrigger: { 
         fontSize: 18,
-        color: "#ed7c44", // Màu của menu trigger
+        color: "#ed7c44",
         padding: 5,
         marginLeft: 7,
     },
@@ -230,11 +257,11 @@ const styles = StyleSheet.create({
         marginTop: 8 
     },
     orderPrice:{
-    color: '#DC143C',
+        color: '#DC143C',
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: "#D3D3D3", // Màu của overlay modal
+        backgroundColor: "#D3D3D3",
         opacity: 0.7,
         justifyContent: "center",
         alignItems: "center",
@@ -257,10 +284,10 @@ const styles = StyleSheet.create({
         color: "#555",
     },
     activeModalOption: {
-        backgroundColor: "#699BF4", // Màu nền cho tab đang hoạt động
+        backgroundColor: "#699BF4",
     },
     activeModalOptionText: {
-        color: "#fff", // Màu chữ cho tab đang hoạt động
+        color: "#fff",
         fontWeight: "bold",
     },
     orderServiceRow: {
@@ -290,5 +317,14 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
     },
-    
+    expandButton: {
+        alignSelf: 'center',
+        marginTop: 8,
+        paddingVertical: 4,
+    },
+    expandButtonText: {
+        color: '#696969',
+        fontSize: 14,
+        fontWeight: '500',
+    },
 });
