@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-    marginBottom: 18,
+    marginBottom: 7,
   },
   headerContent: {
     flexDirection: 'row',
