@@ -1,12 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  Dimensions,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, Dimensions, } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useRouter } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -103,7 +96,6 @@ export default function ShopDetail() {
           </View>
         </View>
         <AllService />
-        <Text>Product ID: {shopId}</Text>
       </ScrollView>
 
       {/* Fixed Navigation Bar */}

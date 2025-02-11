@@ -1,39 +1,9 @@
 import axios from "axios";
+import { Order, Profile } from "@/services/types";
 
 // Đặt base URL cho mock API
 const BASE_URL_1 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/editProfile";
 const BASE_URL_2 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/orders";
-
-interface Profile {
-  id: string;
-  shopName: string;
-  phoneNumber: string;
-  description: string;
-  email: string;
-  birthDate: string;
-  address: string;
-  openingTime: string;
-  closingTime: string;
-  avatar: string;
-}
-
-interface Order {
-  id: string;
-  orderId: string;
-  status: string;
-  time: string;
-  scheduledTime: string;
-  items: { id: string; name: string; price: number; quantity: number }[];
-  subtotal: number;
-  shipping: number;
-  total: number;
-  address: string;
-  paymentMethod: string;
-  paymentTime: string;
-  customerName: string;
-  customerPhone: string;
-  customerNote: string;
-}
 
 // Lấy danh sách toàn bộ hồ sơ
 export const getProfiles = async (): Promise<Profile[]> => {

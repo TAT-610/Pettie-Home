@@ -1,13 +1,39 @@
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
 import { Feather, FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { getProfileById} from '../../../services/api';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 
 const ProfileShop = () => {
   const router = useRouter();
   const handleEditProfile = () => {
     router.push("/editprofile");
   };
+  const profileId = '1';
+  const [profile, setProfile] = useState({
+      id: '',
+      shopName: '',
+      phoneNumber: '',
+      description: '',
+      email: '',
+      birthDate: '',
+      address: '',
+      openingTime: '',
+      closingTime: '',
+      avatar: ''
+    });
+
+  useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const data = await getProfileById(profileId);
+          setProfile(data);
+        } catch (error) {
+          console.error('Lỗi khi lấy hồ sơ:', error);
+        }
+      };
+      fetchData();
+    }, []);
 
   const stats = [
     { label: 'Doanh thu', value: '0đ' },
@@ -18,7 +44,7 @@ const ProfileShop = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <LinearGradient colors={['#01b9bb', '#ed7c44']} style={styles.header}>
+      <View style={styles.header}>
         <View style={styles.headerContent}>
           <Image
             source={{
@@ -27,7 +53,7 @@ const ProfileShop = () => {
             style={styles.avatar}
           />
           <View>
-            <Text style={styles.shopName}>Violet Pet Shop</Text>
+            <Text style={styles.shopName}>{profile.shopName}</Text>
             <View style={styles.ratingContainer}>
               <FontAwesome name="star" size={16} color="#FFD700" />
               <Text style={styles.rating}>5.0</Text>
@@ -37,7 +63,7 @@ const ProfileShop = () => {
         <TouchableOpacity style={styles.notificationIcon}>
           <FontAwesome name="bell" size={20} color="#fff" />
         </TouchableOpacity>
-      </LinearGradient>
+      </View>
 
       <View style={styles.statsContainer}>
         <Text style={styles.statsTitle}>Tổng quan hằng ngày</Text>
@@ -136,6 +162,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     marginBottom: 7,
+    backgroundColor: "#699BF4"
   },
   headerContent: {
     flexDirection: 'row',

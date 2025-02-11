@@ -30,6 +30,7 @@ export default function Welcome() {
         <TouchableOpacity
           style={styles.button}
           // onPress={() => router.push("/signup")}
+          onPress={() => router.push("/(tabsShop)/homeShop")}
         >
           <Text style={styles.textbutton}>Đăng nhập</Text>
         </TouchableOpacity>

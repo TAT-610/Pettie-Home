@@ -1,0 +1,31 @@
+export interface Profile {
+    id: string;
+    shopName: string;
+    phoneNumber: string;
+    description: string;
+    email: string;
+    rating: string;
+    birthDate: string;
+    address: string;
+    openingTime: string;
+    closingTime: string;
+    avatar: string;
+}
+
+export interface Order {
+    id: string;
+    orderId: string;
+    status: string;
+    time: string;
+    scheduledTime: string;
+    items: { id: string; name: string; price: number; quantity: number }[];
+    subtotal: number;
+    shipping: number;
+    total: number;
+    address: string;
+    paymentMethod: string;
+    paymentTime: string;
+    customerName: string;
+    customerPhone: string;
+    customerNote: string;
+}
