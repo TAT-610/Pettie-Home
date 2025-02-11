@@ -1,58 +1,35 @@
-import {
-  FlatList,
-  FlatListComponent,
-  Image,
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import {  FlatList, Image, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, } from "react-native";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React from "react";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-interface CatService {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-}
-const CatService = [
-  {
-    id: 1,
-    name: "Tắm cơ bản cho mèo dưới 5kg",
-    image:
-      "https://i.pinimg.com/736x/e1/7e/69/e17e69221a1a707186aef0f086711cd0.jpg",
-    price: 120,
-  },
+import { CatService } from "@/services/types";
+import { getCatServices } from "@/services/api";
 
-  {
-    id: 2,
-    name: "Combo Spa1: Tắm + Tỉa gọn lông cho mèo",
-    image:
-      "https://i.pinimg.com/736x/cd/cb/6b/cdcb6b1df06746d5802c8baede2b7b49.jpg",
-    price: 220,
-  },
-  {
-    id: 3,
-    name: "Combo Spa2: Tắm + Tạo kiểu cho mèo",
-    image:
-      "https://i.pinimg.com/736x/08/c1/16/08c116f72aaef1ba5f383cd2ad351046.jpg",
-    price: 320,
-  },
-  {
-    id: 44,
-    name: "Nhuộm lông + tạo kiểu cho mèo",
-    image:
-      "https://i.pinimg.com/736x/31/24/29/312429037fa87a4e035002e82a1b966d.jpg",
-    price: 350,
-  },
-];
 const ServicesOfCat = () => {
+  const [services, setServices] = useState<CatService[]>([]);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const handleProductPress = (serviceId: number) => {
-    router.push(`/ViewService/${serviceId}`); // Navigate to ProductDetail page
-  };
+
+  useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const data = await getCatServices();
+          setServices(data);
+        } catch (error) {
+          console.error("Không thể tải dữ liệu dịch vụ mèo:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchData();
+    }, []);
+
+    const handleProductPress = (serviceId: string | number) => {
+      router.push(`/ViewService/${Number(serviceId)}`); // Chuyển đổi sang số
+    };  
+  
+
   const renderItem = ({ item }: { item: CatService }) => (
     <View style={styles.itemContainer}>
       <TouchableOpacity onPress={() => handleProductPress(item.id)}>
@@ -74,13 +51,18 @@ const ServicesOfCat = () => {
       </View>
     </View>
   );
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#ed7c44" />;
+  }
+
   return (
     <View style={styles.container}>
-      <Text style={styles.tittle}>
+      <Text style={styles.title}>
         <FontAwesome5 name="cat" size={16} color="black" /> Dịch vụ cho mèo:
       </Text>
       <FlatList
-        data={CatService}
+        data={services}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
@@ -96,11 +78,10 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
     paddingTop: 10,
-
     backgroundColor: "white",
     marginBottom: 10,
   },
-  tittle: {
+  title: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
@@ -132,7 +113,6 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 15,
-
     fontWeight: "500",
     color: "#ed7c44",
   },

@@ -1,15 +1,9 @@
-import {
-  Text,
-  View,
-  StyleSheet,
-  Image,
-  StatusBar,
-  TouchableOpacity,
-} from "react-native";
+import { Text, View, StyleSheet, Image, StatusBar, TouchableOpacity,} from "react-native";
 import { ScrollView } from "react-native";
 import logo from "../assets/images/logo12.png";
 import pet from "../assets/images/welcome.jpg";
 import { useRouter } from "expo-router";
+
 export default function Welcome() {
   const router = useRouter();
   return (
@@ -30,7 +24,7 @@ export default function Welcome() {
         <TouchableOpacity
           style={styles.button}
           // onPress={() => router.push("/signup")}
-          onPress={() => router.push("/(tabsShop)/homeShop")}
+          onPress={() => router.push("/login")}
         >
           <Text style={styles.textbutton}>Đăng nhập</Text>
         </TouchableOpacity>

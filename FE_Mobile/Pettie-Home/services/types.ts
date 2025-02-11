@@ -29,3 +29,23 @@ export interface Order {
     customerPhone: string;
     customerNote: string;
 }
+
+export interface DogService {
+    id: string;
+  name: string;
+  image: string;
+  price: number;
+  description: string;
+  type: string;
+}
+
+export interface CatService {
+    id: string;
+  name: string;
+  image: string;
+  price: number;
+  description: string;
+  type: string;
+
+}
+

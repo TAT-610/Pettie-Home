@@ -1,9 +1,11 @@
 import axios from "axios";
-import { Order, Profile } from "@/services/types";
+import { CatService, DogService, Order, Profile } from "@/services/types";
 
 // Đặt base URL cho mock API
 const BASE_URL_1 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/editProfile";
 const BASE_URL_2 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/orders";
+const BASE_URL_3 = "https://67ab082665ab088ea7e85901.mockapi.io/sevicesDog";
+const BASE_URL_4 = "https://67ab082665ab088ea7e85901.mockapi.io/servicesCat";
 
 // Lấy danh sách toàn bộ hồ sơ
 export const getProfiles = async (): Promise<Profile[]> => {
@@ -62,3 +64,41 @@ export const getOrderById = async (id: string): Promise<Order> => {
     throw error;
   }
 };
+
+// Lấy danh sách dịch vụ chó từ API
+export const getDogServices = async (): Promise<DogService[]> => {
+  try {
+    const response = await axios.get<DogService[]>(BASE_URL_3);
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách dịch vụ chó:", error);
+    throw error;
+  }
+};
+
+// Lấy danh sách dịch vụ chó từ API
+export const getCatServices = async (): Promise<CatService[]> => {
+  try {
+    const response = await axios.get<CatService[]>(BASE_URL_4);
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách dịch vụ chó:", error);
+    throw error;
+  }
+};
+
+// Lấy thông tin dịch vụ theo ID
+export const getPetServiceById = async (type: "dog" | "cat", id: string) => {
+  try {
+    const BASE_URL = type === "dog" ? BASE_URL_3 : BASE_URL_4;
+    console.log(`Fetching service from ${BASE_URL}/${id}`); // Kiểm tra URL API
+    const response = await axios.get(`${BASE_URL}/${id}`);
+    return response.data;
+  } catch (error: any) {
+    console.error(`Lỗi khi lấy thông tin dịch vụ ${type} với ID ${id}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
