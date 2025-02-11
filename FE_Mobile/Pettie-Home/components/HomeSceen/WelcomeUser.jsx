@@ -87,6 +87,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginHorizontal: 10,
     borderRadius: 100,
+    // Shadow cho iOS
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    // Shadow cho Android
     elevation: 5,
   },
   searchInput: {

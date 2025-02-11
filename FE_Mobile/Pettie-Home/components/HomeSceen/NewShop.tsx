@@ -97,7 +97,7 @@ export default function NewShop() {
   return (
     <View style={styles.container}>
       <View style={styles.contentheader}>
-        <Text style={styles.header}>Làm quen bạn mới :</Text>
+        <Text style={styles.header}>Làm quen bạn mới</Text>
         <AntDesign
           name="arrowright"
           size={24}

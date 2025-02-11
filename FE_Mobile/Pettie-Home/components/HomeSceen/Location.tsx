@@ -86,7 +86,7 @@ export default function Location() {
   return (
     <View style={styles.container}>
       <View style={styles.contentheader}>
-        <Text style={styles.header}>Dịch vụ gần bạn :</Text>
+        <Text style={styles.header}>Dịch vụ gần bạn</Text>
         <AntDesign
           name="arrowright"
           size={24}

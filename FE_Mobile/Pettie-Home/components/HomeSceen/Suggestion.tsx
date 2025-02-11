@@ -98,7 +98,7 @@ export default function Suggestion() {
   return (
     <View style={styles.container}>
       <View style={styles.contentheader}>
-        <Text style={styles.header}>Đề xuất cho bạn :</Text>
+        <Text style={styles.header}>Đề xuất cho bạn</Text>
         <AntDesign
           name="arrowright"
           size={24}
