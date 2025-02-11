@@ -1,6 +1,6 @@
 import { View, Text, Image, StyleSheet } from "react-native";
 import React from "react";
-import banner from "../../assets/images/banner2.jpg";
+import banner from "../../assets/images/banner3.jpg";
 export default function Banner() {
   return (
     <View style={styles.container}>

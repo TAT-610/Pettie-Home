@@ -5,7 +5,9 @@ import {
   StyleSheet,
   Text,
   View,
+  TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -47,9 +49,15 @@ const CatService = [
   },
 ];
 const ServicesOfCat = () => {
+  const router = useRouter();
+  const handleProductPress = (serviceId: number) => {
+    router.push(`/ViewService/${serviceId}`); // Navigate to ProductDetail page
+  };
   const renderItem = ({ item }: { item: CatService }) => (
     <View style={styles.itemContainer}>
-      <Image source={{ uri: item.image }} style={styles.image} />
+      <TouchableOpacity onPress={() => handleProductPress(item.id)}>
+        <Image source={{ uri: item.image }} style={styles.image} />
+      </TouchableOpacity>
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
           {item.name}
@@ -87,13 +95,16 @@ export default ServicesOfCat;
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
-    paddingBottom: 10,
+    paddingTop: 10,
+
     backgroundColor: "white",
+    marginBottom: 10,
   },
   tittle: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
+    paddingTop: 10,
   },
   list: {
     paddingBottom: 10,
