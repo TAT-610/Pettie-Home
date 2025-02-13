@@ -101,7 +101,7 @@ export default function ShopDetail() {
           name="arrowleft"
           size={28}
           color="white"
-          onPress={() => router.back()}
+          onPress={() => router.push("/(tabs)/home")}
           style={styles.backButton}
         />
 
