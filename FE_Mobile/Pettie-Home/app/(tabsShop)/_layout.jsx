@@ -70,6 +70,25 @@ export default function Layout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="services"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Entypo name="shopping-bag" size={26} color={focused ? "#ed7c44" : "#b0b0b0"} />
+          ),
+          tabBarLabel: ({ focused }) => (
+            <Text
+              style={{
+                fontSize: 9,
+                color: focused ? "#ed7c44" : "#b0b0b0",
+                fontWeight: 700,
+              }}
+            >
+              Dịch vụ 
+            </Text>
+          ),
+        }}
+      />
     </Tabs>
     
   );

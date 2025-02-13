@@ -15,40 +15,16 @@ export interface Profile {
     password: string;
 }
 
-export interface Order {
+
+export interface Products {
     id: string;
-    orderId: string;
+    shopId: string;
+    name: string;
+    price: number;
+    quantity: number;
     status: string;
-    time: string;
-    scheduledTime: string;
-    items: { id: string; name: string; price: number; quantity: number }[];
-    subtotal: number;
-    shipping: number;
-    total: number;
-    address: string;
-    paymentMethod: string;
-    paymentTime: string;
-    customerName: string;
-    customerPhone: string;
-    customerNote: string;
-}
-
-export interface DogService {
-    id: string;
-  name: string;
-  image: string;
-  price: number;
-  description: string;
-  type: string;
-}
-
-export interface CatService {
-    id: string;
-  name: string;
-  image: string;
-  price: number;
-  description: string;
-  type: string;
+    image: string;
+    expiry: string;
 
 }
 
