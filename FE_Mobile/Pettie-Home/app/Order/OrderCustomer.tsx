@@ -22,7 +22,7 @@ const OrderCustomer = () => {
   };
 
   const handlePlaceOrder = () => {
-    console.log("Đặt hàng thành công với phương thức: ", paymentMethod);
+    console.log("Đặt hàng thành công với phương thức ok: ", paymentMethod);
   };
 
   return (
