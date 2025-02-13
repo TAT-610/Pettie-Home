@@ -1,8 +1,9 @@
 import axios from "axios";
-import { Profile } from "@/services/types";
+import { Products, Profile } from "@/services/types";
 
 // Đặt base URL cho mock API
 const BASE_URL_1 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/users";
+const BASE_URL_2 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/products";
 
 // Hàm đăng nhập
 export const loginUser = async (userName: string, password: string): Promise<Profile> => {
@@ -74,8 +75,12 @@ export const getProfiles = async (): Promise<Profile[]> => {
 
 // Hàm lấy hồ sơ theo ID
 export const getProfileById = async (id: string): Promise<Profile> => {
+  console.log("");
+  
   try {
     const response = await axios.get<Profile>(`${BASE_URL_1}/${id}`);
+    console.log("getProfileById:", response);
+    
     return response.data;
   } catch (error: any) {
     console.error(`Lỗi khi lấy hồ sơ với ID ${id}:`, error.response?.data || error.message);
@@ -94,7 +99,64 @@ export const updateProfile = async (id: string, updatedData: Partial<Profile>): 
   }
 };
 
+/**
+ * 🔹 Lấy danh sách tất cả cửa hàng (role = "shop")
+ */
+export const getAllShops = async (): Promise<Profile[]> => {
+  try {
+    const response = await axios.get<Profile[]>(`${BASE_URL_1}`);
+    // Manually filter users by role 'shop'
+    const shops = response.data.filter(user => user.role === 'shop');
+    return shops;
+  } catch (error: any) {
+    console.error("Lỗi khi lấy danh sách cửa hàng:", error.response?.data || error.message);
+    throw error;
+  }
+};
 
 
+/**
+ * 🔹 Lấy danh sách sản phẩm theo cửa hàng (shopId)
+ */
+export const getAllProductsByShop = async (shopId: string, id: Profile): Promise<Products[]> => {
+  if (!shopId) throw new Error("shopId không hợp lệ!");
+  if (id.role !== 'shop') throw new Error("User does not have the required shop role.");
+  if (id.id !== shopId) throw new Error("User is not authorized to access this shop's products.");
+
+  try {
+    const response = await axios.get<Products[]>(`${BASE_URL_2}?shopId=${shopId}`);
+    return response.data;
+  } catch (error: any) {
+    console.error(`Lỗi khi lấy sản phẩm của shop ${shopId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
 
 
+/**
+ * 🔹 Lấy sản phẩm theo ID
+ */
+export const getProductById = async (productId: string): Promise<Products> => {
+  if (!productId) throw new Error(" productId không hợp lệ!");
+
+  try {
+    const response = await axios.get<Products>(`${BASE_URL_2}/${productId}`);
+    return response.data;
+  } catch (error: any) {
+    console.error(`Lỗi khi lấy sản phẩm với ID ${productId}:`, error.response?.data || error.message);
+    throw error;
+  }
+};
+
+/**
+ * 🔹 Lấy danh sách tất cả sản phẩm
+ */
+export const getAllProducts = async (): Promise<Products[]> => {
+  try {
+    const response = await axios.get<Products[]>(BASE_URL_2);
+    return response.data;
+  } catch (error: any) {
+    console.error(" Lỗi khi lấy danh sách sản phẩm:", error.response?.data || error.message);
+    throw error;
+  }
+};

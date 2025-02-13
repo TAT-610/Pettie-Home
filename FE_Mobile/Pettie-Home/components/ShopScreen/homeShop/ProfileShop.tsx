@@ -4,6 +4,7 @@ import { getProfileById } from '../../../services/api';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Profile } from '@/services/types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileShop = () => {
   const router = useRouter();
@@ -34,8 +35,22 @@ const ProfileShop = () => {
     return <Text>Đang tải...</Text>;
   }
 
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('userId'); // Xóa ID người dùng khỏi AsyncStorage
+      console.log("Đã logout thành công!"); // Ghi log khi logout thành công
+      router.push('/Auths/login');
+    } catch (error) {
+      console.error("Lỗi khi đăng xuất:", error);
+    }
+  };
+  
   const handleEditProfile = () => {
-    router.push(`/MyShop/${profile.id}`);
+    if (profile?.id) {
+      router.push(`/MyShop/editprofileShop?id=${profile.id}`);
+    } else {
+      console.error("Không có ID để chuyển trang");
+    }
   };
 
   const stats = [
@@ -143,7 +158,7 @@ const ProfileShop = () => {
       </TouchableOpacity>
 
       {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton}>
+      <TouchableOpacity style={styles.logoutButton} onPress={(handleLogout)}>
         <Text style={styles.logoutText}>Đăng xuất</Text>
       </TouchableOpacity>
     </View>

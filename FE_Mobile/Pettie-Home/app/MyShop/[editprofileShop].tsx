@@ -19,14 +19,22 @@ const EditProfileShop = () => {
     birthDate: ""
   });
   const { id } = useLocalSearchParams();
+  console.log("ID", id);
+  
   const profileId = Array.isArray(id) ? id[0] : id;
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
 
   // Lấy dữ liệu hồ sơ khi component được mount
   useEffect(() => {
+
     const fetchData = async () => {
+      console.log("Start get Profile");
+
       try {
+        
         const data = await getProfileById(profileId);
+        console.log("End get Profile");
+
 
         // Kiểm tra nếu dữ liệu trả về bị thiếu, gán giá trị mặc định
         setProfile({
