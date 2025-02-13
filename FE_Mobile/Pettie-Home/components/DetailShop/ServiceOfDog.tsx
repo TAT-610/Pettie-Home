@@ -1,16 +1,18 @@
 import {
   FlatList,
-  FlatListComponent,
   Image,
   StyleSheet,
+  FlatListComponent,
   Text,
   View,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+
 interface DogService {
   id: number;
   name: string;
@@ -75,8 +77,10 @@ const DogService = [
     price: 220,
   },
 ];
+
 const ServiceOfDog = () => {
   const router = useRouter();
+
   const handleProductPress = (serviceId: number) => {
     router.push(`/ViewService/${serviceId}`); // Navigate to ProductDetail page
   };
@@ -104,9 +108,10 @@ const ServiceOfDog = () => {
       </View>
     </View>
   );
+
   return (
     <View style={styles.container}>
-      <Text style={styles.tittle}>
+      <Text style={styles.title}>
         <FontAwesome5 name="dog" size={16} color="black" /> Dịch vụ cho chó:
       </Text>
       <FlatList
@@ -126,11 +131,10 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
     paddingTop: 10,
-
     backgroundColor: "white",
     marginBottom: 10,
   },
-  tittle: {
+  title: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
@@ -162,7 +166,6 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 15,
-
     fontWeight: "500",
     color: "#ed7c44",
   },
@@ -171,10 +174,10 @@ const styles = StyleSheet.create({
     color: "#888",
   },
   contentcard: {
-    alignItems: "flex-end",
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
   },
   iconadd: {
     alignItems: "flex-end",

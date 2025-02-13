@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+
 interface CatService {
   id: number;
   name: string;
@@ -53,6 +54,7 @@ const ServicesOfCat = () => {
   const handleProductPress = (serviceId: number) => {
     router.push(`/ViewService/${serviceId}`); // Navigate to ProductDetail page
   };
+
   const renderItem = ({ item }: { item: CatService }) => (
     <View style={styles.itemContainer}>
       <TouchableOpacity onPress={() => handleProductPress(item.id)}>
@@ -74,9 +76,10 @@ const ServicesOfCat = () => {
       </View>
     </View>
   );
+
   return (
     <View style={styles.container}>
-      <Text style={styles.tittle}>
+      <Text style={styles.title}>
         <FontAwesome5 name="cat" size={16} color="black" /> Dịch vụ cho mèo:
       </Text>
       <FlatList
@@ -96,11 +99,10 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
     paddingTop: 10,
-
     backgroundColor: "white",
     marginBottom: 10,
   },
-  tittle: {
+  title: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
@@ -132,7 +134,6 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 15,
-
     fontWeight: "500",
     color: "#ed7c44",
   },
