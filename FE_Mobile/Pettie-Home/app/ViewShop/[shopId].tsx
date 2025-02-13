@@ -7,6 +7,7 @@ import {
   FlatList,
   Image,
   Dimensions,
+  TouchableOpacity,
 } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useLocalSearchParams } from "expo-router";
@@ -27,7 +28,9 @@ export default function ShopDetail() {
   const router = useRouter();
   const { shopId } = useLocalSearchParams();
   const [navBarColor, setNavBarColor] = useState("rgba(0, 0, 0, 0)");
-
+  const handleOrderPress = () => {
+    router.push(`/Order/OrderCustomer`); // Navigate to ProductDetail page
+  };
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
     setNavBarColor(scrollY > 200 ? "white" : "rgba(0, 0, 0, 0)");
@@ -110,27 +113,47 @@ export default function ShopDetail() {
         />
       </View>
       <View style={styles.card}>
-        <Text
+        <View style={{ marginTop: 5 }}>
+          <Text
+            style={{
+              textAlign: "center",
+              color: "#ed7c44",
+            }}
+          >
+            Tổng thanh toán(2)
+          </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "600",
+              color: "#ed7c44",
+
+              textAlign: "right",
+            }}
+          >
+            220.000đ
+          </Text>
+        </View>
+        <View
           style={{
-            textAlign: "center",
-            color: "#ed7c44",
-            alignItems: "center",
+            backgroundColor: "#ed7c44",
+            paddingVertical: 15,
+            paddingHorizontal: 25,
+            marginLeft: 15,
           }}
         >
-          <FontAwesome6 name="cart-shopping" size={22} color="#ed7c44" />
-          (2)
-        </Text>
-        <Text
-          style={{
-            textAlign: "center",
-            fontSize: 18,
-            fontWeight: "600",
-            color: "#ed7c44",
-            alignItems: "center",
-          }}
-        >
-          220.000đ
-        </Text>
+          <TouchableOpacity onPress={handleOrderPress}>
+            <Text
+              style={{
+                fontSize: 15,
+                fontWeight: "500",
+                color: "white",
+              }}
+            >
+              Đặt dịch vụ
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -143,13 +166,12 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    justifyContent: "space-between",
-    height: "13%", // Fixed height for the navigation bar
+    justifyContent: "flex-end",
+    height: 100,
     flexDirection: "row", // Align items in a row
-    alignItems: "center", // Center items vertically
-    paddingHorizontal: 20,
+
     position: "absolute",
-    paddingBottom: 35,
+
     bottom: 0,
     left: 0,
     right: 0,
