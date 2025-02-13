@@ -1,22 +1,11 @@
-import {
-  Text,
-  View,
-  StyleSheet,
-  Image,
-  StatusBar,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-} from "react-native";
+import { Text, View, StyleSheet, Image, StatusBar, TouchableOpacity,} from "react-native";
 import { ScrollView } from "react-native";
-import { useRouter } from "expo-router";
 import logo from "../assets/images/logo12.png";
-import pet from "../assets/images/bg.jpg";
-
+import pet from "../assets/images/welcome.jpg";
+import { useRouter } from "expo-router";
 
 export default function Welcome() {
   const router = useRouter();
-
   return (
     <ScrollView style={styles.container}>
       <StatusBar hidden={true} />
@@ -31,15 +20,16 @@ export default function Welcome() {
           Nơi cung cấp các dịch vụ cho thú cưng tại nhà
         </Text>
       </View>
-
       <View style={styles.contentbutton}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push("/(tabsShop)/homeShop")}
-        ><Text style={styles.textbutton}>Đăng nhập</Text>
+          // onPress={() => router.push("/signup")}
+          onPress={() => router.push("/Auths/login")}
+          // onPress={() => router.push("/(tabsShop)/homeShop")}
+        >
+          <Text style={styles.textbutton}>Đăng nhập</Text>
         </TouchableOpacity>
       </View>
-      {/* Nút Xem Trước */}
       <TouchableOpacity
         style={styles.button}
         onPress={() => router.push("/(tabs)/home")}
@@ -52,7 +42,7 @@ export default function Welcome() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#01b9bb",
+    backgroundColor: "#699BF4",
     flex: 1,
   },
   centerContent1: {
@@ -63,8 +53,9 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   centerContent: {
+    flex: 1,
     alignItems: "center", // Căn giữa theo chiều ngang
-    justifyContent: "center",
+    justifyContent: "center", // Căn giữa theo chiều dọc
   },
   logo: {
     marginLeft: 1,
@@ -84,18 +75,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 30,
     textAlign: "center",
   },
-  form: {
-    marginTop: 20,
-    paddingHorizontal: 20,
-  },
-  input: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 15,
-    fontSize: 16,
-    color: "#333",
-  },
   button: {
     backgroundColor: "#ed7c44",
     width: "78%",
@@ -105,16 +84,13 @@ const styles = StyleSheet.create({
     alignItems: "center", // Căn chữ ở giữa
     borderWidth: 1, // Độ dày viền
     borderColor: "#fff", // Màu viền trắng
-
-  },
-  previewButton: {
-    marginTop: 15,
-    backgroundColor: "#4caf50",
   },
   textbutton: {
     fontFamily: "sans-serif",
+
     fontSize: 16,
-    color: "#fff",
+    color: "#ffff",
+    fontWeight: "bold",
     marginHorizontal: 20,
     textAlign: "center",
   },

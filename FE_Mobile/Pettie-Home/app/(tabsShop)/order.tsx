@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, FlatList } from "react-native";
 import React from "react";
-import OrderShop from "@/components/ShopScreen/OrderShop";
+import OrderShop from "@/components/ShopScreen/order/OrderShop";
 
 export default function order() {
   return (

@@ -1,12 +1,41 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Feather, FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+import { getProfileById } from '../../../services/api';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Profile } from '@/services/types';
 
 const ProfileShop = () => {
   const router = useRouter();
+  const { id } = useLocalSearchParams(); // Lấy id từ route params
+  console.log("Id in ProfileShop", id);
+  
+  const profileId = Array.isArray(id) ? id[0] : id; // Đảm bảo id là string
+  const [profile, setProfile] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // if (!profileId) return;
+      try {
+        console.log("Fetching profile with ID:", profileId); // Debug log
+        const data = await getProfileById(profileId);
+        console.log("Profile data received:", data); // Kiểm tra dữ liệu
+        setProfile(data);
+      } catch (error) {
+        console.error("Lỗi khi lấy hồ sơ:", error);
+      }
+    };
+  
+    fetchData();
+  }, [profileId]);
+  
+
+  if (!profile) {
+    return <Text>Đang tải...</Text>;
+  }
+
   const handleEditProfile = () => {
-    router.push("/editprofile");
+    router.push(`/MyShop/${profile.id}`);
   };
 
   const stats = [
@@ -17,27 +46,24 @@ const ProfileShop = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <LinearGradient colors={['#01b9bb', '#ed7c44']} style={styles.header}>
+      <View style={styles.header}>
         <View style={styles.headerContent}>
           <Image
-            source={{
-              uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlK35lrkGleTsoX6U_ecq2LcOhdjoXc31O4Q&s',
-            }}
+            source={{ uri: profile.image || 'https://example.com/default-avatar.png' }}
             style={styles.avatar}
           />
           <View>
-            <Text style={styles.shopName}>Violet Pet Shop</Text>
+            <Text style={styles.shopName}>{profile.fullname}</Text>
             <View style={styles.ratingContainer}>
               <FontAwesome name="star" size={16} color="#FFD700" />
-              <Text style={styles.rating}>5.0</Text>
+              <Text style={styles.rating}>{profile.rating || "5.0"}</Text>
             </View>
           </View>
         </View>
         <TouchableOpacity style={styles.notificationIcon}>
           <FontAwesome name="bell" size={20} color="#fff" />
         </TouchableOpacity>
-      </LinearGradient>
+      </View>
 
       <View style={styles.statsContainer}>
         <Text style={styles.statsTitle}>Tổng quan hằng ngày</Text>
@@ -135,7 +161,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
-    marginBottom: 18,
+    marginBottom: 7,
+    backgroundColor: "#699BF4"
   },
   headerContent: {
     flexDirection: 'row',
@@ -194,10 +221,12 @@ const styles = StyleSheet.create({
   logoutButton: {
     backgroundColor: '#ed7c44',
     padding: 15,
-    margin: 20,
+    margin: 9,
     borderRadius: 10,
     alignItems: 'center',
     elevation: 5,
+    marginTop: 20,
+    marginBottom: 30
   },
   logoutText: {
     fontSize: 16,
