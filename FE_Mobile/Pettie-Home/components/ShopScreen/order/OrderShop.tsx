@@ -51,7 +51,7 @@ export default function OrderShop() {
     };
 
     const handleOrderDetail = () => {
-        router.push("/orderdetail");
+        router.push(`/ProductShop/${orderId}`);
     };
 
     const toggleExpand = (orderId: string) => {

@@ -1,7 +1,7 @@
 export interface Profile {
     id: string;
-    shopName: string;
-    phoneNumber: string;
+    userName: string;
+    phone: string;
     description: string;
     email: string;
     rating: string;
@@ -9,7 +9,10 @@ export interface Profile {
     address: string;
     openingTime: string;
     closingTime: string;
-    avatar: string;
+    image: string;
+    role: string;
+    fullname: string;
+    password: string;
 }
 
 export interface Order {

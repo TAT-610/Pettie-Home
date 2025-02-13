@@ -1,27 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert, Modal } from 'react-native';
-import { useRouter } from 'expo-router';
+import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { getProfileById, updateProfile } from '../../../services/api';
+import { getProfileById, updateProfile } from '../../services/api';
 
 const EditProfileShop = () => {
-  const router = useRouter();
-  const profileId = '1'; // ID của shop cần lấy (có thể thay đổi nếu cần)
-
   // State lưu thông tin hồ sơ
   const [profile, setProfile] = useState({
-    id: '',
-    shopName: '',
-    phoneNumber: '',
-    description: '',
-    email: '',
-    birthDate: '',
-    address: '',
-    openingTime: '',
-    closingTime: '',
-    avatar: ''
+    id: "",
+    fullname: "",
+    phone: "",
+    description: "",
+    email: "",
+    address: "",
+    openingTime: "",
+    closingTime: "",
+    image: "",
+    birthDate: ""
   });
-
+  const { id } = useLocalSearchParams();
+  const profileId = Array.isArray(id) ? id[0] : id;
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
 
   // Lấy dữ liệu hồ sơ khi component được mount
@@ -29,43 +27,69 @@ const EditProfileShop = () => {
     const fetchData = async () => {
       try {
         const data = await getProfileById(profileId);
-        setProfile(data);
+
+        // Kiểm tra nếu dữ liệu trả về bị thiếu, gán giá trị mặc định
+        setProfile({
+          id: data?.id || "",
+          fullname: data?.fullname || "",
+          phone: data?.phone || "",
+          description: data?.description || "",
+          email: data?.email || "",
+          address: data?.address || "",
+          openingTime: data?.openingTime || "",
+          closingTime: data?.closingTime || "",
+          image: data?.image || "",
+          birthDate: data?.birthDate || "",
+        });
+
       } catch (error) {
-        console.error('Lỗi khi lấy hồ sơ:', error);
+        console.error("Lỗi khi lấy hồ sơ:", error);
+        Alert.alert("Lỗi", "Không thể tải dữ liệu hồ sơ.");
       }
     };
-    fetchData();
-  }, []);
+
+    if (profileId) {
+      fetchData();
+    }
+  }, [profileId]); // Chạy lại khi profileId thay đổi
+
+  // Xử lý thay đổi giá trị trong form
+  const handleChange = <T extends keyof typeof profile>(field: T) => (value: typeof profile[T]) => {
+    setProfile((prev) => ({ ...prev, [field]: value }));
+  };
+  
+  
 
   // Xử lý lưu dữ liệu khi người dùng nhấn "Lưu"
   const handleSave = async () => {
     if (!profile.id) {
-      Alert.alert('Lỗi', 'Không tìm thấy ID của hồ sơ.');
+      Alert.alert("Lỗi", "Không tìm thấy ID của hồ sơ.");
       return;
     }
 
     try {
       await updateProfile(profile.id, {
-        shopName: profile.shopName,
-        phoneNumber: profile.phoneNumber,
+        fullname: profile.fullname,
+        phone: profile.phone,
         description: profile.description,
         email: profile.email,
         address: profile.address,
         openingTime: profile.openingTime,
         closingTime: profile.closingTime,
-        avatar: profile.avatar,
+        image: profile.image // Fix lỗi thiếu `image`
       });
-  
+
       setSuccessModalVisible(true);
       setTimeout(() => {
         setSuccessModalVisible(false);
-        router.back(); 
+        router.back();
       }, 2000); // Ẩn sau 2 giây
     } catch (error) {
-      console.error('Error updating profile:', error);
-      Alert.alert('Lỗi', 'Cập nhật hồ sơ thất bại.');
+      console.error("Lỗi khi cập nhật hồ sơ:", error);
+      Alert.alert("Lỗi", "Cập nhật hồ sơ thất bại.");
     }
   };
+
 
   return (
     <ScrollView style={styles.container}>
@@ -76,9 +100,9 @@ const EditProfileShop = () => {
           <Text style={styles.title}>Chỉnh sửa hồ sơ</Text>
         </TouchableOpacity>
         <Image
-          source={{ uri: profile?.avatar || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7_PuGiOv6gDS4J7YTJkyDKGoGL2SzJAEY4A&s' }}
+          source={{ uri: profile?.image || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7_PuGiOv6gDS4J7YTJkyDKGoGL2SzJAEY4A&s' }}
           style={styles.avatar}
-          onError={() => setProfile(prev => ({ ...prev, avatar: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7_PuGiOv6gDS4J7YTJkyDKGoGL2SzJAEY4A&s' }))}
+          onError={() => setProfile(prev => ({ ...prev, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7_PuGiOv6gDS4J7YTJkyDKGoGL2SzJAEY4A&s' }))}
         />
       </View>
 
@@ -120,8 +144,8 @@ const EditProfileShop = () => {
           <Text style={styles.label}>Tên Shop</Text>
           <TextInput
             style={styles.input}
-            value={profile.shopName}
-            onChangeText={(text) => setProfile({ ...profile, shopName: text })}
+            value={profile.fullname}
+            onChangeText={(text) => setProfile({ ...profile, fullname: text })}
           />
         </View>
 
@@ -129,9 +153,8 @@ const EditProfileShop = () => {
           <Text style={styles.label}>Số điện thoại</Text>
           <TextInput
             style={styles.input}
-            keyboardType="phone-pad"
-            value={profile.phoneNumber}
-            onChangeText={(text) => setProfile({ ...profile, phoneNumber: text })}
+            value={profile.phone}
+            onChangeText={(text) => setProfile({ ...profile, phone: text })}
           />
         </View>
 
