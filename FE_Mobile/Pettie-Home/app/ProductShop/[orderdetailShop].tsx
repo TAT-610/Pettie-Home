@@ -43,7 +43,7 @@ export default function OrderDetails() {
 
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.headerContainer}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <AntDesign name="arrowleft" size={24} color="black" />
@@ -139,7 +139,7 @@ export default function OrderDetails() {
         <Text style={styles.sectionHeader}>Lưu ý của khách hàng</Text>
         <Text style={styles.noteText}>{orderDetails.customerNote}</Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
