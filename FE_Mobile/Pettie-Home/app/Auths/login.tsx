@@ -1,13 +1,4 @@
-import {
-  Text,
-  View,
-  StyleSheet,
-  Image,
-  StatusBar,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-} from "react-native";
+import { Text, View, StyleSheet, Image, StatusBar, TouchableOpacity, TextInput, Alert } from "react-native";
 import { ScrollView } from "react-native";
 import logo from "../../assets/images/login.png";
 import { useRouter } from "expo-router";
@@ -34,7 +25,8 @@ export default function Login() {
         router.push(`/(tabs)/home?id=${user.id}`);
       } else if (user.role === "shop") {
         router.push(`/(tabsShop)/homeShop?id=${user.id}`);
-        console.log(`Truyen ID User AfterLogin",${user.id}`);
+        console.log(`Truyen ID User AfterLogin",${user.id}` );
+        
       } else {
         router.push("/home");
       }
@@ -77,10 +69,7 @@ export default function Login() {
 
       <Text style={styles.registerText}>
         Không có tài khoản?{" "}
-        <Text
-          style={styles.registerLink}
-          onPress={() => router.push("/Auths/signup")}
-        >
+        <Text style={styles.registerLink} onPress={() => router.push("/Auths/signup")}>
           Đăng ký
         </Text>
       </Text>
@@ -90,13 +79,8 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   container: { backgroundColor: "white", flex: 1 },
-  logo: { marginLeft: 1, width: 410, height: 400 },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
+  logo: { marginLeft: 1, width: "100%", height: 400 },
+  title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
   inputContainer: { width: "100%", marginBottom: 10, alignItems: "center" },
   input: {
     height: 50,
@@ -110,22 +94,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 16,
   },
-  forgotPassword: {
-    textAlign: "right",
-    color: "#333",
-    marginBottom: 20,
-    marginRight: 34,
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  loginButton: {
-    backgroundColor: "#ed7c44",
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: "center",
-    width: "85%",
-    alignSelf: "center",
-  },
+  forgotPassword: { textAlign: "right", color: "#333", marginBottom: 20, marginRight: 34, fontSize: 15, fontWeight: "500" },
+  loginButton: { backgroundColor: "#ed7c44", paddingVertical: 12, borderRadius: 8, alignItems: "center", width: "85%", alignSelf: "center" },
   loginText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
   registerText: { textAlign: "center", marginTop: 20, fontSize: 14 },
   registerLink: { fontWeight: "bold", color: "#000" },
