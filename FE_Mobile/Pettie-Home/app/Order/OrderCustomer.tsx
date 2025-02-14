@@ -12,6 +12,8 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import Entypo from "@expo/vector-icons/Entypo";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 const orderSummary = [
   {
@@ -98,18 +100,24 @@ const OrderCustomer = () => {
         />
       </View>
       <ScrollView style={styles.scrollView}>
+        {/* Địa chỉ nhận hàng */}
         <Text style={styles.sectionTitle}>
-          <Entypo name="location-pin" size={20} color="black" /> Địa chỉ nhận
-          hàng:
+          <FontAwesome6 name="location-dot" size={16} color="#ed7c44" /> Địa chỉ
+          nhận hàng:
         </Text>
-
         <TouchableOpacity
-          onPress={handleChooseAddress}
-          style={styles.addressContainer}
+        // onPress={handleChooseAddress}
+        // style={styles.addressContainer}
         >
           <Text style={styles.addressText}>{address || defaultAddress}</Text>
-          <Text style={styles.changeAddressText}>Thay đổi</Text>
         </TouchableOpacity>
+
+        {/* Số điện thoại */}
+        <Text style={styles.sectionTitle}>
+          <FontAwesome5 name="phone-alt" size={16} color="#ed7c44" /> Số điện
+          thoại:
+        </Text>
+        <Text style={styles.addressText}>0886133779</Text>
 
         <Text style={styles.sectionTitle}>🛒 Tóm tắt đơn hàng:</Text>
         {orderSummary.map((item, index) => {
@@ -170,6 +178,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+    paddingHorizontal: 20,
   },
   navigation: {
     justifyContent: "space-between",
@@ -206,13 +215,15 @@ const styles = StyleSheet.create({
     color: "blue",
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 20,
+    fontSize: 15,
+    fontWeight: "600",
+    marginTop: 10,
   },
   addressText: {
-    fontSize: 16,
-    marginTop: 10,
+    fontSize: 14,
+    marginTop: 5,
+    color: "#666",
+    marginBottom: 5,
   },
   orderSummaryItem: {
     flexDirection: "row",
@@ -252,7 +263,7 @@ const styles = StyleSheet.create({
   placeOrderButton: {
     marginTop: 20,
     padding: 15,
-    backgroundColor: "green",
+    backgroundColor: "#ed7c44",
   },
   placeOrderText: {
     color: "white",
