@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
         marginLeft: 7,
     },
     page: { width: SCREEN_WIDTH, padding: 16 },
-    list: { paddingBottom: 100 },
+    list: { paddingBottom: 100, },
     orderCard: {
         backgroundColor: "#fff",
         padding: 16,

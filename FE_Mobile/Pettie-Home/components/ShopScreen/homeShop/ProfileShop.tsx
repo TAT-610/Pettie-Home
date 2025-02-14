@@ -54,8 +54,8 @@ const ProfileShop = () => {
   };
 
   const stats = [
-    { label: 'Doanh thu', value: '0đ' },
-    { label: 'Đơn hàng', value: '0' },
+    { label: 'Doanh thu', value: '20.250.000đ' },
+    { label: 'Đơn hàng', value: '14' },
     { label: 'Khách truy cập', value: '19' },
   ];
 
