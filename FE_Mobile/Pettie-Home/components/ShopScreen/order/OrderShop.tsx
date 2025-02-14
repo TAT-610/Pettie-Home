@@ -1,9 +1,35 @@
 import { useRouter } from "expo-router";
 import React, { useRef, useState, useEffect } from "react";
 import { Animated, Dimensions, FlatList, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
-import { getOrders } from "../../../services/api";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const orders = [
+    {
+        id: "1",
+        customerName: "Trần Thị Thanh Thảo",
+        time: "15:00 - 20/10/2024",
+        services: [
+            { name: "Cắt tỉa lông (Chó/Mèo) < 3kg", quantity: 1 },
+            { name: "Tắm và vệ sinh (Chó/Mèo) < 3kg", quantity: 1 },
+            { name: "Nhuọm lông (Chó/Mèo) < 6kg", quantity: 1 },
+            { name: "Hạt mèo", quantity: 1 },
+            { name: "Nệm nằm cho mèo", quantity: 1 },
+        ],
+        total: "900.000 VNĐ",
+        status: "Chờ xác nhận",
+    },
+    {
+        id: "2",
+        customerName: "Nguyễn Văn A",
+        time: "10:00 - 21/10/2024",
+        services: [
+            { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
+        ],
+        total: "935.000 VNĐ",
+        status: "Chờ xác nhận",
+    },
+];
 
 const tabs = ["Chờ xác nhận", "Chờ ngày hẹn", "Đang diễn ra", "Đã hoàn thành", "Đã hủy"];
 
@@ -11,48 +37,20 @@ export default function OrderShop() {
     const [activeTab, setActiveTab] = useState<string>(tabs[0]);
     const [isMenuVisible, setMenuVisible] = useState<boolean>(false);
     const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
-    const [orders, setOrders] = useState<any[]>([]); // State to hold orders
     const scrollX = useRef(new Animated.Value(0)).current;
     const flatListRef = useRef<FlatList<string>>(null);
     const router = useRouter();
-    const filteredOrders = orders.filter(order => order.status === activeTab);
-
-    useEffect(() => {
-        const fetchOrders = async () => {
-            try {
-                const data = await getOrders();
-                if (data && Array.isArray(data)) {
-                    const simplifiedOrders = data.map((order) => ({
-                        id: order.id,
-                        customerName: order.customerName,
-                        time: order.time,
-                        status: order.status, // Thêm trạng thái đơn hàng
-                        services: order.items.map((service) => ({
-                            id: service.id, // Thêm id dịch vụ
-                            quantity: service.quantity,
-                            name: service.name,
-                        })),
-                        total: order.total,
-                    }));
-                    setOrders(simplifiedOrders);
-                } else {
-                    console.error("Dữ liệu đơn hàng không hợp lệ:", data);
-                }
-            } catch (error) {
-                console.error("Lỗi khi lấy đơn hàng:", error);
-            }
-        };
-        fetchOrders();
-    }, []);
+    const filteredOrders = orders.filter(service => service.status === activeTab);
 
     const onTabPress = (index: number) => {
         flatListRef.current?.scrollToOffset({ offset: index * SCREEN_WIDTH, animated: true });
         setActiveTab(tabs[index]);
     };
 
-    const handleOrderDetail = () => {
+    const handleOrderDetail = (orderId: string) => {
         router.push(`/ProductShop/${orderId}`);
     };
+    
 
     const toggleExpand = (orderId: string) => {
         const newExpanded = new Set(expandedOrders);
@@ -70,15 +68,15 @@ export default function OrderShop() {
         const shouldShowToggle = item.services.length > 2;
 
         return (
-            <TouchableOpacity style={styles.orderCard} onPress={handleOrderDetail}>
+            <TouchableOpacity style={styles.orderCard} onPress={() => handleOrderDetail(item.id)}>
                 <View style={styles.buttonorder}>
                     <Text style={styles.orderCustomer}>{item.customerName}</Text>
                     <Text style={styles.orderTime}>{item.time}</Text>
                 </View>
 
                 <View style={styles.orderServices}>
-                    {visibleServices?.map((service: any) => (
-                        <View key={service.id} style={styles.orderServiceRow}>
+                {visibleServices.map((service, index) => (
+                        <View key={index} style={styles.orderServiceRow}>
                             <Text style={styles.serviceQuantity}>x{service.quantity}</Text>
                             <Text style={styles.serviceName}>{service.name}</Text>
                         </View>
@@ -252,15 +250,16 @@ const styles = StyleSheet.create({
     buttonorder: {
         flexDirection: "row",
         justifyContent: "space-between",
+        marginBottom: 5
     },
     orderCustomer: { fontSize: 16, fontWeight: "bold", color: "#333" },
     orderTime: { fontSize: 14, color: "#555", marginVertical: 4 },
-    orderServices: { marginTop: 8 },
+    orderServices: { marginTop: 8 , marginBottom: 5},
     orderTotal: {
         fontSize: 16,
         fontWeight: "bold",
         textAlign: "right",
-        marginTop: 8
+        marginTop: 10,
     },
     orderPrice: {
         color: '#DC143C',

@@ -51,7 +51,7 @@ const ServicesShop = () => {
                             <Image source={{ uri: item.image }} style={styles.image} />
                             <View style={styles.details}>
                                 <Text style={styles.name}>{item.name}</Text>
-                                <Text style={styles.price}>Giá: {item.price}đ</Text>
+                                <Text style={styles.price}>Giá: {item.price}.000đ</Text>
                             </View>
                             <TouchableOpacity style={styles.actionButton}>
                                 <AntDesign name="edit" size={15} color="white" />
@@ -67,37 +67,34 @@ const ServicesShop = () => {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#f0f0f0" },
-    header: { fontSize: 25, fontWeight: "800", paddingVertical: 15, textAlign: "center", backgroundColor: "#fff" },
+    header: { fontSize: 20, fontWeight: "800", paddingVertical: 15, textAlign: "center",backgroundColor: "#fff", paddingTop: 40 },
 
     tabContainer: {
         flexDirection: "row", justifyContent: "space-around", backgroundColor: "#fff",
         paddingBottom: 20
     },
     tab: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 20, backgroundColor: "#ddd" },
-    activeTab: { backgroundColor: "#007bff" },
+    activeTab: { backgroundColor: "#ed7c44" },
     tabText: { fontSize: 16, color: "#000" },
     activeTabText: { color: "#fff", fontWeight: "bold" },
 
-    listContainer: { flex: 1, borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 10 },
+    listContainer: { flex: 1, backgroundColor: "#fff", marginTop: 15, padding: 5 },
     card: {
+        flex: 1,
         flexDirection: "row",
-        backgroundColor: "#f9f9f9",
-        padding: 15,
-        marginVertical: 8,
-        borderRadius: 12,
+        justifyContent: "space-between",
         alignItems: "center",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 3,
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd",
     },
-    image: { width: 100, height: 100, borderRadius: 10 },
+    image: { width: 80, height: 80, borderRadius: 10 },
     details: { flex: 1, marginLeft: 15 },
-    name: { fontSize: 18, fontWeight: "bold", marginBottom: 5 },
-    price: { fontSize: 16, color: "#888", marginBottom: 10 },
+    name: { fontSize: 16, fontWeight: "medium", marginBottom: 5 },
+    price: { fontSize: 13, color: "#888", marginBottom: 10 },
 
-    actionButton: { padding: 8, backgroundColor: "#ed7c44", borderRadius: 4, marginTop: 60 },
+    actionButton: { padding: 6, backgroundColor: "#ed7c44", borderRadius: 20, marginTop: 60 },
 
 });
 
