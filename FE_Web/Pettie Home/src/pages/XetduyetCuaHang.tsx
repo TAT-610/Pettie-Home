@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 const stores = [
-  { id: 1, shopName: "Clarke Pitts", status: "Pending", price: 50 },
-  { id: 2, shopName: "Haven Essentials", status: "Chấp nhận", price: 75 },
-  { id: 3, shopName: "Paws & Claws", status: "Pending", price: 120 },
-  { id: 4, shopName: "Pets Paradise", status: "Không chấp nhận", price: 95 },
+  { id: 1, shopName: "Clarke Pitts", status: "Chờ xác nhận", price: 50 },
+  { id: 2, shopName: "Haven Essentials", status: "Từ chối", price: 75 },
+  { id: 3, shopName: "Paws & Claws", status: "Chờ xác nhậnnhận", price: 120 },
+  { id: 4, shopName: "Pets Paradise", status: "Từ chối", price: 95 },
 ];
 
 const XetDuyetCuaHang = () => {
@@ -48,33 +48,43 @@ const XetDuyetCuaHang = () => {
               <th className="px-4 py-3">ID</th>
               <th className="px-4 py-3">Tên cửa hàng</th>
               <th className="px-4 py-3">Trạng thái</th>
-              <th className="px-4 py-3">Price</th>
+              <th className="px-4 py-3">Chi tiết</th>
               <th className="px-4 py-3">Hành động</th>
             </tr>
           </thead>
           <tbody>
             {storeData.map((store) => (
-              <tr key={store.id} className="border-b hover:bg-gray-100 transition-colors">
+              <tr
+                key={store.id}
+                className="border-b hover:bg-gray-100 transition-colors"
+              >
                 <td className="px-4 py-3">{store.id}</td>
                 <td className="px-4 py-3">{store.shopName}</td>
                 <td className="px-4 py-3">
                   {/* Conditional styling for status */}
                   <span
-                    className={`${store.status === "Chấp nhận"
+                    className={`${
+                      store.status === "Chấp nhận"
                         ? "text-green-500"
-                        : store.status === "Không chấp nhận"
-                          ? "text-red-500"
-                          : "text-yellow-500"
-                      }`}
+                        : store.status === "Từ chối"
+                        ? "text-red-500"
+                        : "text-yellow-500"
+                    }`}
                   >
                     {store.status}
                   </span>
                 </td>
-                <td className="px-4 py-3">{store.price} USD</td>
+                <td className="px-4 py-3">
+                  <button className="text-blue-500 hover:text-blue-700">
+                    Chi tiết thông tin
+                  </button>
+                </td>
                 <td className="px-4 py-3 flex items-center space-x-4">
                   <select
                     className="border border-gray-300 rounded-lg px-2 py-1"
-                    onChange={(e) => handleActionChange(store.id, e.target.value)}
+                    onChange={(e) =>
+                      handleActionChange(store.id, e.target.value)
+                    }
                   >
                     <option value="">Chọn hành động</option>
                     <option value="approve">Chấp nhận</option>

@@ -2,14 +2,70 @@ import React from "react";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 
 const stores = [
-  { id: 1, createdAt: "Jul 19, 2020", shopName: "Clarke Pitts", status: "Completed", price: 50 },
-  { id: 2, createdAt: "Aug 1, 2021", shopName: "Haven Essentials", status: "Incompleted", price: 75 },
-  { id: 3, createdAt: "Oct 15, 2021", shopName: "Paws & Claws", status: "Completed", price: 120 },
-  { id: 4, createdAt: "Nov 2, 2020", shopName: "Pets Paradise", status: "Incompleted", price: 95 },
-  { id: 5, createdAt: "Jan 10, 2022", shopName: "Furry Friends", status: "Completed", price: 30 },
-  { id: 6, createdAt: "Mar 22, 2021", shopName: "Puppy Love", status: "Incompleted", price: 60 },
-  { id: 7, createdAt: "Dec 5, 2020", shopName: "Bark Avenue", status: "Completed", price: 110 },
-  { id: 8, createdAt: "Jun 18, 2021", shopName: "Kitty Corner", status: "Incompleted", price: 40 },
+  {
+    id: 1,
+    createdAt: "Jul 19, 2020",
+    shopName: "Clarke Pitts",
+    revenue: 4500000,
+    status: "Completed",
+    price: 50,
+  },
+  {
+    id: 2,
+    createdAt: "Aug 1, 2021",
+    shopName: "Haven Essentials",
+    revenue: 1700000,
+    status: "Incompleted",
+    price: 75,
+  },
+  {
+    id: 3,
+    createdAt: "Oct 15, 2021",
+    shopName: "Paws & Claws",
+    revenue: 200000,
+    status: "Completed",
+    price: 120,
+  },
+  {
+    id: 4,
+    createdAt: "Nov 2, 2020",
+    shopName: "Pets Paradise",
+    revenue: 130130000,
+    status: "Incompleted",
+    price: 95,
+  },
+  {
+    id: 5,
+    createdAt: "Jan 10, 2022",
+    shopName: "Furry Friends",
+    revenue: 500000,
+    status: "Completed",
+    price: 30,
+  },
+  {
+    id: 6,
+    createdAt: "Mar 22, 2021",
+    shopName: "Puppy Love",
+    revenue: 2350000,
+    status: "Incompleted",
+    price: 60,
+  },
+  {
+    id: 7,
+    createdAt: "Dec 5, 2020",
+    shopName: "Bark Avenue",
+    revenue: 475000,
+    status: "Completed",
+    price: 110,
+  },
+  {
+    id: 8,
+    createdAt: "Jun 18, 2021",
+    shopName: "Kitty Corner",
+    revenue: 2400000,
+    status: "Incompleted",
+    price: 40,
+  },
 ];
 
 const CuaHang = () => {
@@ -43,33 +99,24 @@ const CuaHang = () => {
               <th className="px-4 py-3">ID</th>
               <th className="px-4 py-3">Tên cửa hàng</th>
               <th className="px-4 py-3">Ngày tạo</th>
-              <th className="px-4 py-3">Trạng thái</th>
-              <th className="px-4 py-3">Hoạt động</th>
+              <th className="px-4 py-3">Doanh thu</th>
+              <th className="px-4 py-3">Doanh thu cho hệ thống</th>
             </tr>
           </thead>
           <tbody>
             {stores.map((store) => (
-              <tr key={store.id} className="border-b hover:bg-gray-100 transition-colors">
+              <tr
+                key={store.id}
+                className="border-b hover:bg-gray-100 transition-colors"
+              >
                 <td className="px-4 py-3">{store.id}</td>
-                <td className="px-4 py-3">{store.createdAt}</td>
                 <td className="px-4 py-3">{store.shopName}</td>
+                <td className="px-4 py-3">{store.createdAt}</td>
                 <td className="px-4 py-3">
-                  {/* Conditional styling for status */}
-                  <span
-                    className={`${
-                      store.status === "Completed" ? "text-green-500" : "text-orange-500"
-                    }`}
-                  >
-                    {store.status}
-                  </span>
+                  {store.revenue.toLocaleString()} VND
                 </td>
-                <td className="px-4 py-3 flex items-center space-x-4">
-                  <button className="text-blue-500 hover:text-blue-700">
-                    <FaEdit />
-                  </button>
-                  <button className="text-red-500 hover:text-red-700">
-                    <FaTrashAlt />
-                  </button>
+                <td className="px-4 py-3">
+                  {(store.revenue * 0.1).toLocaleString()} VND
                 </td>
               </tr>
             ))}
@@ -80,16 +127,24 @@ const CuaHang = () => {
       {/* Pagination */}
       <div className="flex justify-center items-center mt-4">
         <div className="flex items-center space-x-2">
-          <button className="px-3 py-1 border rounded-md text-gray-600 hover:bg-gray-200">&lt;</button>
+          <button className="px-3 py-1 border rounded-md text-gray-600 hover:bg-gray-200">
+            &lt;
+          </button>
           {[1, 2, 3, 4, 5].map((page) => (
             <button
               key={page}
-              className={`px-3 py-1 border rounded-md ${page === 1 ? "bg-green-200 text-gray-700" : "text-gray-600 hover:bg-gray-200"}`}
+              className={`px-3 py-1 border rounded-md ${
+                page === 1
+                  ? "bg-green-200 text-gray-700"
+                  : "text-gray-600 hover:bg-gray-200"
+              }`}
             >
               {page}
             </button>
           ))}
-          <button className="px-3 py-1 border rounded-md text-gray-600 hover:bg-gray-200">&gt;</button>
+          <button className="px-3 py-1 border rounded-md text-gray-600 hover:bg-gray-200">
+            &gt;
+          </button>
         </div>
       </div>
     </div>

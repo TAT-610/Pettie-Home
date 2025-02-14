@@ -1,12 +1,24 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+
+  // Tài khoản giả
+  const fakeAccount = {
+    phone: "0886133779",
+    password: "123456",
+  };
 
   const handleLogin = async () => {
-    console.log("CHuyen trang");
-    navigate("/admin/thongke");
+    if (phone === fakeAccount.phone && password === fakeAccount.password) {
+      console.log("Đăng nhập thành công");
+      navigate("/admin/thongke");
+    } else {
+      alert("Số điện thoại hoặc mật khẩu không đúng");
+    }
   };
 
   return (
@@ -24,6 +36,24 @@ export default function Login() {
         <p className="text-2xl mb-6">
           Nơi cung cấp các dịch vụ cho thú cưng tại nhà
         </p>
+
+        {/* Phone Input */}
+        <input
+          type="text"
+          placeholder="Số điện thoại"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="mb-4 px-4 py-2 rounded-lg text-black"
+        />
+
+        {/* Password Input */}
+        <input
+          type="password"
+          placeholder="Mật khẩu"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="mb-6 px-4 py-2 rounded-lg text-black"
+        />
 
         {/* Login Button */}
         <button

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaChartBar, FaUsers, FaStore, FaSignOutAlt } from "react-icons/fa";
 import { TbShoppingCartCopy } from "react-icons/tb";
+import { useNavigate } from "react-router-dom";
 
 interface SidebarDataType {
   icon: React.ElementType;
@@ -36,6 +37,7 @@ const SidebarData: SidebarDataType[] = [
 
 const Sidebar = () => {
   const [active, setActive] = useState<string>(window.location.pathname);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Update active link on page load or URL change
@@ -47,15 +49,15 @@ const Sidebar = () => {
     window.location.href = href; // Navigate to the clicked page
   };
 
+  const handleLogout = () => {
+    navigate("/");
+  };
+
   return (
     <div className="w-64 h-screen bg-[#699BF4] shadow-md flex flex-col">
       {/* Logo Section */}
       <div className="m-auto px-6 py-5">
-        <img
-          src="/src/assets/logotest.png"
-          alt="Logo"
-          className="w-45 h-20"
-        />
+        <img src="/src/assets/logotest.png" alt="Logo" className="w-45 h-20" />
       </div>
 
       {/* Navigation Section */}
@@ -107,7 +109,10 @@ const Sidebar = () => {
 
       {/* Logout Section */}
       <div className="px-4 py-6">
-        <button className="flex items-center text-sm font-medium text-white hover:text-red-500 hover:bg-[#37cecc] rounded-lg px-4 py-2 w-full">
+        <button
+          className="flex items-center text-sm font-medium text-white hover:text-red-500 hover:bg-[#37cecc] rounded-lg px-4 py-2 w-full"
+          onClick={handleLogout}
+        >
           <div className="mr-3 text-lg">
             <FaSignOutAlt />
           </div>
