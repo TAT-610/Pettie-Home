@@ -46,7 +46,7 @@ export default function Login() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="UserName"
+          placeholder="Tên người dùng"
           value={username}
           onChangeText={setUsername}
         />
