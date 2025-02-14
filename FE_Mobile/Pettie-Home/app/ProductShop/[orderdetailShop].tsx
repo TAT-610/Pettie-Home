@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ScrollView, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, FlatList, ScrollView, StyleSheet, TouchableOpacity, Modal, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -31,20 +31,7 @@ export default function OrderDetails() {
   const router = useRouter();
   const [order, setOrder] = useState(orderDetails);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
 
-  useEffect(() => {
-    const parseDate = (dateString: any) => {
-      const [datePart, timePart] = dateString.split(' - ');
-      const [day, month, year] = datePart.split('/').map(Number);
-      const [hours, minutes, seconds] = timePart.split(':').map(Number);
-      return new Date(year, month - 1, day, hours, minutes, seconds);
-    };
-
-    setSelectedDate(parseDate(order.scheduledTime));
-  }, [order.scheduledTime]);
-
-  // Hàm định dạng ngày tháng
   const formatDate = (date: any) => {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -52,27 +39,11 @@ export default function OrderDetails() {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     const seconds = String(date.getSeconds()).padStart(2, '0');
-    return `${day}/${month}/${year} - ${hours}:${minutes}:${seconds}`;
-    const currentStatusIndex = statusSteps.indexOf(order.status);
-
   };
 
-  // Xử lý xác nhận thay đổi
-  const handleConfirm = () => {
-    const currentIndex = statusSteps.indexOf(order.status);
-    const nextStatus = statusSteps[currentIndex + 1];
-
-    setOrder(prev => ({
-      ...prev,
-      status: nextStatus,
-      scheduledTime: formatDate(selectedDate),
-    }));
-
-    setIsModalVisible(false);
-  };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.headerContainer}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <AntDesign name="arrowleft" size={24} color="black" />
@@ -103,26 +74,6 @@ export default function OrderDetails() {
           <Text style={styles.label}>Thời gian hẹn:</Text>
           <Text style={styles.value}>{orderDetails.scheduledTime}</Text>
         </View>
-
-        {/* Modal thay đổi lịch hẹn */}
-      <Modal visible={isModalVisible} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Thay đổi lịch hẹn</Text>
-            
-            <TouchableOpacity style={styles.confirmButton} onPress={handleConfirm}>
-              <Text style={styles.confirmText}>Xác nhận</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.cancelButton}
-              onPress={() => setIsModalVisible(false)}
-            >
-              <Text style={styles.cancelText}>Hủy</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
       </View>
 
       <View style={styles.carddetail}>
@@ -132,7 +83,7 @@ export default function OrderDetails() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.itemRow}>
-              <View>
+              <View style={styles.itemInfo}>
                 <Text style={styles.itemText}>{item.name}</Text>
                 <Text style={styles.itemPrice}>{item.price.toLocaleString()} đ</Text>
               </View>
@@ -184,12 +135,11 @@ export default function OrderDetails() {
         </View>
       </View>
 
-      {/* Thay thế nút "Quay lại" bằng card "Lưu ý của khách hàng" */}
       <View style={styles.cardNote}>
         <Text style={styles.sectionHeader}>Lưu ý của khách hàng</Text>
         <Text style={styles.noteText}>{orderDetails.customerNote}</Text>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -197,6 +147,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+    maxWidth: '100%'
   },
   headerContainer: {
     flexDirection: 'row',
@@ -231,11 +182,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    flexWrap: 'wrap',
   },
   headerCard: {
     flexDirection: 'column',
     justifyContent: 'space-between',
     padding: 5,
+    flex: 1,
+    minWidth: Dimensions.get('window').width * 0.4,
   },
   label: {
     fontSize: 16,
@@ -295,6 +249,10 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginBottom: 10,
+    flexWrap: 'wrap',
+  },
+  itemInfo: {
+    flex: 1,
   },
   itemText: {
     fontSize: 16,
@@ -375,51 +333,11 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
     marginTop: 20,
-    marginBottom: 40
+    marginBottom: 50
   },
   noteText: {
     fontSize: 16,
     color: '#333',
     marginTop: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: '90%',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  confirmButton: {
-    backgroundColor: '#25923E',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 15,
-  },
-  cancelButton: {
-    backgroundColor: '#e63946',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 10,
-  },
-  confirmText: {
-    color: 'white',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  cancelText: {
-    color: 'white',
-    textAlign: 'center',
-    fontWeight: 'bold',
   },
 });
