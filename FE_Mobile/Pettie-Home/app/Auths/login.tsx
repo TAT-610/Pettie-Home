@@ -79,7 +79,7 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   container: { backgroundColor: "white", flex: 1 },
-  logo: { marginLeft: 1, width: 410, height: 400 },
+  logo: { marginLeft: 1, width: "100%", height: 400 },
   title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
   inputContainer: { width: "100%", marginBottom: 10, alignItems: "center" },
   input: {
