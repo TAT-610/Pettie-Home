@@ -1,5 +1,5 @@
-import React from 'react';
-import AdminRouter from './routes/AdminRouter';
+import React from "react";
+import AdminRouter from "./routes/AdminRouter";
 
 const App: React.FC = () => {
   return (
@@ -7,6 +7,6 @@ const App: React.FC = () => {
       <AdminRouter />
     </div>
   );
-}
+};
 
 export default App;
