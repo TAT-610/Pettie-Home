@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
-import React, { useRef, useState, useEffect } from "react";
-import { Animated, Dimensions, FlatList, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Animated, Dimensions, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -29,82 +29,155 @@ const orders = [
         total: "935.000 VNĐ",
         status: "Chờ xác nhận",
     },
+    {
+        id: "3",
+        customerName: "Nguyễn Văn A",
+        time: "10:00 - 21/10/2024",
+        services: [
+            { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
+        ],
+        total: "935.000 VNĐ",
+        status: "Chờ xác nhận",
+    },
+    {
+        id: "4",
+        customerName: "Nguyễn Văn A",
+        time: "10:00 - 21/10/2024",
+        services: [
+            { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
+        ],
+        total: "935.000 VNĐ",
+        status: "Chờ ngày hẹn",
+    },
+    {
+        id: "5",
+        customerName: "Nguyễn Văn A",
+        time: "10:00 - 21/10/2024",
+        services: [
+            { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
+        ],
+        total: "935.000 VNĐ",
+        status: "Đang diễn ra",
+    },
 ];
 
 const tabs = ["Chờ xác nhận", "Chờ ngày hẹn", "Đang diễn ra", "Đã hoàn thành", "Đã hủy"];
 
+const OrderActions = ({ onAccept, onCancel }: { onAccept: () => void; onCancel: () => void }) => {
+    return (
+        <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.acceptButton} onPress={onAccept}>
+                <Text style={styles.buttonText}>Nhận Đơn</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+                <Text style={styles.buttonTextCancel}>Hủy Đơn</Text>
+            </TouchableOpacity>
+        </View>
+    );
+};
+
+const OrderCard = ({ order, onPress, onToggleExpand, isExpanded }: { order: typeof orders[0]; onPress: () => void; onToggleExpand: () => void; isExpanded: boolean }) => {
+    const visibleServices = isExpanded ? order.services : order.services.slice(0, 2);
+    const shouldShowToggle = order.services.length > 2;
+
+    return (
+        <TouchableOpacity style={styles.orderCard} onPress={onPress}>
+            <View style={styles.buttonorder}>
+                <Text style={styles.orderCustomer}>{order.customerName}</Text>
+                <Text style={styles.orderTime}>{order.time}</Text>
+            </View>
+
+            <View style={styles.orderServices}>
+                {visibleServices.map((service, index) => (
+                    <View key={index} style={styles.orderServiceRow}>
+                        <Text style={styles.serviceQuantity}>x{service.quantity}</Text>
+                        <Text style={styles.serviceName}>{service.name}</Text>
+                    </View>
+                ))}
+            </View>
+
+            {shouldShowToggle && (
+                <TouchableOpacity
+                    onPress={(e) => {
+                        e.stopPropagation();
+                        onToggleExpand();
+                    }}
+                    style={styles.expandButton}
+                >
+                    <Text style={styles.expandButtonText}>
+                        {isExpanded ? 'Thu gọn ▲' : 'Xem thêm ▼'}
+                    </Text>
+                </TouchableOpacity>
+            )}
+
+            <Text style={styles.orderTotal}>Tổng đơn hàng: <Text style={styles.orderPrice}>{order.total}</Text></Text>
+            <OrderActions onAccept={() => {}} onCancel={() => {}} />
+        </TouchableOpacity>
+    );
+};
+
+const TabBar = ({ tabs, activeTab, onTabPress }: { tabs: string[]; activeTab: string; onTabPress: (index: number) => void }) => {
+    return (
+        <View style={styles.stickyHeader}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
+                {tabs.map((tab, index) => (
+                    <TouchableOpacity
+                        key={tab}
+                        onPress={() => onTabPress(index)}
+                        style={[styles.tab, activeTab === tab && styles.activeTab]}
+                    >
+                        <Text style={activeTab === tab ? styles.activeTabText : styles.tabText}>{tab}</Text>
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
+        </View>
+    );
+};
+
 export default function OrderShop() {
     const [activeTab, setActiveTab] = useState<string>(tabs[0]);
-    const [isMenuVisible, setMenuVisible] = useState<boolean>(false);
     const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
     const scrollX = useRef(new Animated.Value(0)).current;
     const flatListRef = useRef<FlatList<string>>(null);
     const router = useRouter();
-    const filteredOrders = orders.filter(service => service.status === activeTab);
 
-    const onTabPress = (index: number) => {
+    const filteredOrders = useMemo(
+        () => orders.filter(order => order.status === activeTab),
+        [activeTab]
+    );
+
+    const onTabPress = useCallback((index: number) => {
         flatListRef.current?.scrollToOffset({ offset: index * SCREEN_WIDTH, animated: true });
         setActiveTab(tabs[index]);
-    };
+    }, []);
 
-    const handleOrderDetail = (orderId: string) => {
-        router.push(`/ProductShop/${orderId}`);
-    };
-    
+    const handleOrderDetail = useCallback((orderId: string) => {
+        router.push(`/OrderShop/${orderId}`);
+    }, [router]);
 
-    const toggleExpand = (orderId: string) => {
-        const newExpanded = new Set(expandedOrders);
-        if (newExpanded.has(orderId)) {
-            newExpanded.delete(orderId);
-        } else {
-            newExpanded.add(orderId);
-        }
-        setExpandedOrders(newExpanded);
-    };
+    const toggleExpand = useCallback((orderId: string) => {
+        setExpandedOrders(prev => {
+            const newExpanded = new Set(prev);
+            if (newExpanded.has(orderId)) {
+                newExpanded.delete(orderId);
+            } else {
+                newExpanded.add(orderId);
+            }
+            return newExpanded;
+        });
+    }, []);
 
-    const renderOrder = ({ item }: { item: typeof orders[0] }) => {
+    const renderOrder = useCallback(({ item }: { item: typeof orders[0] }) => {
         const isExpanded = expandedOrders.has(item.id);
-        const visibleServices = isExpanded ? item.services : item.services.slice(0, 2);
-        const shouldShowToggle = item.services.length > 2;
-
         return (
-            <TouchableOpacity style={styles.orderCard} onPress={() => handleOrderDetail(item.id)}>
-                <View style={styles.buttonorder}>
-                    <Text style={styles.orderCustomer}>{item.customerName}</Text>
-                    <Text style={styles.orderTime}>{item.time}</Text>
-                </View>
-
-                <View style={styles.orderServices}>
-                {visibleServices.map((service, index) => (
-                        <View key={index} style={styles.orderServiceRow}>
-                            <Text style={styles.serviceQuantity}>x{service.quantity}</Text>
-                            <Text style={styles.serviceName}>{service.name}</Text>
-                        </View>
-                    ))}
-                </View>
-
-                {shouldShowToggle && (
-                    <TouchableOpacity
-                        onPress={(e) => {
-                            e.stopPropagation();
-                            toggleExpand(item.id)
-                        }}
-                        style={styles.expandButton}
-                    >
-                        <Text style={styles.expandButtonText}>
-                            {isExpanded ? 'Thu gọn ▲' : 'Xem thêm ▼'}
-                        </Text>
-                    </TouchableOpacity>
-                )}
-
-                <Text style={styles.orderTotal}>Tổng đơn hàng: <Text style={styles.orderPrice}>{item.total}</Text></Text>
-
-                <TouchableOpacity style={styles.acceptButton}>
-                    <Text style={styles.acceptButtonText}>Nhận đơn</Text>
-                </TouchableOpacity>
-            </TouchableOpacity>
+            <OrderCard
+                order={item}
+                onPress={() => handleOrderDetail(item.id)}
+                onToggleExpand={() => toggleExpand(item.id)}
+                isExpanded={isExpanded}
+            />
         );
-    };
+    }, [expandedOrders, handleOrderDetail, toggleExpand]);
 
     return (
         <View style={styles.container}>
@@ -114,22 +187,7 @@ export default function OrderShop() {
             </View>
 
             {/* Tabs */}
-            <View style={styles.stickyHeader}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
-                    {tabs.map((tab, index) => (
-                        <TouchableOpacity
-                            key={tab}
-                            onPress={() => onTabPress(index)}
-                            style={[styles.tab, activeTab === tab && styles.activeTab]}
-                        >
-                            <Text style={activeTab === tab ? styles.activeTabText : styles.tabText}>{tab}</Text>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
-                <TouchableOpacity onPress={() => setMenuVisible(true)}>
-                    <Text style={styles.menuTrigger}>☰</Text>
-                </TouchableOpacity>
-            </View>
+            <TabBar tabs={tabs} activeTab={activeTab} onTabPress={onTabPress} />
 
             {/* Content */}
             <Animated.FlatList
@@ -158,34 +216,6 @@ export default function OrderShop() {
                     </View>
                 )}
             />
-
-            {/* Modal */}
-            <Modal
-                visible={isMenuVisible}
-                transparent
-                animationType="slide"
-                onRequestClose={() => setMenuVisible(false)}
-            >
-                <TouchableOpacity style={styles.modalOverlay} onPress={() => setMenuVisible(false)} />
-                <View style={styles.modalContainer}>
-                    {tabs.map((tab) => (
-                        <TouchableOpacity
-                            key={tab}
-                            onPress={() => {
-                                setActiveTab(tab);
-                                setMenuVisible(false);
-                            }}
-                            style={[styles.modalOption, activeTab === tab && styles.activeModalOption]}
-                        >
-                            <Text
-                                style={[styles.modalOptionText, activeTab === tab && styles.activeModalOptionText]}
-                            >
-                                {tab}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </Modal>
         </View>
     );
 }
@@ -195,11 +225,12 @@ const styles = StyleSheet.create({
     headerContainer: {
         flexDirection: "row",
         justifyContent: "center",
-        marginTop: 40,
-        marginLeft: 10,
-        marginBottom: 30,
+        backgroundColor: "#699BF4",
+        padding: 30,
+        paddingTop: 60,
+        
     },
-    header: { fontSize: 24, fontWeight: "bold", color: "#333" },
+    header: { fontSize: 24, fontWeight: "bold", color: "#fff" },
     stickyHeader: {
         paddingVertical: 8,
         paddingHorizontal: 16,
@@ -209,6 +240,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
         zIndex: 10,
+        backgroundColor:"#699BF4"
     },
     tabsContainer: {
         flexDirection: "row",
@@ -218,7 +250,7 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         marginRight: 8,
         borderRadius: 16,
-        backgroundColor: "#f0f0f0",
+        backgroundColor: "#fff",
     },
     activeTab: {
         backgroundColor: "#ed7c44",
@@ -230,13 +262,10 @@ const styles = StyleSheet.create({
         color: "#fff",
     },
     menuTrigger: {
-        fontSize: 18,
-        color: "#ed7c44",
-        padding: 5,
         marginLeft: 7,
     },
     page: { width: SCREEN_WIDTH, padding: 16 },
-    list: { paddingBottom: 100, },
+    list: { paddingBottom: 16, },
     orderCard: {
         backgroundColor: "#fff",
         padding: 16,
@@ -252,17 +281,17 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         marginBottom: 5
     },
-    orderCustomer: { fontSize: 16, fontWeight: "bold", color: "#333" },
+    orderCustomer: { fontSize: 16, fontWeight: "medium", color: "#333" },
     orderTime: { fontSize: 14, color: "#555", marginVertical: 4 },
-    orderServices: { marginTop: 8 , marginBottom: 5},
+    orderServices: { marginTop: 8, marginBottom: 5 },
     orderTotal: {
         fontSize: 16,
         fontWeight: "bold",
-        textAlign: "right",
+        textAlign: "left",
         marginTop: 10,
     },
     orderPrice: {
-        color: '#DC143C',
+        color: '#c12b0d',
     },
     modalOverlay: {
         flex: 1,
@@ -289,7 +318,7 @@ const styles = StyleSheet.create({
         color: "#555",
     },
     activeModalOption: {
-        backgroundColor: "#699BF4",
+        backgroundColor: "#ed7c44",
     },
     activeModalOptionText: {
         color: "#fff",
@@ -310,17 +339,35 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: "bold",
     },
-    acceptButton: {
-        marginTop: 16,
-        backgroundColor: "#ed7c44",
-        paddingVertical: 12,
-        borderRadius: 8,
-        alignItems: "center",
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: "flex-end",
+        gap: 20,
+        marginTop: 20
     },
-    acceptButtonText: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "bold",
+    acceptButton: {
+        backgroundColor: '#ed7c44',
+        padding: 10,
+        borderRadius: 5,
+        borderColor: "#ed7c44",
+        borderWidth: 2, // Độ dày của viền
+    },
+    cancelButton: {
+        backgroundColor: '#fff',
+        padding: 10,
+        borderRadius: 5,
+        borderColor: "#ed7c44",
+        borderWidth: 2, // Độ dày của viền
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
+        
+    },
+    buttonTextCancel:{
+        color: '#ed7c44',
+        fontWeight: 'bold',
+        
     },
     expandButton: {
         alignSelf: 'center',

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ScrollView, StyleSheet, TouchableOpacity, Modal, Dimensions } from 'react-native';
+import { View, Text, FlatList, ScrollView, StyleSheet, TouchableOpacity, Modal, Dimensions, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const statusSteps = ['Chờ ngày hẹn', 'Đến cuộc hẹn', 'Đang tiến hành', 'Đã hoàn thành'];
 
@@ -11,10 +11,18 @@ const orderDetails = {
   time: '27/01/2024 - 23:07:42',
   scheduledTime: "28/01/2024 - 10:00:00",
   items: [
-    { id: '1', name: 'Cắt tỉa lông (Chó/Mèo) <3kg ', price: 420000, quantity: 1 },
-    { id: '2', name: 'Tạo hình đặc biệt (Theo yêu cầu) ', price: 120000, quantity: 3 },
-    { id: '3', name: 'Tạo hình đặc biệt (Theo yêu cầu) ', price: 200000, quantity: 2 },
-    { id: '4', name: 'Tạo hình đặc biệt (Theo yêu cầu) ', price: 32000, quantity: 4 },
+    { id: '1', name: 'Cắt tỉa lông (Chó/Mèo) <3kg ', price: 420000, quantity: 1, image: "" },
+    { id: '2', name: 'Tạo hình đặc biệt (Theo yêu cầu) ', price: 120000, quantity: 3, image: "" },
+    { id: '3', name: 'Bánh quy cho chó ', price: 32000, quantity: 4, image: "https://paddy.vn/cdn/shop/files/snack-cho-cho-banh-quy-doggyman_5.jpg?v=1732863422", },
+    {
+      id: '4', name: 'Pate mèo kucinta gói 80g ', price: 32000, quantity: 4, image:
+        "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
+    },
+    {
+      id: '5', name: 'Cát đậu nành Cature cho mèo 2.8kg ', price: 32000, quantity: 4, image:
+        "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
+    },
+
   ],
   subtotal: 925000,
   shipping: 15000,
@@ -32,16 +40,6 @@ export default function OrderDetails() {
   const [order, setOrder] = useState(orderDetails);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const formatDate = (date: any) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-  };
-
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.headerContainer}>
@@ -50,7 +48,7 @@ export default function OrderDetails() {
         </TouchableOpacity>
         <Text style={styles.header}>Thông tin đơn hàng</Text>
       </View>
-      <Text style={styles.statusOrder}>Cuộc hẹn trước</Text>
+      <Text style={styles.statusOrder}>Thông tin lịch hẹn</Text>
 
       <View style={styles.card}>
         <View style={styles.headerCard}>
@@ -66,23 +64,41 @@ export default function OrderDetails() {
               if (currentIndex < statusSteps.length - 1) setIsModalVisible(true);
             }}
           >
-            <Text style={styles.status}>
-              <MaterialCommunityIcons name="motorbike" size={24} color="#25923E" />
-              {order.status}
-            </Text>
+            <View style={styles.status}>
+              <Entypo name="controller-record" size={24} color="#25923E" />
+              <Text style={styles.statusText}>{order.status}</Text>
+            </View>
           </TouchableOpacity>
           <Text style={styles.label}>Thời gian hẹn:</Text>
           <Text style={styles.value}>{orderDetails.scheduledTime}</Text>
         </View>
       </View>
 
+      <View style={styles.cardinfo}>
+        <Text style={styles.sectionHeader}>Thông tin khách hàng</Text>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Tên khách hàng:</Text>
+          <Text style={styles.infoValue}>{orderDetails.customerName}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Số điện thoại:</Text>
+          <Text style={styles.infoValue}>{orderDetails.customerPhone}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Địa chỉ:</Text>
+          <Text style={styles.infoValue}>{orderDetails.address}</Text>
+        </View>
+      </View>
+
       <View style={styles.carddetail}>
         <Text style={styles.sectionHeader}>Chi tiết đơn hàng</Text>
         <FlatList
+          nestedScrollEnabled={true}
           data={orderDetails.items}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.itemRow}>
+              <Image source={{ uri: item.image }} style={styles.image} />
               <View style={styles.itemInfo}>
                 <Text style={styles.itemText}>{item.name}</Text>
                 <Text style={styles.itemPrice}>{item.price.toLocaleString()} đ</Text>
@@ -105,23 +121,7 @@ export default function OrderDetails() {
         </View>
       </View>
 
-      <View style={styles.cardinfo}>
-        <Text style={styles.sectionHeader}>Thông tin khách hàng</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Tên khách hàng:</Text>
-          <Text style={styles.infoValue}>{orderDetails.customerName}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Số điện thoại:</Text>
-          <Text style={styles.infoValue}>{orderDetails.customerPhone}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Địa chỉ:</Text>
-          <Text style={styles.infoValue}>{orderDetails.address}</Text>
-        </View>
-      </View>
-
-      <View style={styles.cardinfo}>
+      <View style={styles.cardpayment}>
         <View style={styles.sectionHeader}>
           <Text style={styles.section}>Phương thức thanh toán</Text>
           <Text style={styles.infoValue}>{orderDetails.paymentMethod}</Text>
@@ -171,6 +171,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
+    color: "#fff"
   },
   card: {
     backgroundColor: '#fff',
@@ -195,25 +196,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 10,
+    marginBottom: 10
   },
   value: {
     fontSize: 16,
     color: '#696969',
-    marginBottom: 8,
     fontWeight: '500',
-    marginTop: 5,
+    paddingBottom: 10,
+
   },
   status: {
-    color: '#25923E',
-    fontWeight: 'bold',
-    fontSize: 16,
+    flexDirection: 'row',  // Căn theo hàng ngang
+    alignItems: 'center',   // Căn giữa icon và chữ
+    justifyContent: 'center', // Căn giữa nội dung theo chiều ngang
     marginTop: 13,
     borderRadius: 10,
-    padding: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
     backgroundColor: 'white',
     borderWidth: 2,
     borderColor: '#25923E',
-    flexDirection: 'row'
+    marginBottom: 15
+  },
+  statusText: {
+    color: '#25923E',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginLeft: 5,  // Tạo khoảng cách giữa icon và chữ
   },
   carddetail: {
     backgroundColor: '#fff',
@@ -222,6 +231,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    marginTop: 20
   },
   sectionHeader: {
     fontSize: 18,
@@ -251,12 +261,21 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     flexWrap: 'wrap',
   },
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    marginRight: 10,
+  },
   itemInfo: {
     flex: 1,
   },
   itemText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'medium',
+    flexWrap: 'wrap',  // Cho phép xuống dòng
+    maxWidth: '90%',
+    marginBottom: 3
   },
   quantity: {
     fontSize: 14,
@@ -265,7 +284,7 @@ const styles = StyleSheet.create({
   itemPrice: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#e63946',
+    color: '#ed7c44',
   },
   totalContainer: {
     flexDirection: 'row',
@@ -298,7 +317,7 @@ const styles = StyleSheet.create({
   finalTotalAmount: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#e63946',
+    color: '#ed7c44',
   },
   cardinfo: {
     backgroundColor: '#fff',
@@ -307,11 +326,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    marginTop: 20,
+  },
+  cardpayment:{
+    backgroundColor: '#fff',
+    padding: 15,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginTop: 20
   },
   infoRow: {
     flexDirection: 'column',
-    justifyContent: 'space-between',
     marginBottom: 10,
     flexWrap: 'wrap',
   },

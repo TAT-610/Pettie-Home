@@ -95,21 +95,21 @@ const ProfileShop = () => {
       {/* Menu */}
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <FontAwesome name="shopping-cart" size={20} color="#4CAF50" />
+          <FontAwesome name="shopping-cart" size={20} color="#43313A" />
           <Text style={styles.menuText}>Thông tin đơn hàng</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <Ionicons name="add-circle" size={20} color="#4CAF50" />
+          <Ionicons name="add-circle" size={20} color="#43313A" />
           <Text style={styles.menuText}>Thêm sản phẩm</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <FontAwesome5 name="money-bill-wave" size={19} style={{ marginRight: -2 }} color="#4CAF50" />
+          <FontAwesome5 name="money-bill-wave" size={19} style={{ marginRight: -2 }} color="#43313A" />
           <Text style={styles.menuText}>Doanh thu</Text>
         </View>
         <Text style={styles.menuValue}>20.250.000 đ</Text>
@@ -117,42 +117,42 @@ const ProfileShop = () => {
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <Ionicons name="storefront-sharp" size={20} color="#4CAF50" />
+          <Ionicons name="storefront-sharp" size={20} color="#43313A" />
           <Text style={styles.menuText}>Đăng ký mở cửa hàng</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem}>
         <View style={styles.menuItemLeft}>
-          <FontAwesome name="question-circle-o" size={20} color="#4CAF50" />
+          <FontAwesome name="question-circle-o" size={20} color="#43313A" />
           <Text style={styles.menuText}>Hỗ trợ</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <FontAwesome name="cogs" size={20} color="#4CAF50" />
+          <FontAwesome name="cogs" size={20} color="#43313A" />
           <Text style={styles.menuText}>Cài đặt</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <FontAwesome name="file-text" size={20} color="#4CAF50" />
+          <FontAwesome name="file-text" size={20} color="#43313A" />
           <Text style={styles.menuText}>Điều khoản & Chính sách</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
         <View style={styles.menuItemLeft}>
-          <FontAwesome name="edit" size={20} color="#4CAF50" />
+          <FontAwesome name="edit" size={20} color="#43313A" />
           <Text style={styles.menuText}>Chỉnh sửa thông tin</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <FontAwesome5 name="briefcase-medical" size={20} color="#4CAF50" />
+          <FontAwesome5 name="briefcase-medical" size={20} color="#43313A" />
           <Text style={styles.menuText}>Thêm dịch vụ</Text>
         </View>
       </TouchableOpacity>
@@ -184,8 +184,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatar: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     borderRadius: 40,
     marginRight: 18,
   },
