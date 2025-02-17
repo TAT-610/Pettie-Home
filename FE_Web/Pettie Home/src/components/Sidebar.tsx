@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaChartBar, FaUsers, FaStore, FaSignOutAlt } from "react-icons/fa";
+import { FaMoneyBillTransfer } from "react-icons/fa6";
+
 import { TbShoppingCartCopy } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 
@@ -20,6 +22,11 @@ const SidebarData: SidebarDataType[] = [
     icon: FaUsers,
     heading: "Người dùng",
     href: "/admin/nguoidung",
+  },
+  {
+    icon: FaMoneyBillTransfer,
+    heading: "Quản lí giao dịch",
+    href: "/admin/giaodich",
   },
   {
     icon: FaStore,
@@ -54,9 +61,9 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 h-screen bg-[#699BF4] shadow-md flex flex-col">
+    <div className="w-64 h-screen bg-[#699BF4] shadow-lg flex flex-col">
       {/* Logo Section */}
-      <div className="m-auto px-6 py-5">
+      <div className="mx-auto px-6 mt-12">
         <img src="/src/assets/logotest.png" alt="Logo" className="w-45 h-20" />
       </div>
 
@@ -70,8 +77,8 @@ const Sidebar = () => {
                 onClick={() => handleNavigation(item.href)}
                 className={`flex items-center text-sm font-medium rounded-lg px-4 py-2 cursor-pointer ${
                   active === item.href
-                    ? "bg-white text-green-900"
-                    : "text-white hover:text-green-900 hover:bg-white"
+                    ? "bg-white text-[#ed7c44]"
+                    : "text-white hover:text-[#ed7c44] hover:bg-white"
                 }`}
               >
                 <div className="mr-3 text-lg">
@@ -89,8 +96,8 @@ const Sidebar = () => {
                         onClick={() => handleNavigation(subItem.href)}
                         className={`flex items-center text-sm font-medium rounded-lg px-4 py-2 cursor-pointer ${
                           active === subItem.href
-                            ? "bg-white text-green-900"
-                            : "text-white hover:text-green-900 hover:bg-white"
+                            ? "bg-white text-[#ed7c44]"
+                            : "text-white hover:text-[#ed7c44] hover:bg-white"
                         }`}
                       >
                         <div className="mr-3 text-lg">

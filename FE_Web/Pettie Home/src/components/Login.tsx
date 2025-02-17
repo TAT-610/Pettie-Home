@@ -52,7 +52,7 @@ export default function Login() {
             className="mb-6 px-4 py-2 rounded-lg text-black  w-[400px]  border-2 border-slate-300 "
           />
           <button
-            className="px-5 py-3 bg-[#ed7c44]  text-white text-base font-semibold rounded-full hover:bg-[#ff8c57] transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
+            className="px-5 py-3 bg-[#ed7c44] text-white text-base font-semibold rounded-full hover:bg-[#ff8c57] transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
             onClick={handleLogin}
           >
             Đăng nhập
