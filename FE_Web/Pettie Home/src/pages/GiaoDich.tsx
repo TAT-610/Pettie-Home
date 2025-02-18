@@ -9,8 +9,8 @@ export default function GiaoDich() {
   const [giaoDichData, setGiaoDichData] = useState([
     {
       id: 1,
-      shopName: "Shop A",
-      amount: "5,000,000 VND",
+      shopName: "Tiệm nhà Bụp",
+      amount: "450.000 VND",
       bankName: "Vietcombank",
       accountNumber: "123456789",
       status: 1,
@@ -18,8 +18,8 @@ export default function GiaoDich() {
     },
     {
       id: 2,
-      shopName: "Shop B",
-      amount: "3,200,000 VND",
+      shopName: "Pet Shop Thủ Đức",
+      amount: "325.000 VND",
       bankName: "Techcombank",
       accountNumber: "987654321",
       status: 3,
@@ -27,8 +27,8 @@ export default function GiaoDich() {
     },
     {
       id: 3,
-      shopName: "Shop C",
-      amount: "8,500,000 VND",
+      shopName: "Thế giới thú cưng Quin Quin",
+      amount: "365.000 VND",
       bankName: "BIDV",
       accountNumber: "567890123",
       status: 2,
@@ -36,7 +36,7 @@ export default function GiaoDich() {
     },
     {
       id: 4,
-      shopName: "Shop D",
+      shopName: "Pet mart quận 9",
       amount: "2,750,000 VND",
       bankName: "Agribank",
       accountNumber: "654321987",
@@ -191,24 +191,43 @@ export default function GiaoDich() {
       </div>
 
       {/* Modal xác nhận */}
-      {modalOpen && (
+      {modalOpen && selectedId !== null && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <p className="text-lg font-semibold mb-4">Xác nhận thanh toán?</p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={confirmTransfer}
-                className="px-4 py-2 bg-blue-500 text-white rounded"
-              >
-                Xác nhận
-              </button>
-            </div>
+            {(() => {
+              const selectedShop = giaoDichData.find(
+                (shop) => shop.id === selectedId
+              );
+              return selectedShop ? (
+                <>
+                  <p className="text-lg font-medium font-sans mb-4">
+                    Bạn xác nhận thanh toán cho{" "}
+                    <span className="font-medium text-blue-600">
+                      {selectedShop.shopName}
+                    </span>
+                    ?
+                  </p>
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={closeModal}
+                      className="px-4 py-2 bg-gray-300 rounded"
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      onClick={confirmTransfer}
+                      className="px-4 py-2 bg-blue-500 text-white rounded"
+                    >
+                      Xác nhận
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-lg font-semibold text-red-500">
+                  Lỗi: Không tìm thấy giao dịch.
+                </p>
+              );
+            })()}
           </div>
         </div>
       )}

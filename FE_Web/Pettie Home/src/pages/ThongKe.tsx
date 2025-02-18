@@ -51,7 +51,7 @@ const shop = [
       "https://i.pinimg.com/736x/ac/df/80/acdf808d2132658c9fa834aca6837359.jpg",
   },
   {
-    id: 5,
+    id: 6,
     name: "Tắm rữa thú cưng Sephera",
     income: "250",
     avatar:

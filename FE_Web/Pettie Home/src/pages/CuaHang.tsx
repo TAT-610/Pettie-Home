@@ -147,7 +147,9 @@ const CuaHang = () => {
                 </td>
                 <td className="px-2 py-4">
                   <button
-                    onClick={() => navigate(`/store/${store.id}`)}
+                    onClick={() =>
+                      navigate(`/admin/cuahang/detailshop/${store.id}`)
+                    }
                     className="px-1 py-1  text-blue-500 rounded-lg hover:border-2 hover:border-blue-500"
                   >
                     Xem thêm
