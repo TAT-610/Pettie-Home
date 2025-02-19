@@ -25,6 +25,5 @@ export interface Products {
     status: string;
     image: string;
     expiry: string;
-
 }
 

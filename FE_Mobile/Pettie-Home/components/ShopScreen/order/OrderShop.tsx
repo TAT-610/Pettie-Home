@@ -221,7 +221,7 @@ export default function OrderShop() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#f9f9f9" },
+    container: { flex: 1, backgroundColor: "#e9f1ff" },
     headerContainer: {
         flexDirection: "row",
         justifyContent: "center",

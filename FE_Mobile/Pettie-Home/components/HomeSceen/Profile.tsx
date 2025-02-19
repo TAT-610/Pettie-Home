@@ -4,38 +4,49 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProfileById } from '@/services/api';
+import { Profile } from "@/services/types";
 
 const ProfileScreen = () => {
     const router = useRouter();
-    const { id } = useLocalSearchParams();
-    const profileId = Array.isArray(id) ? id[0] : id;
-    const [profile, setProfile] = useState({
-        image: 'https://scontent.fsgn19-1.fna.fbcdn.net/v/t39.30808-6/480179390_3667516136724913_1364683503257777307_n.jpg?stp=dst-jpg_s600x600_tt6&_nc_cat=105&ccb=1-7&_nc_sid=833d8c&_nc_ohc=1PMu_TO52oAQ7kNvgE83Upv&_nc_oc=AdgP2LcGEiDw0jiJcY_J9D_SqlTEcRJ6jTB1zV8NxFk8ThirM2PWZphsJq0GG5db3zg&_nc_zt=23&_nc_ht=scontent.fsgn19-1.fna&_nc_gid=AsXb1m_sE4nA8mQMCLwSBbB&oh=00_AYBlFsxBcwPxyRD_twZnr-ylY5peWENwSZQLnsa4WnMJWw&oe=67B811D8',
-        fullname: 'Nguyễn Văn A',
-        rating: '5.0',
-    });
+    const [id, setId] = useState<string | null>(null);
+    const [profile, setProfile] = useState<Profile | null>(null);
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //       // if (!profileId) return;
-    //       try {
-    //         console.log("Fetching profile with ID:", profileId); // Debug log
-    //         const data = await getProfileById(profileId);
-    //         console.log("Profile data received:", data); // Kiểm tra dữ liệu
-    //         setProfile(data);
-    //       } catch (error) {
-    //         console.error("Lỗi khi lấy hồ sơ:", error);
-    //       }
-    //     };
-      
-    //     fetchData();
-    //   }, [profileId]);
-      
-    
-    //   if (!profile) {
-    //     return <Text>Đang tải...</Text>;
-    //   }
-    
+
+    useEffect(() => {
+        const fetchId = async () => {
+            try {
+                const storedId = await AsyncStorage.getItem("idUser");
+                console.log("ID from AsyncStorage:", storedId);
+                setId(storedId);
+            } catch (error) {
+                console.error("Error retrieving idUser:", error);
+            }
+        };
+        fetchId();
+    }, []);
+
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!id) return;
+            try {
+                console.log("Fetching profile with ID:", id);
+                const data = await getProfileById(id);
+                console.log("Profile data received:", data);
+                setProfile(data);
+            } catch (error) {
+                console.error("Lỗi khi lấy hồ sơ:", error);
+            }
+        };
+
+        fetchData();
+    }, [id]);
+
+    if (!profile) {
+        return <Text>Đang tải...</Text>;
+    }
+
 
     const handleLogout = async () => {
         try {
@@ -50,8 +61,8 @@ const ProfileScreen = () => {
     const stats = [
         { label: 'Chờ xác nhận', icon: 'wallet' },
         { label: 'Đang xử lí', icon: 'truck' },
-        { label: 'Thành công', icon: 'inbox' },
-        { label: 'Đã hủy', icon: 'clock' },
+        { label: 'Lịch sử đơn hàng', icon: 'clock' },
+        { label: 'Đã hủy', icon: 'cart-remove' },
     ];
 
     const menuItems = [
@@ -69,45 +80,41 @@ const ProfileScreen = () => {
                     <Image source={{ uri: profile.image }} style={styles.avatar} />
                     <View style={styles.userInfo}>
                         <Text style={styles.shopName}>{profile.fullname}</Text>
-                        <View style={styles.ratingContainer}>
-                            <FontAwesome name="star" size={16} color="#FFD700" />
-                            <Text style={styles.rating}>{profile.rating}</Text>
-                        </View>
                     </View>
                 </View>
                 <TouchableOpacity style={styles.notificationIcon}>
                     <FontAwesome name="bell" size={20} color="#fff" />
                 </TouchableOpacity>
             </View>
-
-            {/* Thống kê */}
-            <View style={styles.statsContainer}>
-                <Text style={styles.statsTitle}>Tổng quan hằng ngày</Text>
-                <View style={styles.statsList}>
-                    {stats.map((item, index) => (
-                        <View key={index} style={styles.statItem}>
-                            <FontAwesome5 name={item.icon} size={24} color="#ed7c44" />
-                            <Text style={styles.statLabel}>{item.label}</Text>
-                        </View>
-                    ))}
-                </View>
-            </View>
-
-            {/* Menu chức năng */}
-            <View style={styles.menuContainer}>
-                {menuItems.map((item, index) => {
-                    const IconComponent = item.library;
-                    return (
-                        <TouchableOpacity key={index} style={styles.menuItem}>
-                            <View style={styles.menuItemLeft}>
-                                <IconComponent name={item.icon} size={20} color="#43313A" />
-                                <Text style={styles.menuText}>{item.label}</Text>
+            <View style={{ padding: 10 }}>
+                {/* Thống kê */}
+                <View style={styles.statsContainer}>
+                    <Text style={styles.statsTitle}>Đơn hàng</Text>
+                    <View style={styles.statsList}>
+                        {stats.map((item, index) => (
+                            <View key={index} style={styles.statItem}>
+                                <FontAwesome5 name={item.icon} size={24} color="#ed7c44" />
+                                <Text style={styles.statLabel}>{item.label}</Text>
                             </View>
-                            <FontAwesome name="angle-right" size={20} color="#999" />
-                        </TouchableOpacity>
-                    );
-                })}
-            </View>
+                        ))}
+                    </View>
+                </View>
+
+                {/* Menu chức năng */}
+                <View style={styles.menuContainer}>
+                    {menuItems.map((item, index) => {
+                        const IconComponent = item.library;
+                        return (
+                            <TouchableOpacity key={index} style={styles.menuItem}>
+                                <View style={styles.menuItemLeft}>
+                                    <IconComponent name={item.icon} size={20} color="#ed7c44" />
+                                    <Text style={styles.menuText}>{item.label}</Text>
+                                </View>
+                                <FontAwesome name="angle-right" size={20} color="#999" />
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View></View>
 
             {/* Nút đăng xuất */}
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -120,7 +127,7 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#e9f1ff',
     },
     header: {
         padding: 20,
@@ -150,16 +157,6 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: 'bold',
         color: '#fff',
-    },
-    ratingContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginTop: 5,
-    },
-    rating: {
-        fontSize: 16,
-        color: '#fff',
-        marginLeft: 5,
     },
     notificationIcon: {
         padding: 10,
@@ -219,10 +216,11 @@ const styles = StyleSheet.create({
     logoutButton: {
         backgroundColor: '#ed7c44',
         padding: 15,
-        margin: 15,
+        margin: 10,
         borderRadius: 10,
         alignItems: 'center',
         elevation: 3,
+        marginBottom: 50
     },
     logoutText: {
         fontSize: 16,

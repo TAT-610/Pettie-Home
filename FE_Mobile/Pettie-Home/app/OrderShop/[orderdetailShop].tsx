@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, FlatList, ScrollView, StyleSheet, TouchableOpacity, Modal, Dimensions, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { AntDesign, Entypo, MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, Entypo } from '@expo/vector-icons';
 
 const statusSteps = ['Chờ ngày hẹn', 'Đến cuộc hẹn', 'Đang tiến hành', 'Đã hoàn thành'];
 
@@ -44,101 +44,102 @@ export default function OrderDetails() {
     <ScrollView style={styles.container}>
       <View style={styles.headerContainer}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <AntDesign name="arrowleft" size={24} color="black" />
+          <AntDesign name="left" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.header}>Thông tin đơn hàng</Text>
       </View>
-      <Text style={styles.statusOrder}>Thông tin lịch hẹn</Text>
 
-      <View style={styles.card}>
-        <View style={styles.headerCard}>
-          <Text style={styles.label}>Mã đơn hàng:</Text>
-          <Text style={styles.value}>{orderDetails.orderId}</Text>
-          <Text style={styles.label}>Thời gian đã tạo đơn:</Text>
-          <Text style={styles.value}>{orderDetails.time}</Text>
-        </View>
-        <View style={styles.headerCard}>
-          <TouchableOpacity
-            onPress={() => {
-              const currentIndex = statusSteps.indexOf(order.status);
-              if (currentIndex < statusSteps.length - 1) setIsModalVisible(true);
-            }}
-          >
-            <View style={styles.status}>
-              <Entypo name="controller-record" size={24} color="#25923E" />
-              <Text style={styles.statusText}>{order.status}</Text>
-            </View>
-          </TouchableOpacity>
-          <Text style={styles.label}>Thời gian hẹn:</Text>
-          <Text style={styles.value}>{orderDetails.scheduledTime}</Text>
-        </View>
-      </View>
-
-      <View style={styles.cardinfo}>
-        <Text style={styles.sectionHeader}>Thông tin khách hàng</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Tên khách hàng:</Text>
-          <Text style={styles.infoValue}>{orderDetails.customerName}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Số điện thoại:</Text>
-          <Text style={styles.infoValue}>{orderDetails.customerPhone}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Địa chỉ:</Text>
-          <Text style={styles.infoValue}>{orderDetails.address}</Text>
-        </View>
-      </View>
-
-      <View style={styles.carddetail}>
-        <Text style={styles.sectionHeader}>Chi tiết đơn hàng</Text>
-        <FlatList
-          nestedScrollEnabled={true}
-          data={orderDetails.items}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.itemRow}>
-              <Image source={{ uri: item.image }} style={styles.image} />
-              <View style={styles.itemInfo}>
-                <Text style={styles.itemText}>{item.name}</Text>
-                <Text style={styles.itemPrice}>{item.price.toLocaleString()} đ</Text>
+      <View style={{ padding: 10 }}>
+        <Text style={styles.statusOrder}>Thông tin lịch hẹn</Text>
+        <View style={styles.card}>
+          <View style={styles.headerCard}>
+            <Text style={styles.label}>Mã đơn hàng:</Text>
+            <Text style={styles.value}>{orderDetails.orderId}</Text>
+            <Text style={styles.label}>Thời gian đã tạo đơn:</Text>
+            <Text style={styles.value}>{orderDetails.time}</Text>
+          </View>
+          <View style={styles.headerCard}>
+            <TouchableOpacity
+              onPress={() => {
+                const currentIndex = statusSteps.indexOf(order.status);
+                if (currentIndex < statusSteps.length - 1) setIsModalVisible(true);
+              }}
+            >
+              <View style={styles.status}>
+                <Entypo name="controller-record" size={24} color="#25923E" />
+                <Text style={styles.statusText}>{order.status}</Text>
               </View>
-              <Text style={styles.quantity}>x {item.quantity}</Text>
-            </View>
-          )}
-        />
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalText}>Tổng đơn hàng:</Text>
-          <Text style={styles.totalAmount}>{orderDetails.subtotal.toLocaleString()} đ</Text>
-        </View>
-        <View style={styles.totalContainerFee}>
-          <Text style={styles.totalText}>Phí vận chuyển:</Text>
-          <Text style={styles.totalAmount}>{orderDetails.shipping.toLocaleString()} đ</Text>
-        </View>
-        <View style={styles.totalContainer}>
-          <Text style={styles.finalTotalText}>Tổng cộng:</Text>
-          <Text style={styles.finalTotalAmount}>{orderDetails.total.toLocaleString()} đ</Text>
-        </View>
-      </View>
-
-      <View style={styles.cardpayment}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.section}>Phương thức thanh toán</Text>
-          <Text style={styles.infoValue}>{orderDetails.paymentMethod}</Text>
+            </TouchableOpacity>
+            <Text style={styles.label}>Thời gian hẹn:</Text>
+            <Text style={styles.value}>{orderDetails.scheduledTime}</Text>
+          </View>
         </View>
 
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Thời gian đặt hàng:</Text>
-          <Text style={styles.value}>{orderDetails.time}</Text>
-          <Text style={styles.infoLabel}>Thời gian thanh toán:</Text>
-          <Text style={styles.value}>{orderDetails.paymentTime}</Text>
+        <View style={styles.cardinfo}>
+          <Text style={styles.sectionHeader}>Thông tin khách hàng</Text>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Tên khách hàng:</Text>
+            <Text style={styles.infoValue}>{orderDetails.customerName}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Số điện thoại:</Text>
+            <Text style={styles.infoValue}>{orderDetails.customerPhone}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Địa chỉ:</Text>
+            <Text style={styles.infoValue}>{orderDetails.address}</Text>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.cardNote}>
-        <Text style={styles.sectionHeader}>Lưu ý của khách hàng</Text>
-        <Text style={styles.noteText}>{orderDetails.customerNote}</Text>
-      </View>
+        <View style={styles.carddetail}>
+          <Text style={styles.sectionHeader}>Chi tiết đơn hàng</Text>
+          <FlatList
+            nestedScrollEnabled={true}
+            data={orderDetails.items}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.itemRow}>
+                <Image source={{ uri: item.image }} style={styles.image} />
+                <View style={styles.itemInfo}>
+                  <Text style={styles.itemText}>{item.name}</Text>
+                  <Text style={styles.itemPrice}>{item.price.toLocaleString()} đ</Text>
+                </View>
+                <Text style={styles.quantity}>x {item.quantity}</Text>
+              </View>
+            )}
+          />
+          <View style={styles.totalContainer}>
+            <Text style={styles.totalText}>Tổng đơn hàng:</Text>
+            <Text style={styles.totalAmount}>{orderDetails.subtotal.toLocaleString()} đ</Text>
+          </View>
+          <View style={styles.totalContainerFee}>
+            <Text style={styles.totalText}>Phí vận chuyển:</Text>
+            <Text style={styles.totalAmount}>{orderDetails.shipping.toLocaleString()} đ</Text>
+          </View>
+          <View style={styles.totalContainer}>
+            <Text style={styles.finalTotalText}>Tổng cộng:</Text>
+            <Text style={styles.finalTotalAmount}>{orderDetails.total.toLocaleString()} đ</Text>
+          </View>
+        </View>
+
+        <View style={styles.cardpayment}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.section}>Phương thức thanh toán</Text>
+            <Text style={styles.infoValue}>{orderDetails.paymentMethod}</Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Thời gian đặt hàng:</Text>
+            <Text style={styles.value}>{orderDetails.time}</Text>
+            <Text style={styles.infoLabel}>Thời gian thanh toán:</Text>
+            <Text style={styles.value}>{orderDetails.paymentTime}</Text>
+          </View>
+        </View>
+
+        <View style={styles.cardNote}>
+          <Text style={styles.sectionHeader}>Lưu ý của khách hàng</Text>
+          <Text style={styles.noteText}>{orderDetails.customerNote}</Text>
+        </View></View>
     </ScrollView>
   );
 }
@@ -146,15 +147,16 @@ export default function OrderDetails() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 10,
-    maxWidth: '100%'
+    maxWidth: '100%',
+    backgroundColor: "#e9f1ff"
   },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 40,
-    margin: 20,
-    right: 10,
+    backgroundColor: "#699BF4",
+    padding: 10,
+    paddingBottom: 30,
+    paddingTop: 30,
   },
   backButton: {
     marginRight: 10,
@@ -162,7 +164,7 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
   },
   statusOrder: {
     fontSize: 15,
@@ -327,7 +329,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  cardpayment:{
+  cardpayment: {
     backgroundColor: '#fff',
     padding: 15,
     shadowColor: '#000',

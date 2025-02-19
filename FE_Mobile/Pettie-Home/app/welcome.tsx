@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
   centerContent1: {
     margin: 0,
     paddingTop: 40,
-    backgroundColor: "#ffff",
+    backgroundColor: "#fff",
     height: 300,
     width: "100%",
   },
