@@ -10,11 +10,12 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Alert,
 } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const orders = [
+const initialOrders = [
   {
     id: "1",
     shopName: "Pet Shop Thủ Đức",
@@ -120,20 +121,24 @@ const tabs = [
 ];
 
 const OrderActions = ({
+  orderStatus,
   onAccept,
   onCancel,
 }: {
+  orderStatus: string;
   onAccept: () => void;
   onCancel: () => void;
 }) => {
   return (
     <View style={styles.buttonContainer}>
       <TouchableOpacity style={styles.acceptButton} onPress={onAccept}>
-        <Text style={styles.buttonText}>Nhận Đơn</Text>
+        <Text style={styles.buttonText}>Chi tiết đơn</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
-        <Text style={styles.buttonTextCancel}>Hủy Đơn</Text>
-      </TouchableOpacity>
+      {orderStatus === "Chờ xác nhận" && (
+        <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
+          <Text style={styles.buttonTextCancel}>Hủy Đơn</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -143,11 +148,13 @@ const OrderCard = ({
   onPress,
   onToggleExpand,
   isExpanded,
+  onCancelOrder,
 }: {
-  order: (typeof orders)[0];
+  order: (typeof initialOrders)[0];
   onPress: () => void;
   onToggleExpand: () => void;
   isExpanded: boolean;
+  onCancelOrder: () => void;
 }) => {
   const visibleServices = isExpanded
     ? order.services
@@ -217,7 +224,11 @@ const OrderCard = ({
       <Text style={styles.orderTotal}>
         Tổng đơn hàng: <Text style={styles.orderPrice}>{order.total}</Text>
       </Text>
-      <OrderActions onAccept={() => {}} onCancel={() => {}} />
+      <OrderActions
+        orderStatus={order.status}
+        onAccept={() => {}}
+        onCancel={onCancelOrder}
+      />
     </TouchableOpacity>
   );
 };
@@ -257,6 +268,7 @@ const TabBar = ({
 };
 
 export default function OrderCustomer() {
+  const [orders, setOrders] = useState(initialOrders);
   const [activeTab, setActiveTab] = useState<string>(tabs[0]);
   const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -265,7 +277,7 @@ export default function OrderCustomer() {
 
   const filteredOrders = useMemo(
     () => orders.filter((order) => order.status === activeTab),
-    [activeTab]
+    [orders, activeTab]
   );
 
   const onTabPress = useCallback((index: number) => {
@@ -278,7 +290,8 @@ export default function OrderCustomer() {
 
   const handleOrderDetail = useCallback(
     (orderId: string) => {
-      router.push(`/OrderShop/${orderId}`);
+      // router.push(`/OrderShop/${orderId}`);
+      router.push(`/ViewOrderCustomer/${orderId}`);
     },
     [router]
   );
@@ -295,8 +308,15 @@ export default function OrderCustomer() {
     });
   }, []);
 
+  const handleCancelOrder = useCallback((orderId: string) => {
+    setOrders((prevOrders) =>
+      prevOrders.filter((order) => order.id !== orderId)
+    );
+    Alert.alert(" ✅ Hủy thành công", "Đơn hàng đã được hủy thành công.");
+  }, []);
+
   const renderOrder = useCallback(
-    ({ item }: { item: (typeof orders)[0] }) => {
+    ({ item }: { item: (typeof initialOrders)[0] }) => {
       const isExpanded = expandedOrders.has(item.id);
       return (
         <OrderCard
@@ -304,10 +324,11 @@ export default function OrderCustomer() {
           onPress={() => handleOrderDetail(item.id)}
           onToggleExpand={() => toggleExpand(item.id)}
           isExpanded={isExpanded}
+          onCancelOrder={() => handleCancelOrder(item.id)}
         />
       );
     },
-    [expandedOrders, handleOrderDetail, toggleExpand]
+    [expandedOrders, handleOrderDetail, toggleExpand, handleCancelOrder]
   );
 
   return (
