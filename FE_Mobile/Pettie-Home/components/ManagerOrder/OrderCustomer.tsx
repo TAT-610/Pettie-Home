@@ -9,8 +9,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
-
+import Entypo from "@expo/vector-icons/Entypo";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const orders = [
@@ -19,20 +20,44 @@ const orders = [
     shopName: "Pet Shop Thủ Đức",
     time: "15:00 - 20/10/2024",
     services: [
-      { name: "Cắt tỉa lông (Chó/Mèo) < 3kg", quantity: 1 },
-      { name: "Tắm và vệ sinh (Chó/Mèo) < 3kg", quantity: 1 },
-      { name: "Nhuọm lông (Chó/Mèo) < 6kg", quantity: 1 },
-      { name: "Hạt mèo", quantity: 1 },
-      { name: "Nệm nằm cho mèo", quantity: 1 },
+      {
+        name: "Combo Spa1: Tắm + Tỉa gọn lông cho mèo",
+        quantity: 1,
+        price: 220,
+        image:
+          "https://i.pinimg.com/736x/cd/cb/6b/cdcb6b1df06746d5802c8baede2b7b49.jpg",
+      },
+      {
+        name: "Pate mèo kucinta gói 80g",
+        quantity: 2,
+        price: 10,
+        image:
+          "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
+      },
+      {
+        name: "Cây cào móng chó mèo",
+        quantity: 1,
+        price: 220,
+        image:
+          "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
+      },
     ],
-    total: "900.000 VNĐ",
+    total: "480.000 VNĐ",
     status: "Chờ xác nhận",
   },
   {
     id: "2",
     shopName: "Tiệm Spa nhà Bụp",
     time: "10:00 - 21/10/2024",
-    services: [{ name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 }],
+    services: [
+      {
+        name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg",
+        quantity: 2,
+        price: 220,
+        image:
+          "https://i.pinimg.com/736x/cd/cb/6b/cdcb6b1df06746d5802c8baede2b7b49.jpg",
+      },
+    ],
     total: "935.000 VNĐ",
     status: "Chờ xác nhận",
   },
@@ -40,7 +65,15 @@ const orders = [
     id: "3",
     shopName: "Pet Mart Juddy",
     time: "10:00 - 21/10/2024",
-    services: [{ name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 }],
+    services: [
+      {
+        name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg",
+        quantity: 2,
+        price: 220,
+        image:
+          "https://i.pinimg.com/736x/cd/cb/6b/cdcb6b1df06746d5802c8baede2b7b49.jpg",
+      },
+    ],
     total: "935.000 VNĐ",
     status: "Chờ ngày hẹn",
   },
@@ -48,7 +81,15 @@ const orders = [
     id: "4",
     shopName: "Nguyễn Văn A",
     time: "10:00 - 21/10/2024",
-    services: [{ name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 }],
+    services: [
+      {
+        name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg",
+        quantity: 2,
+        price: 220,
+        image:
+          "https://i.pinimg.com/736x/cd/cb/6b/cdcb6b1df06746d5802c8baede2b7b49.jpg",
+      },
+    ],
     total: "935.000 VNĐ",
     status: "Chờ ngày hẹn",
   },
@@ -56,7 +97,15 @@ const orders = [
     id: "5",
     shopName: "Nguyễn Văn A",
     time: "10:00 - 21/10/2024",
-    services: [{ name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 }],
+    services: [
+      {
+        name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg",
+        quantity: 2,
+        price: 220,
+        image:
+          "https://i.pinimg.com/736x/cd/cb/6b/cdcb6b1df06746d5802c8baede2b7b49.jpg",
+      },
+    ],
     total: "935.000 VNĐ",
     status: "Đang diễn ra",
   },
@@ -108,15 +157,45 @@ const OrderCard = ({
   return (
     <TouchableOpacity style={styles.orderCard} onPress={onPress}>
       <View style={styles.buttonorder}>
-        <Text style={styles.orderCustomer}>{order.shopName}</Text>
-        <Text style={styles.orderTime}>{order.time}</Text>
+        <Text style={styles.orderCustomer}>
+          <Entypo name="shop" size={15} color="#ed7c44" /> {order.shopName}
+        </Text>
+        <Text style={styles.orderTime}>{order.status}</Text>
       </View>
 
       <View style={styles.orderServices}>
         {visibleServices.map((service, index) => (
           <View key={index} style={styles.orderServiceRow}>
-            <Text style={styles.serviceQuantity}>x{service.quantity}</Text>
-            <Text style={styles.serviceName}>{service.name}</Text>
+            {service.image && (
+              <Image
+                source={{ uri: service.image }}
+                style={styles.serviceImage}
+              />
+            )}
+
+            <View style={{ flex: 1 }}>
+              <Text
+                style={styles.serviceName}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {service.name}
+              </Text>
+              <View
+                style={{
+                  alignItems: "flex-end",
+                  flex: 1,
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  paddingBottom: 5,
+                }}
+              >
+                <Text style={{ fontWeight: "600", color: "#666" }}>
+                  {service.price}.000
+                </Text>
+                <Text style={styles.serviceQuantity}>x{service.quantity}</Text>
+              </View>
+            </View>
           </View>
         ))}
       </View>
@@ -266,6 +345,7 @@ export default function OrderCustomer() {
               keyExtractor={(order) => order.id}
               renderItem={renderOrder}
               contentContainerStyle={styles.list}
+              showsVerticalScrollIndicator={false}
             />
           </View>
         )}
@@ -317,11 +397,11 @@ const styles = StyleSheet.create({
   menuTrigger: {
     marginLeft: 7,
   },
-  page: { width: SCREEN_WIDTH, padding: 16 },
+  page: { width: SCREEN_WIDTH, paddingTop: 16, paddingHorizontal: 12 },
   list: { paddingBottom: 16 },
   orderCard: {
     backgroundColor: "#fff",
-    padding: 16,
+    paddingVertical: 15,
     marginBottom: 12,
     borderRadius: 8,
     shadowColor: "#000",
@@ -333,18 +413,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 5,
+    paddingHorizontal: 15,
   },
-  orderCustomer: { fontSize: 16, fontWeight: "medium", color: "#333" },
-  orderTime: { fontSize: 14, color: "#555", marginVertical: 4 },
+  orderCustomer: { fontSize: 16, fontWeight: "bold", color: "#333" },
+  orderTime: {
+    fontSize: 14,
+    color: "#ed7c44",
+    marginVertical: 4,
+    fontWeight: "700",
+  },
   orderServices: { marginTop: 8, marginBottom: 5 },
   orderTotal: {
-    fontSize: 16,
+    paddingHorizontal: 15,
+    fontSize: 15,
     fontWeight: "bold",
     textAlign: "left",
     marginTop: 10,
+    flex: 1,
   },
   orderPrice: {
-    color: "#c12b0d",
+    color: "#ed7c44",
   },
   modalOverlay: {
     flex: 1,
@@ -379,24 +467,27 @@ const styles = StyleSheet.create({
   },
   orderServiceRow: {
     flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
+    flex: 1,
+    marginBottom: 10,
+    paddingHorizontal: 15,
   },
   serviceQuantity: {
     marginRight: 8,
     fontSize: 14,
-    color: "#555",
-    fontWeight: "600",
+    color: "#666",
+    fontWeight: "500",
   },
   serviceName: {
     fontSize: 14,
-    fontWeight: "bold",
+    fontWeight: "500",
+    color: "#444",
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 20,
     marginTop: 20,
+    paddingHorizontal: 15,
   },
   acceptButton: {
     backgroundColor: "#ed7c44",
@@ -422,12 +513,18 @@ const styles = StyleSheet.create({
   },
   expandButton: {
     alignSelf: "center",
-    marginTop: 8,
+
     paddingVertical: 4,
   },
   expandButtonText: {
     color: "#696969",
     fontSize: 15,
     fontWeight: "400",
+  },
+  serviceImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 5,
+    marginRight: 10,
   },
 });
