@@ -1,60 +1,105 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     View, Text, StyleSheet, FlatList, TouchableOpacity,
     ScrollView, Dimensions, Image, Modal
 } from "react-native";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
+import { Products, Profile } from "@/services/types";
+import { getAllProductsByShop, getAllShops } from "@/services/api";
+import { useRouter } from "expo-router";
 
 interface Product {
     id: string;
     name: string;
     price: string;
-    stock: number;
+    quantity: number;
     status: string;
-    imageUrl?: any;
+    image: string;
 }
 
 const productsMock: Product[] = [
     {
         id: "1",
-        name: "Hạt mèo trưởng thành Zoi Cat",
+        name: "Cát đậu nành Cature cho mèo 2.8kg",
         price: "232.000đ",
-        stock: 10,
+        quantity: 10,
         status: "Đang hoạt động",
-        imageUrl: require("../../../assets/images/hat-meo-zoi-cat-1kg-thuc-an-cho-meo-truong-thanh-cutepets.webp"),
+        image: "https://paddy.vn/cdn/shop/files/Thi_tk_ch_acoten_2.png?v=1690719510",
     },
     {
         id: "2",
-        name: "Pate Mèo Snappy Tom 85g",
+        name: "Pate mèo kucinta gói 80g",
         price: "12.000đ",
-        stock: 0,
+        quantity: 0,
         status: "Hết hàng",
-        imageUrl: require("../../../assets/images/pate.webp"),
+        image: "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
     },
     {
         id: "3",
-        name: "Hạt cho mèo SC Mix topping hạt sấy 1.5kg",
+        name: "Bánh quy cho chó",
         price: "135.000đ",
-        stock: 5,
+        quantity: 5,
         status: "Đang hoạt động",
-        imageUrl: require("../../../assets/images/hatSCMix.webp"),
+        image: "https://paddy.vn/cdn/shop/files/snack-cho-cho-banh-quy-doggyman_5.jpg?v=1732863422",
     },
     {
         id: "4",
-        name: "Ổ Nệm Hình Thú Dễ Thương",
+        name: "Cây cào móng chó mèo",
         price: "305.000đ",
-        stock: 0,
+        quantity: 0,
         status: "Đang hoạt động",
-        imageUrl: require("../../../assets/images/nemchomeo.jpg"),
+        image: "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
     },
 ];
 
 const tabs = ["Đang hoạt động", "Hết hàng", "Đang xét duyệt", "Không thành công"];
 
-export default function ProductShop() {
+export default function ProductShop({ shopId, id }: { shopId: string; id: Profile }) {
     const [activeTab, setActiveTab] = useState<string>(tabs[0]);
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const [isMenuVisible, setMenuVisible] = useState<boolean>(false);
+    const router = useRouter();
+
+    // const [products, setProducts] = useState<Products[]>([]);
+
+
+    // useEffect(() => {
+    //     console.log("Goi api getAllShop");
+    //     const fetchAllShops = async () => {
+    //       try {
+    //         const shopsData = await getAllShops();
+    //         console.log("ShopData", shopsData);  // Check the data received
+    //       } catch (error) {
+    //         console.error("Error fetching shops:", error);
+    //       }
+    //     };
+    //     fetchAllShops();
+    //   }, []);
+
+    //   useEffect(() => {
+    //     console.log("Goi api getAllProduct");
+    //     const fetchAllProductsByShop = async () => {
+    //       try {
+    //         const productsData = await getAllProductsByShop(shopId,id);
+    //         console.log("productsData: ", productsData);  // Check the data received
+    //         setProducts(productsData); // Lưu dữ liệu sản phẩm vào state
+    //         filterProducts(activeTab, productsData); // Lọc sản phẩm theo tab hiện tại
+    //       } catch (error) {
+    //         console.error("Error fetching product:", error);
+    //       }
+    //     };
+    //     fetchAllProductsByShop();
+    //   }, [shopId, id]);
+
+    // useEffect(() => {
+    //     filterProducts(activeTab, products);
+    // }, [activeTab, products]);
+
+    // const filterProducts = (status: string, products: Products[]) => {
+    //     const filtered = products.filter(product => product.status === status);
+    //     setFilteredProducts(filtered);
+    // };
+
 
     useEffect(() => {
         filterProducts(activeTab);
@@ -65,29 +110,20 @@ export default function ProductShop() {
         setFilteredProducts(filtered);
     };
 
-    const renderProduct = ({ item }: { item: Product }) => (
-        <View style={styles.productCard}>
-            <View style={styles.productInfo}>
-                {item.imageUrl && <Image source={item.imageUrl} style={styles.productImage} />}
-                <View style={styles.productDetails}>
-                    <Text style={styles.productName}>{item.name}</Text>
-                    <Text style={styles.productPrice}>Giá: {item.price}</Text>
-                    <Text style={styles.productStock}>Kho: {item.stock}</Text>
-                    <Text style={styles.productStatus}>Trạng thái: {item.status}</Text>
-                </View>
-                <TouchableOpacity style={styles.actionButton}>
-                    <AntDesign name="edit" size={15} color="white" />
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
+    const handleAddProduct = useCallback(() => {
+        router.push(`/ProductShop/addproduct`);
+    }, [router]);
+
+    const handleEditProduct = useCallback((productId: string) => {
+        router.push(`/ProductShop/[editproduct]?id=${productId}`);
+    }, [router]);
 
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}>
                 <Text style={styles.header}>Sản phẩm</Text>
-                <TouchableOpacity style={styles.addButton}>
-                    <Text style={styles.addButtonText}>Thêm sản phẩm</Text>
+                <TouchableOpacity style={styles.addButton} onPress={handleAddProduct}>
+                    <Text ><Ionicons name="add-circle" size={35} color="#fff" /></Text>
                 </TouchableOpacity>
             </View>
 
@@ -104,16 +140,32 @@ export default function ProductShop() {
                     ))}
                 </ScrollView>
                 <TouchableOpacity onPress={() => setMenuVisible(true)}>
-                    <Text style={styles.menuTrigger}>☰</Text>
+                    <Text style={styles.menuTrigger}><AntDesign name="filter" size={24} color="#fff" /></Text>
                 </TouchableOpacity>
             </View>
 
-            <FlatList
-                data={filteredProducts}
-                keyExtractor={(item) => item.id}
-                renderItem={renderProduct}
-                contentContainerStyle={styles.list}
-            />
+            {/* Danh sách dịch vụ */}
+            <View style={styles.listContainer}>
+                <FlatList
+                    data={filteredProducts}
+                    keyExtractor={(item) => item.id.toString()}
+                    renderItem={({ item }) => (
+                        <View style={styles.card}>
+                            <Image source={{ uri: item.image }} style={styles.image} />
+                            <View style={styles.details}>
+                                <Text style={styles.name}>{item.name}</Text>
+                                <Text style={styles.price}>Giá: {item.price}.000đ</Text>
+                            </View>
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => handleEditProduct(item.id)} // Pass productId here
+                            >
+                                <AntDesign name="edit" size={20} color="white" />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                />
+            </View>
 
             <Modal
                 visible={isMenuVisible}
@@ -144,25 +196,30 @@ export default function ProductShop() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1 },
-    headerContainer: { flexDirection: "row", justifyContent: "space-between", padding: 15, paddingTop: 40, backgroundColor: "#fff" },
-    header: { fontSize: 22, fontWeight: "bold" },
-    addButton: { backgroundColor: "#ed7c44", padding: 10, borderRadius: 8 },
-    addButtonText: { color: "#fff", fontWeight: "bold" },
-    stickyHeader: { flexDirection: "row", justifyContent: "space-between", padding: 10, backgroundColor: "#fff" },
+    container: { flex: 1, backgroundColor: "#e9f1ff" },
+    headerContainer: { flexDirection: "row", justifyContent: "space-between", padding: 15, paddingTop: 40, backgroundColor: "#699BF4" },
+    header: { fontSize: 22, fontWeight: "bold", padding: 12, color: "#fff" },
+    addButton: { padding: 4 },
+    stickyHeader: { flexDirection: "row", justifyContent: "space-between", padding: 10, backgroundColor: "#699BF4", marginBottom: 10 },
     tabsContainer: { flexDirection: "row" },
-    tab: { padding: 10, borderRadius: 20, backgroundColor: "#f0f0f0", marginHorizontal: 5 },
+    tab: { padding: 10, borderRadius: 20, backgroundColor: "#fff", marginHorizontal: 5 },
     activeTab: { backgroundColor: "#ed7c44" },
     tabText: { color: "#555" },
     activeTabText: { color: "#fff" },
-    menuTrigger: { fontSize: 18, color: "#ed7c44", padding: 5 },
-    list: { flexDirection: "row",
+    menuTrigger: { padding: 5 },
+    list: {
+        flexDirection: "row",
         paddingVertical: 12,
         paddingHorizontal: 10,
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
+        backgroundColor: "e9f1ff",
     },
-    productCard: {
+    listContainer: {
+        paddingHorizontal: 5,
+        marginBottom: 10,
+    },
+    card: {
         flex: 1,
         flexDirection: "row",
         justifyContent: "space-between",
@@ -171,19 +228,17 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
-        marginTop: 15,
-        
+        backgroundColor: "white"
     },
-    productInfo: { flexDirection: "row", alignItems: "center", flex: 1,
-        padding: 5,
-      },
-    productImage: { width: 80, height: 80, borderRadius: 10 },
-    productDetails: { flex: 1, marginLeft: 15 },
-    productName: { fontSize: 16, fontWeight: "medium" },
-    productPrice: { color: "#555" },
-    productStock: { color: "#777" },
-    productStatus: { fontStyle: "italic" },
-    actionButton: { backgroundColor: "#ed7c44", padding: 6, borderRadius: 20 },
+    image: { width: 80, height: 80, borderRadius: 10 },
+    details: {
+        flex: 1, marginLeft: 15,
+        marginBottom: 27
+    },
+    name: { fontSize: 16, fontWeight: "medium", marginBottom: 5 },
+    price: { fontSize: 13, color: "#ed7c44", marginBottom: 10 },
+
+    actionButton: { padding: 6, backgroundColor: "#ed7c44", borderRadius: 20, },
     modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },
     modalContainer: { backgroundColor: "#fff", padding: 20, borderRadius: 10, position: "absolute", bottom: 0, width: "100%" },
     modalOption: { padding: 15 },
