@@ -278,7 +278,7 @@ const OrderCustomer = () => {
             onPress={handlePlaceOrder}
             style={styles.placeOrderButton}
           >
-            <Text style={styles.placeOrderText}>Đặt hàng</Text>
+            <Text style={styles.placeOrderText}>Đặt lịch hẹn</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   },
   placeOrderButton: {
     marginTop: 20,
-    padding: 15,
+    padding: 12,
     backgroundColor: "#ed7c44",
   },
   placeOrderText: {
