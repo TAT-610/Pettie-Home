@@ -14,7 +14,7 @@ import Feather from "@expo/vector-icons/Feather";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 const orderSummary = [
   {
     serviceId: 1,
@@ -30,6 +30,13 @@ const orderSummary = [
     image:
       "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg",
   },
+  {
+    productId: 2,
+    quantity: 1,
+    price: 220,
+    image:
+      "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
+  },
 ];
 
 const DogService1 = {
@@ -43,18 +50,33 @@ const DogService1 = {
     "Dịch vụ tắm cơ bản dành cho chó dưới 4 kg bao gồm tỉa lông cơ bản, vệ sinh lỗ tai, cắt móng/ dũa móng, tắm bằng xà boong chuyên dụng, sấy lông, gỡ rối, đánh tơi và thoa lotion nước hoa cho chó.",
 };
 
-const Product = {
-  id: 1,
-  name: "Pate mèo kucinta gói 80g",
-  image:
-    "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
-  price: 10,
-  rate: 4.5, // Giả sử đây là đánh giá trung bình
-  brand: "Kucinta",
-  description:
-    "Pate Cho Mèo Kucinta Gói 80g Cao Cấp Nhập Khẩu Từ Malaysia. Quy cách đóng gói: Gói seal 80g. Thành phần: Thịt gà, Cá ngừ, Cá cơm, Cá mòi, Thanh cua. Sản phẩm cao cấp siêu thơm ngon",
-  shopId: 2,
-};
+const Product = [
+  {
+    id: 1,
+    name: "Pate mèo kucinta gói 80g",
+    image:
+      "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
+    price: 10,
+    rate: 4.5, // Giả sử đây là đánh giá trung bình
+    brand: "Kucinta",
+    description:
+      "Pate Cho Mèo Kucinta Gói 80g Cao Cấp Nhập Khẩu Từ Malaysia. Quy cách đóng gói: Gói seal 80g. Thành phần: Thịt gà, Cá ngừ, Cá cơm, Cá mòi, Thanh cua. Sản phẩm cao cấp siêu thơm ngon",
+    shopId: 2,
+  },
+  {
+    id: 2,
+    name: "Cây cào móng chó mèo",
+
+    image:
+      "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
+    price: 220,
+    rate: 4.5, // Giả sử đây là đánh giá trung bình
+    brand: "Kucinta",
+    description:
+      "Pate Cho Mèo Kucinta Gói 80g Cao Cấp Nhập Khẩu Từ Malaysia. Quy cách đóng gói: Gói seal 80g. Thành phần: Thịt gà, Cá ngừ, Cá cơm, Cá mòi, Thanh cua. Sản phẩm cao cấp siêu thơm ngon",
+    shopId: 2,
+  },
+];
 
 const OrderCustomer = () => {
   const router = useRouter();
@@ -101,83 +123,164 @@ const OrderCustomer = () => {
       </View>
       <ScrollView style={styles.scrollView}>
         {/* Địa chỉ nhận hàng */}
-        <Text style={styles.sectionTitle}>
-          <FontAwesome6 name="location-dot" size={16} color="#ed7c44" /> Địa chỉ
-          nhận hàng:
-        </Text>
-        <TouchableOpacity
-        // onPress={handleChooseAddress}
-        // style={styles.addressContainer}
+        <View
+          style={{
+            backgroundColor: "white",
+            paddingHorizontal: 20,
+            elevation: 5,
+          }}
         >
-          <Text style={styles.addressText}>{address || defaultAddress}</Text>
-        </TouchableOpacity>
-
-        {/* Số điện thoại */}
-        <Text style={styles.sectionTitle}>
-          <FontAwesome5 name="phone-alt" size={16} color="#ed7c44" /> Số điện
-          thoại:
-        </Text>
-        <Text style={styles.addressText}>0886133779</Text>
-        <Text style={styles.sectionTitle}>
-          <FontAwesome6 name="calendar-check" size={16} color="#ed7c44" /> Thời
-          gian hẹn:
-        </Text>
-        <Text style={styles.addressText}>21/02/2025 - 15:00</Text>
-
-        <Text style={styles.sectionTitle}>
-          <FontAwesome6 name="list-check" size={16} color="#ed7c44" /> Chi tiết
-          đơn hàng:
-        </Text>
-
-        {orderSummary.map((item, index) => {
-          const isService = item.serviceId !== undefined;
-          const service = isService ? DogService1 : Product;
-          return (
-            <View key={index} style={styles.orderSummaryItem}>
-              <Image source={{ uri: item.image }} style={styles.orderImage} />
-              <Text style={styles.orderSummaryText}>
-                {service.name} - {item.price}đ x {item.quantity}
+          <View style={styles.content}>
+            <Text style={styles.sectionTitle}>
+              <FontAwesome6 name="location-dot" size={16} color="#ed7c44" /> Địa
+              chỉ của bạn:
+            </Text>
+            <TouchableOpacity
+            // onPress={handleChooseAddress}
+            // style={styles.addressContainer}
+            >
+              <Text style={styles.addressText}>
+                {address || defaultAddress}
               </Text>
-            </View>
-          );
-        })}
+            </TouchableOpacity>
+          </View>
 
-        <Text style={styles.totalText}>Tổng: {calculateTotal()}đ</Text>
+          {/* Số điện thoại */}
 
-        <Text style={styles.sectionTitle}>💬 Lưu ý cho shop:</Text>
-        <TextInput
-          value={note}
-          onChangeText={setNote}
-          placeholder="Nhập lời nhắn..."
-          style={styles.noteInput}
-        />
-
-        <Text style={styles.sectionTitle}>💳 Phương thức thanh toán:</Text>
-        <TouchableOpacity
-          onPress={() => setPaymentMethod("VN Pay")}
-          style={[
-            styles.paymentButton,
-            paymentMethod === "VN Pay" && styles.selectedPaymentButton,
-          ]}
+          <View style={styles.content}>
+            <Text style={styles.sectionTitle}>
+              <FontAwesome5 name="phone-alt" size={16} color="#ed7c44" /> Số
+              điện thoại:
+            </Text>
+            <Text style={styles.addressText}>0886133779</Text>
+          </View>
+          <View style={styles.content2}>
+            <Text style={styles.sectionTitle}>
+              <FontAwesome6 name="calendar-check" size={16} color="#ed7c44" />{" "}
+              Thời gian hẹn:
+            </Text>
+            <Text style={styles.addressText}>21/02/2025 - 15:00</Text>
+          </View>
+        </View>
+        <View
+          style={{
+            backgroundColor: "white",
+            paddingHorizontal: 20,
+            marginTop: 12,
+            elevation: 2,
+          }}
         >
-          <Text>Thanh toán VN Pay</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => setPaymentMethod("Tiền mặt")}
-          style={[
-            styles.paymentButton,
-            paymentMethod === "Tiền mặt" && styles.selectedPaymentButton,
-          ]}
-        >
-          <Text>Tiền mặt</Text>
-        </TouchableOpacity>
+          <Text style={styles.sectionTitle2}>
+            <FontAwesome6 name="list-check" size={16} color="#ed7c44" /> Chi
+            tiết đơn hàng:
+          </Text>
 
-        <TouchableOpacity
-          onPress={handlePlaceOrder}
-          style={styles.placeOrderButton}
+          {orderSummary.map((item, index) => {
+            const isService = item.serviceId !== undefined;
+            const service = isService
+              ? DogService1
+              : Product.find((p) => p.id === item.productId);
+            return (
+              <View style={{ flexDirection: "row" }} key={index}>
+                <View style={styles.orderSummaryItem}>
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.orderImage}
+                  />
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={styles.name}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                    >
+                      {service?.name}
+                    </Text>
+                    <View style={styles.contentcard}>
+                      <View>
+                        <Text style={styles.price}>{item.price}.000 đ</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+                <View style={{ width: 15, paddingTop: 12 }}>
+                  <Text>x{item.quantity}</Text>
+                </View>
+              </View>
+            );
+          })}
+          <View style={styles.totalcontent}>
+            <Text style={styles.totalText}>Tổng đơn hàng:</Text>
+            <Text style={styles.totalprice2}>{calculateTotal()}.000đ</Text>
+          </View>
+          <View style={styles.totalcontent2}>
+            <Text style={styles.totalText}>Phí vận chuyển:</Text>
+            <Text style={styles.totalprice2}>25.000đ</Text>
+          </View>
+          <View style={styles.totalcontent2}>
+            <Text style={styles.totalText2}>Phí vận chuyển:</Text>
+            <Text style={styles.totalprice3}>{calculateTotal() + 25}.000đ</Text>
+          </View>
+        </View>
+        <View
+          style={{
+            backgroundColor: "white",
+            paddingHorizontal: 20,
+            paddingBottom: 12,
+            marginTop: 10,
+            elevation: 2,
+          }}
         >
-          <Text style={styles.placeOrderText}>Đặt hàng</Text>
-        </TouchableOpacity>
+          <Text style={styles.sectionTitle}>
+            <FontAwesome6 name="signal-messenger" size={16} color="#ed7c44" />{" "}
+            Lưu ý cho shop:
+          </Text>
+          <TextInput
+            value={note}
+            onChangeText={setNote}
+            placeholder="Nhập lời nhắn..."
+            style={styles.noteInput}
+          />
+
+          <Text style={styles.sectionTitle}>
+            <FontAwesome6 name="money-check-dollar" size={16} color="#ed7c44" />{" "}
+            Phương thức thanh toán:
+          </Text>
+          <TouchableOpacity
+            onPress={() => setPaymentMethod("VN Pay")}
+            style={[
+              styles.paymentButton,
+              paymentMethod === "VN Pay" && styles.selectedPaymentButton,
+            ]}
+          >
+            <FontAwesome
+              name={paymentMethod === "VN Pay" ? "dot-circle-o" : "circle-o"}
+              size={20}
+              color="#ed7c44"
+            />
+            <Text style={{ marginLeft: 10 }}>Thanh toán VN Pay</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setPaymentMethod("Tiền mặt")}
+            style={[
+              styles.paymentButton,
+              paymentMethod === "Tiền mặt" && styles.selectedPaymentButton,
+            ]}
+          >
+            <FontAwesome
+              name={paymentMethod === "Tiền mặt" ? "dot-circle-o" : "circle-o"}
+              size={20}
+              color="#ed7c44"
+            />
+            <Text style={{ marginLeft: 10 }}>Tiền mặt</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handlePlaceOrder}
+            style={styles.placeOrderButton}
+          >
+            <Text style={styles.placeOrderText}>Đặt hàng</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
   );
@@ -186,8 +289,8 @@ const OrderCustomer = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
-    paddingHorizontal: 20,
+    backgroundColor: "#e9f1ff",
+    paddingBottom: 50,
   },
   navigation: {
     justifyContent: "space-between",
@@ -195,7 +298,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 10,
-    position: "absolute",
+    position: "relative",
     top: 0,
     left: 0,
     right: 0,
@@ -214,10 +317,10 @@ const styles = StyleSheet.create({
     borderRadius: 100,
   },
   scrollView: {
-    paddingTop: 80,
+    flex: 1,
   },
   chooseAddressButton: {
-    marginBottom: 20,
+    marginBottom: 80,
   },
   chooseAddressText: {
     fontSize: 16,
@@ -228,6 +331,16 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 10,
   },
+
+  sectionTitle2: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginTop: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    paddingTop: 5,
+    paddingBottom: 10,
+  },
   addressText: {
     fontSize: 14,
     marginTop: 5,
@@ -235,29 +348,43 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   orderSummaryItem: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    paddingTop: 12,
   },
   orderImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 5,
+    width: 65,
+    height: 65,
+    borderRadius: 10,
     marginRight: 10,
   },
   orderSummaryText: {
     fontSize: 16,
   },
   totalText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginTop: 10,
+    fontSize: 15,
+    color: "#888",
+    fontWeight: "400",
+  },
+  totalText2: {
+    fontSize: 16.5,
+
+    fontWeight: "500",
+  },
+  totalprice2: {
+    fontSize: 15,
+    color: "#888",
+    fontWeight: "400",
+  },
+  totalprice3: {
+    fontSize: 16.5,
+    color: "#ed7c44",
+    fontWeight: "600",
   },
   noteInput: {
     borderWidth: 1,
-    borderColor: "gray",
+    borderColor: "#bbb",
     padding: 10,
     marginTop: 10,
   },
@@ -265,9 +392,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
     padding: 10,
     backgroundColor: "white",
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 8,
   },
+
   selectedPaymentButton: {
-    backgroundColor: "lightblue",
+    backgroundColor: "#f0f0f0",
   },
   placeOrderButton: {
     marginTop: 20,
@@ -284,6 +415,52 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "700",
     paddingTop: 20,
+  },
+  content: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+    backgroundColor: "#ffff",
+
+    paddingBottom: 5,
+  },
+  content2: {
+    backgroundColor: "#ffff",
+
+    paddingBottom: 5,
+  },
+  name: {
+    fontSize: 14,
+    fontWeight: "400",
+    marginBottom: 5,
+  },
+  price: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#ed7c44",
+  },
+
+  contentcard: {
+    paddingTop: 12,
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  totalcontent: {
+    flexDirection: "row",
+    borderTopWidth: 1,
+    borderTopColor: "#ddd",
+    marginTop: 15,
+    paddingVertical: 8,
+    justifyContent: "space-between",
+  },
+  totalcontent2: {
+    flexDirection: "row",
+    borderTopWidth: 1,
+    borderTopColor: "#ddd",
+    paddingBottom: 20,
+    paddingVertical: 10,
+    justifyContent: "space-between",
   },
 });
 

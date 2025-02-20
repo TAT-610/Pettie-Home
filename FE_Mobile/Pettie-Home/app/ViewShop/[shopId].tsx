@@ -120,7 +120,7 @@ export default function ShopDetail() {
               color: "#ed7c44",
             }}
           >
-            Tổng thanh toán(2)
+            Tổng thanh toán(3)
           </Text>
           <Text
             style={{
@@ -131,7 +131,7 @@ export default function ShopDetail() {
               textAlign: "right",
             }}
           >
-            220.000đ
+            340.000đ
           </Text>
         </View>
         <View
