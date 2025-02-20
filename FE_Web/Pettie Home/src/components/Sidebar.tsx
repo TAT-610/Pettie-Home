@@ -20,7 +20,7 @@ const SidebarData: SidebarDataType[] = [
   },
   {
     icon: FaUsers,
-    heading: "Người dùng",
+    heading: "Quản lí người dùng",
     href: "/admin/nguoidung",
   },
   {
@@ -30,12 +30,12 @@ const SidebarData: SidebarDataType[] = [
   },
   {
     icon: FaStore,
-    heading: "Cửa Hàng",
+    heading: "Quản lí cửa hàng",
     href: "/admin/cuahang",
     children: [
       {
         icon: TbShoppingCartCopy,
-        heading: "Xét Duyệt Cửa Hàng",
+        heading: "Xét duyệt cửa Hàng",
         href: "/admin/xetduyetCuahang",
       },
     ],

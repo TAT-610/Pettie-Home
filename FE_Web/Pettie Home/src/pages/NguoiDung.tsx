@@ -112,7 +112,7 @@ const NguoiDung = () => {
       <div className="flex justify-between py-3 px-8 bg-slate-50 items-center mb-6 shadow-sm">
         <div className="relative w-1/2 flex items-center space-x-2">
           <span className="font-bold font-sans text-xl text-gray-600 mr-10">
-            Khách hàng
+            Quản lí người dùng
           </span>
           <div className="relative flex-1">
             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 mr-2 text-gray-400" />
