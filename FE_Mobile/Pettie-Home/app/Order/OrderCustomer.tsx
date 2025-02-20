@@ -14,7 +14,7 @@ import Feather from "@expo/vector-icons/Feather";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 const orderSummary = [
   {
     serviceId: 1,
@@ -118,8 +118,17 @@ const OrderCustomer = () => {
           thoại:
         </Text>
         <Text style={styles.addressText}>0886133779</Text>
+        <Text style={styles.sectionTitle}>
+          <FontAwesome6 name="calendar-check" size={16} color="#ed7c44" /> Thời
+          gian hẹn:
+        </Text>
+        <Text style={styles.addressText}>21/02/2025 - 15:00</Text>
 
-        <Text style={styles.sectionTitle}>🛒 Tóm tắt đơn hàng:</Text>
+        <Text style={styles.sectionTitle}>
+          <FontAwesome6 name="list-check" size={16} color="#ed7c44" /> Chi tiết
+          đơn hàng:
+        </Text>
+
         {orderSummary.map((item, index) => {
           const isService = item.serviceId !== undefined;
           const service = isService ? DogService1 : Product;
