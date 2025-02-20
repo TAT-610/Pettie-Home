@@ -10,7 +10,7 @@ const ProfileShop = () => {
   const router = useRouter();
   const { id } = useLocalSearchParams(); // Lấy id từ route params
   console.log("Id in ProfileShop", id);
-  
+
   const profileId = Array.isArray(id) ? id[0] : id; // Đảm bảo id là string
   const [profile, setProfile] = useState<Profile | null>(null);
 
@@ -26,10 +26,10 @@ const ProfileShop = () => {
         console.error("Lỗi khi lấy hồ sơ:", error);
       }
     };
-  
+
     fetchData();
   }, [profileId]);
-  
+
 
   if (!profile) {
     return <Text>Đang tải...</Text>;
@@ -44,15 +44,22 @@ const ProfileShop = () => {
       console.error("Lỗi khi đăng xuất:", error);
     }
   };
-  
+
   const handleEditProfile = () => {
+    console.log("navigate editprofile");
+    
     if (profile?.id) {
-      router.push(`/MyShop/editprofileShop?id=${profile.id}`);
+      router.push(`/MyShop/editProfile/[editprofileShop]?id=${profile.id}`);
     } else {
       console.error("Không có ID để chuyển trang");
     }
   };
-
+// anh sua lai cau truc thu muc o MyShop, noi na`o ma su dung 2 th` do la phai import lai
+  const handleWallet = () => {
+    console.log("Navigating to wallet with id:", profileId);
+    router.push(`/MyShop/Wallet/[walletshop]?id=${profile.id}`);
+  };
+  // tab doanh thu đó là component nào e
   const stats = [
     { label: 'Doanh thu', value: '20.250.000đ' },
     { label: 'Đơn hàng', value: '14' },
@@ -95,21 +102,21 @@ const ProfileShop = () => {
       {/* Menu */}
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <FontAwesome name="shopping-cart" size={20} color="#4CAF50" />
+          <FontAwesome name="shopping-cart" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Thông tin đơn hàng</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <Ionicons name="add-circle" size={20} color="#4CAF50" />
+          <Ionicons name="add-circle" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Thêm sản phẩm</Text>
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.menuItem} >
+      <TouchableOpacity style={styles.menuItem} onPress={handleWallet}>
         <View style={styles.menuItemLeft}>
-          <FontAwesome5 name="money-bill-wave" size={19} style={{ marginRight: -2 }} color="#4CAF50" />
+          <FontAwesome5 name="money-bill-wave" size={19} style={{ marginRight: -2 }} color="#ed7c44" />
           <Text style={styles.menuText}>Doanh thu</Text>
         </View>
         <Text style={styles.menuValue}>20.250.000 đ</Text>
@@ -117,42 +124,42 @@ const ProfileShop = () => {
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <Ionicons name="storefront-sharp" size={20} color="#4CAF50" />
+          <Ionicons name="storefront-sharp" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Đăng ký mở cửa hàng</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem}>
         <View style={styles.menuItemLeft}>
-          <FontAwesome name="question-circle-o" size={20} color="#4CAF50" />
+          <FontAwesome name="question-circle-o" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Hỗ trợ</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <FontAwesome name="cogs" size={20} color="#4CAF50" />
+          <FontAwesome name="cogs" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Cài đặt</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <FontAwesome name="file-text" size={20} color="#4CAF50" />
+          <FontAwesome name="file-text" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Điều khoản & Chính sách</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
         <View style={styles.menuItemLeft}>
-          <FontAwesome name="edit" size={20} color="#4CAF50" />
+          <FontAwesome name="edit" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Chỉnh sửa thông tin</Text>
         </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
-          <FontAwesome5 name="briefcase-medical" size={20} color="#4CAF50" />
+          <FontAwesome5 name="briefcase-medical" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Thêm dịch vụ</Text>
         </View>
       </TouchableOpacity>
@@ -168,6 +175,7 @@ const ProfileShop = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#e9f1ff"
   },
   header: {
     padding: 40,
@@ -184,8 +192,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   avatar: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     borderRadius: 40,
     marginRight: 18,
   },

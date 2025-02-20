@@ -4,7 +4,7 @@ import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { getProfileById, updateProfile } from '../../services/api';
 
-const EditProfileShop = () => {
+const EditProfile = () => {
   // State lưu thông tin hồ sơ
   const [profile, setProfile] = useState({
     id: "",
@@ -278,4 +278,4 @@ const styles = StyleSheet.create({
   saveButtonText: { fontSize: 16, fontWeight: 'bold', color: '#fff' }
 });
 
-export default EditProfileShop;
+export default EditProfile;

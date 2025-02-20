@@ -7,18 +7,18 @@ import { useState } from "react";
 
 export default function Login() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      const user = await loginUser(username, password);
+      const user = await loginUser(phone, password);
 
       if (!user || !user.role || !user.id) {
         throw new Error("Không thể xác định vai trò người dùng.");
       }
 
-      Alert.alert("Đăng nhập thành công", `Chào mừng ${user.userName}`);
+      Alert.alert("Đăng nhập thành công", `Chào mừng ${user.phone}`);
 
       // Điều hướng dựa theo role
       if (user.role === "user") {
@@ -46,9 +46,9 @@ export default function Login() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Tên người dùng"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="Số điện thoại"
+          value={phone}
+          onChangeText={setPhone}
         />
         <TextInput
           style={styles.input}

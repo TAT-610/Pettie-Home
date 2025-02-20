@@ -1,22 +1,23 @@
 import axios from "axios";
 import { Products, Profile } from "@/services/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Đặt base URL cho mock API
 const BASE_URL_1 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/users";
 const BASE_URL_2 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/products";
 
 // Hàm đăng nhập
-export const loginUser = async (userName: string, password: string): Promise<Profile> => {
-  console.log("Login with Username is: ", { userName }, "and Password is:", { password });
-  console.log(`Requesting: ${BASE_URL_1}?username=${userName}`);
+export const loginUser = async (phone: string, password: string): Promise<Profile> => {
+  console.log("Login with Phone is: ", { phone }, "and Password is:", { password });
+  console.log(`Requesting: ${BASE_URL_1}?phone=${phone}`);
 
   try {
     console.log("Send Req Api");
 
-    const response = await axios.get<Profile[]>(`${BASE_URL_1}?userName=${userName}`);
+    const response = await axios.get<Profile[]>(`${BASE_URL_1}?phone=${phone}`);
     console.log("API Response:", response.data);
 
-
+    
 
     if (response.data.length === 0) {
       throw new Error("Tên đăng nhập không tồn tại");
@@ -27,6 +28,23 @@ export const loginUser = async (userName: string, password: string): Promise<Pro
     if (!user) {
       throw new Error("Mật khẩu không đúng");
     }
+    // luu id:
+    const id = user.id;
+    console.log("ID login", id);
+    await AsyncStorage.setItem("idUser", id)
+
+    
+    // luu role
+    const role = user.role;
+    console.log("User Role: ", role);
+
+    if (role === 'user') {
+      await AsyncStorage.setItem("roleUser", role)
+    } else {
+      // viet them ham khac nen co them role moi
+      await AsyncStorage.setItem("roleShop", role)
+    }
+    
 
     return user;
   } catch (error) {
