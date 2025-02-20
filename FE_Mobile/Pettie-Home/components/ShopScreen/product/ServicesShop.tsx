@@ -47,21 +47,27 @@ const ServicesShop = () => {
             <Text style={styles.header}>Dịch vụ</Text>
             {/* Tabs */}
             <View style={styles.tabContainer}>
+                <View style={{flexDirection: "row"}}>
                 {tabs.map((tab, index) => (
                     <TouchableOpacity
                         key={index}
                         style={[styles.tab, activeTab === tab && styles.activeTab]}
                         onPress={() => setActiveTab(tab)}
                     >
-                        <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+                        <Text
+                            style={[styles.tabText, activeTab === tab && styles.activeTabText]}
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                        >
                             {tab}
                         </Text>
                     </TouchableOpacity>
-                ))}
+                ))}</View>
                 <TouchableOpacity style={styles.addButton} onPress={handleAddService}>
-                    <Text ><Ionicons name="add-circle" size={40} color="#fff" /></Text>
+                    <Ionicons name="add-circle" size={40} color="#fff" />
                 </TouchableOpacity>
             </View>
+
 
             {/* Danh sách dịch vụ */}
             <View style={styles.listContainer}>
@@ -97,17 +103,16 @@ const styles = StyleSheet.create({
         textAlign: "center", backgroundColor: "#699BF4", paddingTop: 50,
         color: "#fff"
     },
-
-    tabContainer: {
-        flexDirection: "row", justifyContent: "space-around", backgroundColor: "#699BF4",
-        paddingBottom: 20
-    },
-    tab: { paddingVertical: 10, paddingHorizontal: 20, borderRadius: 30, backgroundColor: "#fff" },
+    tabContainer: { flexDirection: "row", backgroundColor: "#699BF4", paddingBottom: 9,  justifyContent: "space-between", padding: 10},
+    tab: { padding: 10, borderRadius: 20, backgroundColor: "#fff", marginHorizontal: 5 },
     activeTab: { backgroundColor: "#ed7c44" },
-    tabText: { fontSize: 16, color: "#000" },
-    addButton: { padding: 4 },
-    activeTabText: { color: "#fff", fontWeight: "bold" },
-
+    tabText: { color: "#555" },
+    activeTabText: { color: "#fff" },
+    addButton: {
+        marginLeft: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     listContainer: {
         paddingHorizontal: 5,
         paddingTop: 15,

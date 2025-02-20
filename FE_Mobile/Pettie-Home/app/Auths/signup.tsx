@@ -65,7 +65,7 @@ export default function Register() {
 
 const styles = StyleSheet.create({
   container: { backgroundColor: "white", flex: 1 },
-  logo: { marginLeft: 1, width: 410, height: 400 },
+  logo: { marginLeft: 1, width: "100%", height: 400 },
   title: {
     fontSize: 26,
     fontWeight: "bold",
