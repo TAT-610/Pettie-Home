@@ -304,12 +304,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
-    backgroundColor: "white",
+
     elevation: 10,
     shadowColor: "black",
     shadowOffset: { width: 0, height: -5 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
+    backgroundColor: "#699BF4",
   },
   backButton: {
     marginTop: 20,
@@ -416,6 +417,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "700",
     paddingTop: 20,
+    color: "white",
   },
   content: {
     borderBottomWidth: 1,

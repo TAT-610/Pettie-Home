@@ -9,7 +9,7 @@ export default function profile() {
       renderItem={null}
       ListFooterComponent={() => (
         <>
-          <View style={{ backgroundColor: "#f9f9f9" }}>
+          <View style={{ backgroundColor: "#e9f1ff" }}>
             <Profile />
           </View>
         </>
