@@ -92,6 +92,7 @@ const OrderCustomer = () => {
   };
 
   const handlePlaceOrder = () => {
+    router.push(`/Order/payment`);
     console.log("Đặt hàng thành công với phương thức: ", paymentMethod);
   };
 

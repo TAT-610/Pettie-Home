@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 
 const statusSteps = [
+  "Chờ xác nhận",
   "Chờ ngày hẹn",
   "Đến cuộc hẹn",
   "Đang tiến hành",
@@ -20,7 +21,7 @@ const statusSteps = [
 
 const orderDetails = {
   orderId: "#1009",
-  status: "Đang tiến hành",
+  status: "Chờ xác nhận",
   time: "27/01/2024 - 23:07:42",
   scheduledTime: "28/01/2024 - 10:00:00",
   items: [
@@ -45,22 +46,6 @@ const orderDetails = {
       quantity: 4,
       image:
         "https://paddy.vn/cdn/shop/files/snack-cho-cho-banh-quy-doggyman_5.jpg?v=1732863422",
-    },
-    {
-      id: "4",
-      name: "Pate mèo kucinta gói 80g ",
-      price: 32000,
-      quantity: 4,
-      image:
-        "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
-    },
-    {
-      id: "5",
-      name: "Cát đậu nành Cature cho mèo 2.8kg ",
-      price: 32000,
-      quantity: 4,
-      image:
-        "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
     },
   ],
   subtotal: 925000,
