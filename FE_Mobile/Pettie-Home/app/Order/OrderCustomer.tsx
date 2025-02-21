@@ -6,6 +6,8 @@ import {
   ScrollView,
   StyleSheet,
   Image,
+  Modal,
+  FlatList,
 } from "react-native";
 import React, { useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -83,7 +85,9 @@ const OrderCustomer = () => {
   const { address } = useLocalSearchParams();
   const [note, setNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("VN Pay");
-
+  const [selectedDate, setSelectedDate] = useState(getFormattedDate(0));
+  const [selectedTime, setSelectedTime] = useState("15:00");
+  const [isModalVisible, setModalVisible] = useState(false);
   const defaultAddress =
     "Tòa Bs16, 88 Phước Thiện, Khu phố 29, Quận 9, Hồ Chí Minh";
 
@@ -103,7 +107,35 @@ const OrderCustomer = () => {
       0
     );
   };
+  // Lấy danh sách 3 ngày liên tiếp từ hôm nay
+  const getNextThreeDays = () => {
+    return Array.from({ length: 3 }, (_, index) => getFormattedDate(index));
+  };
 
+  // Lấy danh sách giờ từ 8h sáng đến 5h chiều
+  const getAvailableTimes = () => {
+    return Array.from({ length: 10 }, (_, index) => `${8 + index}:00`);
+  };
+
+  // Hàm định dạng ngày theo dd/MM
+  function getFormattedDate(offset) {
+    const date = new Date();
+    date.setDate(date.getDate() + offset);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    return `${day}/${month}`;
+  }
+
+  // Xử lý khi chọn ngày
+  const handleSelectDate = (date) => {
+    setSelectedDate(date);
+  };
+
+  // Xử lý khi chọn giờ
+  const handleSelectTime = (time) => {
+    setSelectedTime(time);
+    setModalVisible(false);
+  };
   return (
     <View style={styles.container}>
       <View style={styles.navigation}>
@@ -122,6 +154,69 @@ const OrderCustomer = () => {
           style={styles.backButton}
         />
       </View>
+      {/* Modal chọn ngày và giờ */}
+      <Modal visible={isModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Chọn ngày</Text>
+            <FlatList
+              data={getNextThreeDays()}
+              keyExtractor={(item) => item}
+              horizontal
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.optionButton,
+                    selectedDate === item && styles.selectedOption,
+                  ]}
+                  onPress={() => handleSelectDate(item)}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      selectedDate === item && styles.selectedOptionText,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+
+            <Text style={styles.modalTitle}>Chọn giờ</Text>
+            <FlatList
+              data={getAvailableTimes()}
+              keyExtractor={(item) => item}
+              horizontal
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.optionButton,
+                    selectedTime === item && styles.selectedOption,
+                  ]}
+                  onPress={() => handleSelectTime(item)}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      selectedTime === item && styles.selectedOptionText,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Đóng</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <ScrollView style={styles.scrollView}>
         {/* Địa chỉ nhận hàng */}
         <View
@@ -155,12 +250,24 @@ const OrderCustomer = () => {
             </Text>
             <Text style={styles.addressText}>0886133779</Text>
           </View>
-          <View style={styles.content2}>
+          {/* <View style={styles.content2}>
             <Text style={styles.sectionTitle}>
               <FontAwesome6 name="calendar-check" size={16} color="#ed7c44" />{" "}
               Thời gian hẹn:
             </Text>
             <Text style={styles.addressText}>21/02/2025 - 15:00</Text>
+          </View> */}
+          {/* Thời gian hẹn */}
+          <View style={styles.content}>
+            <Text style={styles.sectionTitle}>
+              <FontAwesome6 name="calendar-check" size={16} color="#ed7c44" />{" "}
+              Thời gian hẹn:
+            </Text>
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <Text style={styles.addressText}>
+                {selectedDate}/2025 - {selectedTime}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         <View
@@ -464,6 +571,54 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     paddingVertical: 10,
     justifyContent: "space-between",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    width: "80%",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  optionButton: {
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  selectedOption: {
+    backgroundColor: "#ed7c44",
+  },
+  optionText: {
+    fontSize: 14,
+    color: "#000",
+  },
+  closeButton: {
+    marginTop: 15,
+    padding: 10,
+    backgroundColor: "#ed7c44",
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  selectedOptionText: {
+    color: "#fff",
   },
 });
 
