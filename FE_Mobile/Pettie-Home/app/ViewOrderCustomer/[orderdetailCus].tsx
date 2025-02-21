@@ -22,22 +22,24 @@ const statusSteps = [
 const orderDetails = {
   orderId: "#1009",
   status: "Chờ xác nhận",
-  time: "27/01/2024 - 23:07:42",
-  scheduledTime: "28/01/2024 - 10:00:00",
+  time: "27/01/2025 - 23:07:42",
+  scheduledTime: "28/01/2025 - 10:00:00",
   items: [
     {
       id: "1",
       name: "Tắm cơ bản cho chó < 4kg ",
       price: 100000,
       quantity: 1,
-      image: "https://i.pinimg.com/736x/f7/0d/69/f70d69556578090929bc1e99da269d9f.jpg",
+      image:
+        "https://i.pinimg.com/736x/f7/0d/69/f70d69556578090929bc1e99da269d9f.jpg",
     },
     {
       id: "2",
       name: "Pate mèo kucinta gói 80g",
       price: 10000,
       quantity: 1,
-      image: "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
+      image:
+        "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
     },
     {
       id: "3",
@@ -101,11 +103,16 @@ export default function OrderDetails() {
                     style={styles.statusContainer}
                     onPress={() => {
                       const currentIndex = statusSteps.indexOf(order.status);
-                      if (currentIndex < statusSteps.length - 1) setIsModalVisible(true);
+                      if (currentIndex < statusSteps.length - 1)
+                        setIsModalVisible(true);
                     }}
                   >
                     <View style={styles.status}>
-                      <Entypo name="controller-record" size={20} color="#25923E" />
+                      <Entypo
+                        name="controller-record"
+                        size={20}
+                        color="#25923E"
+                      />
                       <Text style={styles.statusText}>{order.status}</Text>
                     </View>
                   </TouchableOpacity>
@@ -115,7 +122,9 @@ export default function OrderDetails() {
                     <Text style={styles.value}>{orderDetails.time}</Text>
 
                     <Text style={styles.label}>Thời gian hẹn:</Text>
-                    <Text style={styles.value}>{orderDetails.scheduledTime}</Text>
+                    <Text style={styles.value}>
+                      {orderDetails.scheduledTime}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -169,17 +178,29 @@ export default function OrderDetails() {
               </View>
 
               <View style={styles.infoRow}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between"}}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <Text style={styles.infoLabel}>Thời gian đặt hàng:</Text>
-                  <Text style={styles.value}>{orderDetails.time}</Text></View>
-                <View style={{ flexDirection: "row", justifyContent: "space-between"}}>
+                  <Text style={styles.value}>{orderDetails.time}</Text>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <Text style={styles.infoLabel}>Thời gian thanh toán:</Text>
-                  <Text style={styles.value}>{orderDetails.paymentTime}</Text></View>
+                  <Text style={styles.value}>{orderDetails.paymentTime}</Text>
+                </View>
               </View>
             </View>
 
             <View style={styles.cardNote}>
-              <Text style={styles.sectionHeader}>Lưu ý của shop</Text>
+              <Text style={styles.sectionHeader}>Lưu ý cho shop</Text>
               <Text style={styles.noteText}>{orderDetails.customerNote}</Text>
             </View>
           </View>
@@ -258,7 +279,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderWidth: 2,
     borderColor: "#25923E",
-    marginRight: 10
+    marginRight: 10,
   },
   statusText: {
     fontSize: 14,
@@ -267,9 +288,9 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   timeContainer: {
-    alignItems: "flex-start",  // Căn thời gian về bên phải
+    alignItems: "flex-start", // Căn thời gian về bên phải
     textAlign: "right",
-    marginLeft: 20
+    marginLeft: 20,
   },
   label: {
     fontSize: 14,
@@ -294,7 +315,7 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 14,
     color: "#ed7c44",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   carddetail: {
     backgroundColor: "#fff",
@@ -306,7 +327,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   sectionHeader: {
-    fontSize: 18,
+    fontSize: 16,
     marginBottom: 10,
     fontWeight: "bold",
     color: "#222",
@@ -317,7 +338,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   section: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#333",
     fontWeight: "bold",
     flex: 3,
