@@ -18,19 +18,19 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const initialOrders = [
   {
     id: "1",
-    shopName: "Pet Shop Thủ Đức",
+    shopName: "Tiệm nhà Bụp",
     time: "15:00 - 20/10/2024",
     services: [
       {
-        name: "Combo Spa1: Tắm + Tỉa gọn lông cho mèo",
+        name: "Tắm cơ bản cho chó < 4kg",
         quantity: 1,
-        price: 220,
+        price: 100,
         image:
-          "https://i.pinimg.com/736x/cd/cb/6b/cdcb6b1df06746d5802c8baede2b7b49.jpg",
+          "https://i.pinimg.com/736x/f7/0d/69/f70d69556578090929bc1e99da269d9f.jpg",
       },
       {
         name: "Pate mèo kucinta gói 80g",
-        quantity: 2,
+        quantity: 1,
         price: 10,
         image:
           "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
@@ -43,7 +43,7 @@ const initialOrders = [
           "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
       },
     ],
-    total: "480.000 VNĐ",
+    total: "365.000 VNĐ",
     status: "Chờ xác nhận",
   },
   {
@@ -59,7 +59,7 @@ const initialOrders = [
           "https://i.pinimg.com/736x/cd/cb/6b/cdcb6b1df06746d5802c8baede2b7b49.jpg",
       },
     ],
-    total: "935.000 VNĐ",
+    total: "440.000 VNĐ",
     status: "Chờ xác nhận",
   },
   {

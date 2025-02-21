@@ -49,18 +49,21 @@ const ProfileScreen = () => {
         }
     };
 
+    const handleEditProfile = () => {
+        console.log("navigate editprofile");
+
+        if (profile?.id) {
+            router.push(`/ProfileCustomer/[editprofile]?id=${profile.id}`);
+        } else {
+            console.error("Không có ID để chuyển trang");
+        }
+    };
+
     const stats = [
         { label: 'Chờ xác nhận', icon: FontAwesome5, name: 'clipboard-list' },
-        { label: 'Đang xử lí', icon: FontAwesome6 , name: 'truck-fast' },
+        { label: 'Đang xử lí', icon: FontAwesome6, name: 'truck-fast' },
         { label: 'Lịch sử đơn hàng', icon: FontAwesome5, name: 'clock' },
         { label: 'Đã hủy', icon: MaterialCommunityIcons, name: 'cart-remove' },
-    ];
-
-    const menuItems = [
-        { label: 'Hỗ trợ', icon: FontAwesome, name: 'question-circle-o' },
-        { label: 'Cài đặt', icon: FontAwesome5, name: 'cogs' },
-        { label: 'Điều khoản & Chính sách', icon: FontAwesome, name: 'file-text' },
-        { label: 'Chỉnh sửa thông tin', icon: FontAwesome5, name: 'edit' },
     ];
 
     return (
@@ -86,17 +89,34 @@ const ProfileScreen = () => {
                     ))}
                 </View>
             </View>
+            <View style={styles.cardmenu}>
+                <TouchableOpacity style={styles.menuItem}>
+                    <View style={styles.menuItemLeft}>
+                        <FontAwesome name="question-circle-o" size={20} color="#ed7c44" />
+                        <Text style={styles.menuText}>Hỗ trợ</Text>
+                    </View>
+                </TouchableOpacity>
 
-            <View style={styles.section}>
-                {menuItems.map((item, index) => (
-                    <TouchableOpacity key={index} style={styles.menuItem}>
-                        <View style={styles.menuItemLeft}>
-                            <item.icon name={item.name} size={20} color="#ed7c44" />
-                            <Text style={styles.menuText}>{item.label}</Text>
-                        </View>
-                        <FontAwesome name="angle-right" size={20} color="#999" />
-                    </TouchableOpacity>
-                ))}
+                <TouchableOpacity style={styles.menuItem} >
+                    <View style={styles.menuItemLeft}>
+                        <FontAwesome name="cogs" size={20} color="#ed7c44" />
+                        <Text style={styles.menuText}>Cài đặt</Text>
+                    </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.menuItem} >
+                    <View style={styles.menuItemLeft}>
+                        <FontAwesome name="file-text" size={20} color="#ed7c44" />
+                        <Text style={styles.menuText}>Điều khoản & Chính sách</Text>
+                    </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
+                    <View style={styles.menuItemLeft}>
+                        <FontAwesome name="edit" size={20} color="#ed7c44" />
+                        <Text style={styles.menuText}>Chỉnh sửa thông tin</Text>
+                    </View>
+                </TouchableOpacity>
             </View>
 
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -162,6 +182,10 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#555',
         marginTop: 5,
+    },
+    cardmenu: {
+        backgroundColor: "#fff",
+        marginTop: 20,
     },
     menuItem: {
         flexDirection: 'row',
