@@ -11,6 +11,7 @@ interface DogService {
   image: string;
   price: number;
   description: string;
+  shopId: number;
 }
 
 const DogService1: DogService = {
@@ -19,6 +20,7 @@ const DogService1: DogService = {
   image:
     "https://i.pinimg.com/736x/f7/0d/69/f70d69556578090929bc1e99da269d9f.jpg",
   price: 100,
+  shopId: 2,
   description:
     "Dịch vụ tắm cơ bản dành cho chó dưới 4 kg bao gồm tỉa lông cơ bản, vệ sinh lỗ tai, cắt móng/ dũa móng, tắm bằng xà boong chuyên dụng, sấy lông, gỡ rối, đánh tơi và thoa lotion nước hoa cho chó.",
 };
@@ -99,6 +101,7 @@ const ServiceDetail = () => {
             style={styles.bookingButton}
             onPress={() => {
               console.log("Đặt dịch vụ với số lượng:", quantity);
+              router.push(`/ViewShop/${DogService1.shopId}`);
             }}
           >
             <Text style={styles.bookingButtonText}>

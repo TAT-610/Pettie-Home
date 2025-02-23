@@ -20,7 +20,7 @@ const EditProfile = () => {
   });
   const { id } = useLocalSearchParams();
   console.log("ID", id);
-  
+
   const profileId = Array.isArray(id) ? id[0] : id;
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
 
@@ -31,7 +31,7 @@ const EditProfile = () => {
       console.log("Start get Profile");
 
       try {
-        
+
         const data = await getProfileById(profileId);
         console.log("End get Profile");
 
@@ -60,13 +60,6 @@ const EditProfile = () => {
       fetchData();
     }
   }, [profileId]); // Chạy lại khi profileId thay đổi
-
-  // Xử lý thay đổi giá trị trong form
-  const handleChange = <T extends keyof typeof profile>(field: T) => (value: typeof profile[T]) => {
-    setProfile((prev) => ({ ...prev, [field]: value }));
-  };
-  
-  
 
   // Xử lý lưu dữ liệu khi người dùng nhấn "Lưu"
   const handleSave = async () => {
@@ -104,7 +97,7 @@ const EditProfile = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <AntDesign name="arrowleft" size={24} color="black" />
+        <AntDesign name="left" size={24} color="#333" />
           <Text style={styles.title}>Chỉnh sửa hồ sơ</Text>
         </TouchableOpacity>
         <Image
@@ -116,26 +109,24 @@ const EditProfile = () => {
 
       {/* Form */}
       <View style={styles.form}>
-        <View style={styles.row}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Giờ mở cửa</Text>
-            <TextInput
-              style={styles.input}
-              value={profile.openingTime}
-              onChangeText={(text) => setProfile({ ...profile, openingTime: text })}
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Giờ đóng cửa</Text>
-            <TextInput
-              style={styles.input}
-              value={profile.closingTime}
-              onChangeText={(text) => setProfile({ ...profile, closingTime: text })}
-            />
-          </View>
-        </View>
-
         <View style={styles.inputContainer}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Tên người dùng</Text>
+            <TextInput
+              style={styles.input}
+              value={profile.fullname}
+              onChangeText={(text) => setProfile({ ...profile, fullname: text })}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>Số điện thoại</Text>
+            <TextInput
+              style={styles.input}
+              value={profile.phone}
+              onChangeText={(text) => setProfile({ ...profile, phone: text })}
+            />
+          </View>
           <Text style={styles.label}>Miêu tả</Text>
           <TextInput
             style={[styles.input, styles.textarea]}
@@ -148,23 +139,7 @@ const EditProfile = () => {
           <Text style={styles.textCounter}>{profile.description.length}/180</Text>
         </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Tên Shop</Text>
-          <TextInput
-            style={styles.input}
-            value={profile.fullname}
-            onChangeText={(text) => setProfile({ ...profile, fullname: text })}
-          />
-        </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Số điện thoại</Text>
-          <TextInput
-            style={styles.input}
-            value={profile.phone}
-            onChangeText={(text) => setProfile({ ...profile, phone: text })}
-          />
-        </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Email</Text>
@@ -274,7 +249,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   modalText: { fontSize: 18, fontWeight: 'bold', color: '#4CAF50', marginTop: 10 },
-  
+
   saveButtonText: { fontSize: 16, fontWeight: 'bold', color: '#fff' }
 });
 
