@@ -88,11 +88,14 @@ const OrderCustomer = () => {
   const [selectedDate, setSelectedDate] = useState(getFormattedDate(0));
   const [selectedTime, setSelectedTime] = useState("15:00");
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isPhoneModalVisible, setPhoneModalVisible] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("0886133779");
+  const [newPhoneNumber, setNewPhoneNumber] = useState(phoneNumber);
   const defaultAddress =
     "Tòa Bs16, 88 Phước Thiện, Khu phố 29, Quận 9, Hồ Chí Minh";
 
   const handleChooseAddress = () => {
-    router.push(`/Order/Address`);
+    router.push("/Order/Address");
   };
 
   const handlePlaceOrder = () => {
@@ -107,18 +110,17 @@ const OrderCustomer = () => {
       0
     );
   };
-  // Lấy danh sách 3 ngày liên tiếp từ hôm nay
+
   const getNextThreeDays = () => {
     return Array.from({ length: 3 }, (_, index) => getFormattedDate(index));
   };
 
-  // Lấy danh sách giờ từ 8h sáng đến 5h chiều
   const getAvailableTimes = () => {
     return Array.from({ length: 10 }, (_, index) => `${8 + index}:00`);
   };
 
   // Hàm định dạng ngày theo dd/MM
-  function getFormattedDate(offset) {
+  function getFormattedDate(offset: any) {
     const date = new Date();
     date.setDate(date.getDate() + offset);
     const day = date.getDate().toString().padStart(2, "0");
@@ -127,15 +129,22 @@ const OrderCustomer = () => {
   }
 
   // Xử lý khi chọn ngày
-  const handleSelectDate = (date) => {
+  const handleSelectDate = (date: any) => {
     setSelectedDate(date);
   };
 
   // Xử lý khi chọn giờ
-  const handleSelectTime = (time) => {
+  const handleSelectTime = (time: any) => {
     setSelectedTime(time);
     setModalVisible(false);
   };
+
+  // Xử lý cập nhật số điện thoại
+  const handleUpdatePhoneNumber = () => {
+    setPhoneNumber(newPhoneNumber);
+    setPhoneModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.navigation}>
@@ -187,7 +196,8 @@ const OrderCustomer = () => {
             <FlatList
               data={getAvailableTimes()}
               keyExtractor={(item) => item}
-              horizontal
+              numColumns={3}
+              key={`numColumns-${3}`}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={[
@@ -217,6 +227,35 @@ const OrderCustomer = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Modal cập nhật số điện thoại */}
+      <Modal visible={isPhoneModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Cập nhật số điện thoại</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập số điện thoại mới"
+              value={newPhoneNumber}
+              onChangeText={setNewPhoneNumber}
+              keyboardType="phone-pad"
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleUpdatePhoneNumber}
+            >
+              <Text style={styles.closeButtonText}>Cập nhật</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setPhoneModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Hủy</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView style={styles.scrollView}>
         {/* Địa chỉ nhận hàng */}
         <View
@@ -231,10 +270,7 @@ const OrderCustomer = () => {
               <FontAwesome6 name="location-dot" size={16} color="#ed7c44" /> Địa
               chỉ của bạn:
             </Text>
-            <TouchableOpacity
-            // onPress={handleChooseAddress}
-            // style={styles.addressContainer}
-            >
+            <TouchableOpacity onPress={handleChooseAddress}>
               <Text style={styles.addressText}>
                 {address || defaultAddress}
               </Text>
@@ -242,22 +278,16 @@ const OrderCustomer = () => {
           </View>
 
           {/* Số điện thoại */}
-
           <View style={styles.content}>
             <Text style={styles.sectionTitle}>
               <FontAwesome5 name="phone-alt" size={16} color="#ed7c44" /> Số
               điện thoại:
             </Text>
-            <Text style={styles.addressText}>0886133779</Text>
+            <TouchableOpacity onPress={() => setPhoneModalVisible(true)}>
+              <Text style={styles.addressText}>{phoneNumber}</Text>
+            </TouchableOpacity>
           </View>
-          {/* <View style={styles.content2}>
-            <Text style={styles.sectionTitle}>
-              <FontAwesome6 name="calendar-check" size={16} color="#ed7c44" />{" "}
-              Thời gian hẹn:
-            </Text>
-            <Text style={styles.addressText}>21/02/2025 - 15:00</Text>
-          </View> */}
-          {/* Thời gian hẹn */}
+
           <View style={styles.content}>
             <Text style={styles.sectionTitle}>
               <FontAwesome6 name="calendar-check" size={16} color="#ed7c44" />{" "}
@@ -619,6 +649,13 @@ const styles = StyleSheet.create({
   },
   selectedOptionText: {
     color: "#fff",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#bbb",
+    padding: 10,
+    marginTop: 10,
+    width: "100%",
   },
 });
 
