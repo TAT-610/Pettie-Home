@@ -1,19 +1,28 @@
-export interface Profile {
-    id: string;
-    userName: string;
-    phone: string;
-    description: string;
-    email: string;
-    rating: string;
-    birthDate: string;
-    address: string;
-    openingTime: string;
-    closingTime: string;
-    image: string;
-    role: string;
-    fullname: string;
-    password: string;
-}
+// import { Profile } from './types';
+// export interface Profile {
+//     id: string, 
+//     fullname: string,
+//     email: string, 
+//     emailConfirmed: boolean;
+//     phoneNumber: 
+// }
+
+// export interface Profile {
+//     id: string;
+//     userName: string;
+//     phone: string;
+//     description: string;
+//     email: string;
+//     rating: string;
+//     birthDate: string;
+//     address: string;
+//     openingTime: string;
+//     closingTime: string;
+//     image: string;
+//     role: string;
+//     fullname: string;
+//     password: string;
+// }
 
 
 export interface Products {

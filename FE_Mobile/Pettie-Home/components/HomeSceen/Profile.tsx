@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Feather, FontAwesome, FontAwesome5, FontAwesome6, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProfileById } from '@/services/api';
@@ -8,33 +8,36 @@ import { Profile } from '@/services/types';
 
 const ProfileScreen = () => {
     const router = useRouter();
-    const [id, setId] = useState<string | null>(null);
+    // const [id, setId] = useState<string | null>(null);
+    const {userData} = useLocalSearchParams();
+    console.log("User Data in Profile", userData);
+     
     const [profile, setProfile] = useState<Profile | null>(null);
 
-    useEffect(() => {
-        const fetchId = async () => {
-            try {
-                const storedId = await AsyncStorage.getItem('idUser');
-                setId(storedId);
-            } catch (error) {
-                console.error('Error retrieving idUser:', error);
-            }
-        };
-        fetchId();
-    }, []);
+    // useEffect(() => {
+    //     const fetchId = async () => {
+    //         try {
+    //             const storedId = await AsyncStorage.getItem('idUser');
+    //             setId(storedId);
+    //         } catch (error) {
+    //             console.error('Error retrieving idUser:', error);
+    //         }
+    //     };
+    //     fetchId();
+    // }, []);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            if (!id) return;
-            try {
-                const data = await getProfileById(id);
-                setProfile(data);
-            } catch (error) {
-                console.error('Lỗi khi lấy hồ sơ:', error);
-            }
-        };
-        fetchData();
-    }, [id]);
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         if (!id) return;
+    //         try {
+    //             const data = await getProfileById(id);
+    //             setProfile(data);
+    //         } catch (error) {
+    //             console.error('Lỗi khi lấy hồ sơ:', error);
+    //         }
+    //     };
+    //     fetchData();
+    // }, [id]);
 
     if (!profile) {
         return <Text>Đang tải...</Text>;

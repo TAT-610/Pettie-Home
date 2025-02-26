@@ -3,55 +3,78 @@ import { Products, Profile } from "@/services/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Đặt base URL cho mock API
-const BASE_URL_1 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/users";
-const BASE_URL_2 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/products";
+// const BASE_URL_1 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/users";
+// const BASE_URL_2 = "https://67a8ae906e9548e44fc1b8a3.mockapi.io/products";
+const BASE_URL_1 = "http://14.225.198.232:8080";
+const BASE_URL_2 = "http://14.225.198.232:8080/api/v1"
 
-// Hàm đăng nhập
-export const loginUser = async (phone: string, password: string): Promise<Profile> => {
-  console.log("Login with Phone is: ", { phone }, "and Password is:", { password });
-  console.log(`Requesting: ${BASE_URL_1}?phone=${phone}`);
+export const loginUser = async (username: string, password: string): Promise<any> => {
+  console.log("Login with username:", username, "Password:", password);
 
   try {
-    console.log("Send Req Api");
-
-    const response = await axios.get<Profile[]>(`${BASE_URL_1}?phone=${phone}`);
-    console.log("API Response:", response.data);
-
-    
-
-    if (response.data.length === 0) {
-      throw new Error("Tên đăng nhập không tồn tại");
-    }
-
-    // Kiểm tra mật khẩu thủ công
-    const user = response.data.find(user => user.password === password);
-    if (!user) {
-      throw new Error("Mật khẩu không đúng");
-    }
-    // luu id:
-    const id = user.id;
-    console.log("ID login", id);
-    await AsyncStorage.setItem("idUser", id)
+    const response = await axios.post(
+      `${BASE_URL_1}/connect/token`,
+      new URLSearchParams({
+        username: username,
+        password: password,
+        client_id: "petshop_spa",
+        scope: "openid email phone profile offline_access roles",
+        grant_type: "password",
+      }).toString(),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    ); 
+    const access_token = response.data.access_token;    
+    const id_token = response.data.id_token;
 
     
-    // luu role
-    const role = user.role;
-    console.log("User Role: ", role);
-
-    if (role === 'user') {
-      await AsyncStorage.setItem("roleUser", role)
-    } else {
-      // viet them ham khac nen co them role moi
-      await AsyncStorage.setItem("roleShop", role)
-    }
+    await AsyncStorage.setItem("access_token", access_token);
+    await AsyncStorage.setItem("id_token", id_token);
     
-
-    return user;
+    // gọi hàm getUserAccount để lấy thông tin user
+    const userData = await getUserAccount();
+    
+    console.log("API Response :", response.data);
+    return { 
+      access_token, 
+      id_token, 
+      userData 
+    };
   } catch (error) {
     console.error("Lỗi đăng nhập:", error);
     throw error;
   }
 };
+
+// ham get UserAccount
+export const getUserAccount = async () => {
+  try {
+    const access_token = await AsyncStorage.getItem("access_token");
+    if (!access_token) {
+      throw new Error ("Access token is not found")
+    }
+
+    const response = await axios.get(
+      `${BASE_URL_2}/account/users/me`,
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    )
+    
+    console.log("User Data: ", response.data);
+    
+    return response.data;
+  } catch (error) {
+    console.error("Get User Account Error: ", error)
+    throw error;
+  }
+}
 
 // Hàm đăng ký
 export const registerUser = async (

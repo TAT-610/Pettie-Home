@@ -7,26 +7,25 @@ import { useState } from "react";
 
 export default function Login() {
   const router = useRouter();
-  const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");  
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      const user = await loginUser(phone, password);
-
-      if (!user || !user.role || !user.id) {
-        throw new Error("Không thể xác định vai trò người dùng.");
-      }
-
-      Alert.alert("Đăng nhập thành công", `Chào mừng ${user.phone}`);
-
+      const user = await loginUser(username, password);
+      
+      // Lấy thông tin user từ response
+      // const userData = user.UserData.data;
+      const { fullName, roles, id } = user.userData.data;
+      const userRole = roles.length > 0 ? roles[0] : "USER"; // Mặc định USER nếu không có role
+  
+      Alert.alert("Đăng nhập thành công", `Chào mừng ${fullName}`);
+      
       // Điều hướng dựa theo role
-      if (user.role === "user") {
-        router.push(`/(tabs)/home?id=${user.id}`);
-      } else if (user.role === "shop") {
-        router.push(`/(tabsShop)/homeShop?id=${user.id}`);
-        console.log(`Truyen ID User AfterLogin",${user.id}` );
-        
+      if (userRole === "USER") {
+        router.push(`/(tabs)/home?id=${id}`);
+      } else if (userRole === "SHOP") {
+        router.push(`/(tabsShop)/homeShop?id=${id}`);
       } else {
         router.push("/home");
       }
@@ -34,6 +33,7 @@ export default function Login() {
       Alert.alert("Lỗi", error.message || "Đăng nhập thất bại");
     }
   };
+  
 
   return (
     <ScrollView style={styles.container}>
@@ -46,9 +46,10 @@ export default function Login() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Số điện thoại"
-          value={phone}
-          onChangeText={setPhone}
+          placeholder="Email hoặc số điện thoại"
+          value={username}
+          onChangeText={setUsername}
+          keyboardType="email-address"  // Cải thiện nhập email
         />
         <TextInput
           style={styles.input}
