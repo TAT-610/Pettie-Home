@@ -7,9 +7,8 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  SafeAreaView,
+  ScrollView,
 } from "react-native";
-import { ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { registerUser } from "@/services/api";
@@ -23,6 +22,8 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<"user" | "shop">("user"); // State lưu vai trò
+  const [bankName, setBankName] = useState(""); // Tên ngân hàng
+  const [bankAccount, setBankAccount] = useState(""); // Số tài khoản ngân hàng
 
   const handleRegister = async () => {
     try {
@@ -31,7 +32,9 @@ export default function Register() {
         phoneNumber,
         password,
         confirmPassword,
-        role
+        role,
+        role === "shop" ? bankName : undefined, // Không dùng null
+        role === "shop" ? bankAccount : undefined // Không dùng null
       );
       Alert.alert("Đăng ký thành công", `Chào mừng ${user.userName}`);
       router.push("/Auths/login");
@@ -79,10 +82,28 @@ export default function Register() {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
         />
+
+        {/* Nếu chọn role "shop", hiển thị thêm input */}
+        {role === "shop" && (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Tên ngân hàng"
+              value={bankName}
+              onChangeText={setBankName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Số tài khoản ngân hàng"
+              keyboardType="numeric"
+              value={bankAccount}
+              onChangeText={setBankAccount}
+            />
+          </>
+        )}
       </View>
 
       {/* Chọn vai trò bằng Ionicons */}
-
       <View style={styles.roleContainer}>
         {/* Người dùng */}
         <TouchableOpacity
@@ -114,6 +135,13 @@ export default function Register() {
       <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
         <Text style={styles.registerText}>Đăng ký</Text>
       </TouchableOpacity>
+
+      <Text style={styles.loginText}>
+        Đã có tài khoản! {" "}
+        <Text style={styles.registerLink} onPress={() => router.push("/Auths/login")}>
+          Đăng nhập
+        </Text>
+      </Text>
     </ScrollView>
   );
 }
@@ -153,7 +181,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-evenly",
   },
-  roleTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
   radioOption: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
   radioText: { fontSize: 16, marginLeft: 10 },
   registerButton: {
@@ -163,7 +190,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "85%",
     alignSelf: "center",
-    marginBottom: 70,
+    marginBottom: 5,
   },
   registerText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  loginText: { textAlign: "center", marginTop: 20, fontSize: 14 },
+  registerLink: { fontWeight: "bold", color: "#000" },
 });

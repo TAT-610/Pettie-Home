@@ -82,7 +82,9 @@ export const registerUser = async (
   phoneNumber: string,
   password: string,
   confirmPassword: string,
-  role: "user" | "shop"
+  role: "user" | "shop",
+  bankName?: string, // Thêm vào, nhưng chỉ dùng nếu role là "shop"
+  bankAccount?: string // Thêm vào, nhưng chỉ dùng nếu role là "shop"
 ): Promise<Profile> => {
   if (password !== confirmPassword) {
     throw new Error("Mật khẩu xác nhận không khớp.");
@@ -94,6 +96,8 @@ export const registerUser = async (
       phoneNumber,
       password,
       role,
+      bankName: bankName || undefined, // Sử dụng undefined nếu không có giá trị
+      bankAccount: bankAccount || undefined,
     });
 
     return response.data;

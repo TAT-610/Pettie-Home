@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProfileById } from '@/services/api';
 import { Profile } from '@/services/types';
 
-const ProfileScreen = () => {
+const ProfileScreen = () => { 
     const router = useRouter();
     // const [id, setId] = useState<string | null>(null);
     const {userData} = useLocalSearchParams();
