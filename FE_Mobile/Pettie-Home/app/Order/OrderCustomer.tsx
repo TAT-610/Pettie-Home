@@ -6,6 +6,8 @@ import {
   ScrollView,
   StyleSheet,
   Image,
+  Modal,
+  FlatList,
 } from "react-native";
 import React, { useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -83,12 +85,17 @@ const OrderCustomer = () => {
   const { address } = useLocalSearchParams();
   const [note, setNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("VN Pay");
-
+  const [selectedDate, setSelectedDate] = useState(getFormattedDate(0));
+  const [selectedTime, setSelectedTime] = useState("15:00");
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [isPhoneModalVisible, setPhoneModalVisible] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("0886133779");
+  const [newPhoneNumber, setNewPhoneNumber] = useState(phoneNumber);
   const defaultAddress =
     "Tòa Bs16, 88 Phước Thiện, Khu phố 29, Quận 9, Hồ Chí Minh";
 
   const handleChooseAddress = () => {
-    router.push(`/Order/Address`);
+    router.push("/Order/Address");
   };
 
   const handlePlaceOrder = () => {
@@ -102,6 +109,40 @@ const OrderCustomer = () => {
       (total, item) => total + item.price * item.quantity,
       0
     );
+  };
+
+  const getNextThreeDays = () => {
+    return Array.from({ length: 3 }, (_, index) => getFormattedDate(index));
+  };
+
+  const getAvailableTimes = () => {
+    return Array.from({ length: 10 }, (_, index) => `${8 + index}:00`);
+  };
+
+  // Hàm định dạng ngày theo dd/MM
+  function getFormattedDate(offset: any) {
+    const date = new Date();
+    date.setDate(date.getDate() + offset);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    return `${day}/${month}`;
+  }
+
+  // Xử lý khi chọn ngày
+  const handleSelectDate = (date: any) => {
+    setSelectedDate(date);
+  };
+
+  // Xử lý khi chọn giờ
+  const handleSelectTime = (time: any) => {
+    setSelectedTime(time);
+    setModalVisible(false);
+  };
+
+  // Xử lý cập nhật số điện thoại
+  const handleUpdatePhoneNumber = () => {
+    setPhoneNumber(newPhoneNumber);
+    setPhoneModalVisible(false);
   };
 
   return (
@@ -122,6 +163,99 @@ const OrderCustomer = () => {
           style={styles.backButton}
         />
       </View>
+      {/* Modal chọn ngày và giờ */}
+      <Modal visible={isModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Chọn ngày</Text>
+            <FlatList
+              data={getNextThreeDays()}
+              keyExtractor={(item) => item}
+              horizontal
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.optionButton,
+                    selectedDate === item && styles.selectedOption,
+                  ]}
+                  onPress={() => handleSelectDate(item)}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      selectedDate === item && styles.selectedOptionText,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+
+            <Text style={styles.modalTitle}>Chọn giờ</Text>
+            <FlatList
+              data={getAvailableTimes()}
+              keyExtractor={(item) => item}
+              numColumns={3}
+              key={`numColumns-${3}`}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.optionButton,
+                    selectedTime === item && styles.selectedOption,
+                  ]}
+                  onPress={() => handleSelectTime(item)}
+                >
+                  <Text
+                    style={[
+                      styles.optionText,
+                      selectedTime === item && styles.selectedOptionText,
+                    ]}
+                  >
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Đóng</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal cập nhật số điện thoại */}
+      <Modal visible={isPhoneModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Cập nhật số điện thoại</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập số điện thoại mới"
+              value={newPhoneNumber}
+              onChangeText={setNewPhoneNumber}
+              keyboardType="phone-pad"
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleUpdatePhoneNumber}
+            >
+              <Text style={styles.closeButtonText}>Cập nhật</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setPhoneModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Hủy</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView style={styles.scrollView}>
         {/* Địa chỉ nhận hàng */}
         <View
@@ -136,10 +270,7 @@ const OrderCustomer = () => {
               <FontAwesome6 name="location-dot" size={16} color="#ed7c44" /> Địa
               chỉ của bạn:
             </Text>
-            <TouchableOpacity
-            // onPress={handleChooseAddress}
-            // style={styles.addressContainer}
-            >
+            <TouchableOpacity onPress={handleChooseAddress}>
               <Text style={styles.addressText}>
                 {address || defaultAddress}
               </Text>
@@ -147,20 +278,26 @@ const OrderCustomer = () => {
           </View>
 
           {/* Số điện thoại */}
-
           <View style={styles.content}>
             <Text style={styles.sectionTitle}>
               <FontAwesome5 name="phone-alt" size={16} color="#ed7c44" /> Số
               điện thoại:
             </Text>
-            <Text style={styles.addressText}>0886133779</Text>
+            <TouchableOpacity onPress={() => setPhoneModalVisible(true)}>
+              <Text style={styles.addressText}>{phoneNumber}</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.content2}>
+
+          <View style={styles.content}>
             <Text style={styles.sectionTitle}>
               <FontAwesome6 name="calendar-check" size={16} color="#ed7c44" />{" "}
               Thời gian hẹn:
             </Text>
-            <Text style={styles.addressText}>21/02/2025 - 15:00</Text>
+            <TouchableOpacity onPress={() => setModalVisible(true)}>
+              <Text style={styles.addressText}>
+                {selectedDate}/2025 - {selectedTime}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
         <View
@@ -304,12 +441,13 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
-    backgroundColor: "white",
+
     elevation: 10,
     shadowColor: "black",
     shadowOffset: { width: 0, height: -5 },
     shadowOpacity: 0.1,
     shadowRadius: 5,
+    backgroundColor: "#699BF4",
   },
   backButton: {
     marginTop: 20,
@@ -416,6 +554,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "700",
     paddingTop: 20,
+    color: "white",
   },
   content: {
     borderBottomWidth: 1,
@@ -462,6 +601,61 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     paddingVertical: 10,
     justifyContent: "space-between",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    width: "80%",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  optionButton: {
+    padding: 10,
+    marginVertical: 5,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  selectedOption: {
+    backgroundColor: "#ed7c44",
+  },
+  optionText: {
+    fontSize: 14,
+    color: "#000",
+  },
+  closeButton: {
+    marginTop: 15,
+    padding: 10,
+    backgroundColor: "#ed7c44",
+    borderRadius: 8,
+    alignItems: "center",
+    width: "100%",
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 14,
+  },
+  selectedOptionText: {
+    color: "#fff",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#bbb",
+    padding: 10,
+    marginTop: 10,
+    width: "100%",
   },
 });
 
