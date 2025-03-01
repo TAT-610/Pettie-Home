@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { registerUser } from "@/services/api";
+import { registerUser } from "@/services/user/api";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import logo from "../../assets/images/login.png";
 

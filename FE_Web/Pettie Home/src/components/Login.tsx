@@ -11,17 +11,17 @@ const [loading, setLoading] = useState(false);
 const handleLogin = async () => {
   setLoading(true);
   try {
-    const user = await loginUser(username, password);
+    const { accessToken, userData } = await loginUser(username, password);
+    console.log("User", userData);
 
-    // Lấy thông tin user từ response
-    const { username: userFetchedName, roles, id } = user.userData?.data || {};
-    const userRole = roles?.length > 0 ? roles[0] : "Admin";
+    // Trích xuất dữ liệu đúng cách
+    const { fullName, roles, id } = userData.data || {};
+    const userRole = roles?.length > 0 ? roles[0] : "USER";
 
-    alert(`Đăng nhập thành công! Chào mừng ${userFetchedName || "Người dùng"}`);
+    alert(`Đăng nhập thành công! Chào mừng ${fullName || "Người dùng"}`);
 
     // Lưu token vào localStorage
-    localStorage.setItem("access_token", user.access_token);
-    localStorage.setItem("id_token", user.id_token || "");
+    localStorage.setItem("access_token", accessToken);
     localStorage.setItem("user_id", id || "");
 
     // Điều hướng dựa theo vai trò
@@ -36,6 +36,7 @@ const handleLogin = async () => {
     setLoading(false);
   }
 };
+
   
   return (
     <div className="flex justify-between min-h-screen bg-[#699BF4] login-container">

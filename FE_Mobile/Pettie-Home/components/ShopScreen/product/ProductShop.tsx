@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { Products, Profile } from "@/services/types";
-import { getAllProductsByShop, getAllShops } from "@/services/api";
+import { getAllProductsByShop, getAllShops } from "@/services/user/api";
 import { useRouter } from "expo-router";
 
 interface Product {

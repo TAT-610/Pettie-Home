@@ -2,7 +2,7 @@ import { Text, View, StyleSheet, Image, StatusBar, TouchableOpacity, TextInput, 
 import { ScrollView } from "react-native";
 import logo from "../../assets/images/login.png";
 import { useRouter } from "expo-router";
-import { loginUser } from "@/services/api";
+import { loginUser } from "@/services/user/api";
 import { useState } from "react";
 
 export default function Login() {

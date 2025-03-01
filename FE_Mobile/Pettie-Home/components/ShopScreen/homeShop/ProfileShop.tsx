@@ -1,34 +1,32 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Feather, FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { getProfileById } from '../../../services/api';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { getUserAccount } from '../../../services/user/api';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Profile } from '@/services/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileShop = () => {
   const router = useRouter();
-  const { id } = useLocalSearchParams(); // Lấy id từ route params
-  console.log("Id in ProfileShop", id);
-
-  const profileId = Array.isArray(id) ? id[0] : id; // Đảm bảo id là string
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      // if (!profileId) return;
+    const fetchProfile = async () => {
       try {
-        console.log("Fetching profile with ID:", profileId); // Debug log
-        const data = await getProfileById(profileId);
-        console.log("Profile data received:", data); // Kiểm tra dữ liệu
-        setProfile(data);
+        const userData = await getUserAccount();
+        setProfile(userData);
       } catch (error) {
-        console.error("Lỗi khi lấy hồ sơ:", error);
+        console.error("Lỗi khi lấy thông tin tài khoản:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData();
-  }, [profileId]);
+
+    fetchProfile();
+  }, []);
+
 
 
   if (!profile) {
@@ -37,8 +35,8 @@ const ProfileShop = () => {
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem('userId'); // Xóa ID người dùng khỏi AsyncStorage
-      console.log("Đã logout thành công!"); // Ghi log khi logout thành công
+      await AsyncStorage.removeItem('access_token');
+      await AsyncStorage.removeItem('id_token');
       router.push('/Auths/login');
     } catch (error) {
       console.error("Lỗi khi đăng xuất:", error);
@@ -56,7 +54,6 @@ const ProfileShop = () => {
   };
 // anh sua lai cau truc thu muc o MyShop, noi na`o ma su dung 2 th` do la phai import lai
   const handleWallet = () => {
-    console.log("Navigating to wallet with id:", profileId);
     router.push(`/MyShop/Wallet/[walletshop]?id=${profile.id}`);
   };
   // tab doanh thu đó là component nào e

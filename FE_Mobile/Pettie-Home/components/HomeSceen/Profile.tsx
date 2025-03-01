@@ -3,7 +3,7 @@ import { Feather, FontAwesome, FontAwesome5, FontAwesome6, Fontisto, Ionicons, M
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getProfileById } from '@/services/api';
+import { getProfileById } from '@/services/user/api';
 import { Profile } from '@/services/types';
 
 const ProfileScreen = () => { 

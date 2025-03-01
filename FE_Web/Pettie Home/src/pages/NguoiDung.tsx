@@ -104,26 +104,29 @@ const NguoiDung = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user.id} className="bg-white border-b">
-                <td className="px-4 py-3">{user.id}</td>
-                <td className="px-4 py-3">{user.email}</td>
-                <td className="px-4 py-3">{user.fullName}</td>
-                <td className="px-4 py-3">{user.phoneNumber ?? "_"}</td>
-                <td className="px-4 py-3">{user.roles.length > 0 ? user.roles.join(", ") : "Chưa có vai trò"}</td>
-                <td className="px-4 py-3">
-                  <button
-                    className={`px-3 py-1 rounded-md font-sans ${user.isLockedOut ? "border-red-500 border-2 text-red-600" : "border-green-500 border-2 text-green-600"
-                      }`}
-                    title={user.isLockedOut ? "Tài khoản này đang bị khóa" : "Tài khoản này đang hoạt động"}
-                    onClick={() => toggleUserStatus(user)}
-                  >
-                    {user.isLockedOut ? "Không hoạt động" : "Đang hoạt động"}
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {users
+              .filter(user => !user.roles.includes("shop") && !user.roles.includes("admin")) // Lọc bỏ user có role shop/admin
+              .map((user) => (
+                <tr key={user.id} className="bg-white border-b">
+                  <td className="px-4 py-3">{user.id}</td>
+                  <td className="px-4 py-3">{user.email}</td>
+                  <td className="px-4 py-3">{user.fullName}</td>
+                  <td className="px-4 py-3">{user.phoneNumber ?? "_"}</td>
+                  <td className="px-4 py-3">{user.roles.length > 0 ? user.roles.join(", ") : "Chưa có vai trò"}</td>
+                  <td className="px-4 py-3">
+                    <button
+                      className={`px-3 py-1 rounded-md font-sans ${user.isLockedOut ? "border-red-500 border-2 text-red-600" : "border-green-500 border-2 text-green-600"
+                        }`}
+                      title={user.isLockedOut ? "Tài khoản này đang bị khóa" : "Tài khoản này đang hoạt động"}
+                      onClick={() => toggleUserStatus(user)}
+                    >
+                      {user.isLockedOut ? "Không hoạt động" : "Đang hoạt động"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
+
 
         </table>
       </div>
