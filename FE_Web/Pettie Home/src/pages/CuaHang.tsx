@@ -78,7 +78,7 @@ const CuaHang = () => {
   );
 
   return (
-    <div className="bg-[#EDF2F9] h-full">
+    <div className="bg-[#EDF2F9] min-h-screen overflow-auto relative">
       <div className="flex justify-between py-3 px-8 bg-slate-50 items-center mb-6 shadow-sm">
         <div className="relative w-1/2 flex items-center space-x-2">
           <span className="font-bold font-sans text-xl text-gray-600 mr-10">

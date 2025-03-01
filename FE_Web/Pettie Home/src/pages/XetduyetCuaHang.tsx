@@ -95,7 +95,7 @@ const XetDuyetCuaHang = () => {
   );
 
   return (
-    <div className="bg-[#EDF2F9] h-full overflow-hidden">
+    <div className="bg-[#EDF2F9] min-h-screen overflow-auto relative">
       {/* Header */}
       <div className="flex justify-between py-3 px-8 bg-slate-50 items-center mb-6 shadow-sm">
         <div className="relative w-1/2 flex items-center space-x-2">
