@@ -31,7 +31,7 @@ export const getUserAccount = async () => {
 }
 
 // Hàm lấy thông tin Shop theo ID
-export const getShopById = async (id: string) => { // Thêm id vào tham số
+export const getShopById = async (id: string) => {
   try {
     const access_token = await AsyncStorage.getItem("access_token");
     if (!access_token) {
@@ -39,7 +39,7 @@ export const getShopById = async (id: string) => { // Thêm id vào tham số
     }
 
     const response = await axios.get(
-      `${BASE_URL_2}/shops/${id}`, // Truyền id vào URL
+      `${BASE_URL_2}/shops/profile/${id}`,  // Sửa lại để lấy dữ liệu theo id
       {
         headers: {
           Authorization: `Bearer ${access_token}`,
@@ -48,10 +48,10 @@ export const getShopById = async (id: string) => { // Thêm id vào tham số
       }
     );
 
-    console.log("User Data: ", response.data);
+    console.log("Shop Data: ", response.data);
     return response.data;
   } catch (error) {
-    console.error("Get User Account Error: ", error);
+    console.error("Get Shop Data Error: ", error);
     throw error;
   }
 };
@@ -68,7 +68,7 @@ export const updateShopById = async (
     }
 
     const response = await axios.patch<ProfileShop>(
-      `${BASE_URL_2}/account/shops/${id}`, // Giữ nguyên logic
+      `${BASE_URL_2}/shops/${id}`, // Giữ nguyên logic
       updateData,
       {
         headers: {

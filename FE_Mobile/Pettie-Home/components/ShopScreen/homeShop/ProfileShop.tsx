@@ -8,14 +8,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileShop = () => {
   const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const userData = await getUserAccount();
+
         setProfile(userData);
+        console.log("profile data in ProfileShop", profile);
+
+
+
+
       } catch (error) {
         console.error("Lỗi khi lấy thông tin tài khoản:", error);
       } finally {
@@ -27,7 +33,8 @@ const ProfileShop = () => {
     fetchProfile();
   }, []);
 
-
+  const shopId = profile?.data?.id;
+  console.log("SHopid", shopId);
 
   if (!profile) {
     return <Text>Đang tải...</Text>;
@@ -45,16 +52,17 @@ const ProfileShop = () => {
 
   const handleEditProfile = () => {
     console.log("navigate editprofile");
-    
-    if (profile?.id) {
-      router.push(`/MyShop/editProfile/[editprofileShop]?id=${profile.id}`);
+    console.log("Profile id truoc khi truyen: ",shopId);
+
+    if (shopId) {
+      router.push(`/MyShop/editProfile/[editprofileShop]?id=${shopId}`);
     } else {
       console.error("Không có ID để chuyển trang");
     }
   };
-// anh sua lai cau truc thu muc o MyShop, noi na`o ma su dung 2 th` do la phai import lai
+  // anh sua lai cau truc thu muc o MyShop, noi na`o ma su dung 2 th` do la phai import lai
   const handleWallet = () => {
-    router.push(`/MyShop/Wallet/[walletshop]?id=${profile.id}`);
+    router.push(`/MyShop/Wallet/[walletshop]?id=${shopId}`);
   };
   // tab doanh thu đó là component nào e
   const stats = [

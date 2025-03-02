@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert, Modal } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { getShopById, getUserAccount, updateShopById } from '@/services/shop/api';
+import { getShopById, getUserAccount, updateShopById } from '@/services/shop/apiprofile';
 import { ProfileShop } from '@/services/types';
 
 const EditProfileShop = () => {
+  const {id} = useLocalSearchParams();
+  console.log("Id Shop in EditProfileShop", id);
+  
   const router = useRouter();
   const [profile, setProfile] = useState<ProfileShop | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -21,23 +24,25 @@ const EditProfileShop = () => {
     try {
       const user = await getUserAccount();
       if (!user?.id) throw new Error("Không tìm thấy ID người dùng");
-
-      setShopId(user.id);
+  
       const shopData = await getShopById(user.id);
-      setProfile(shopData);
+      if (shopData) {
+        setProfile(shopData); // Gán dữ liệu profile cho state
+      }
     } catch (error) {
       Alert.alert("Lỗi", "Không thể tải dữ liệu hồ sơ.");
     } finally {
       setLoading(false);
     }
   };
+  
 
   const handleSave = async () => {
     if (!shopId || !profile) {
       Alert.alert("Lỗi", "Dữ liệu không hợp lệ.");
       return;
     }
-
+  
     try {
       const updatedProfile = await updateShopById(shopId, profile);
       setProfile(updatedProfile);
@@ -47,6 +52,7 @@ const EditProfileShop = () => {
       Alert.alert("Lỗi", "Cập nhật hồ sơ thất bại.");
     }
   };
+  
 
   return (
     <ScrollView style={styles.container}>

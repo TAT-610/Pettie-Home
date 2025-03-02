@@ -64,7 +64,7 @@ export const getUserAccount = async () => {
       }
     )
     
-    console.log("User Data: ", response.data);
+    console.log("User Data ne`: ", response.data);
     
     return response.data;
   } catch (error) {

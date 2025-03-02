@@ -1,28 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { AntDesign, Entypo } from "@expo/vector-icons";
+import { createProduct } from "@/services/shop/apiproduct";
+import { Products } from "@/services/types";
 
 export default function AddProduct() {
     const router = useRouter();
-    const [product, setProduct] = useState({
+    
+    type PartialProduct = Partial<Products>;
+    const [product, setProduct] = useState<PartialProduct>({
         name: "",
         retailPrice: "",
         wholesalePrice: "",
         quantity: "",
         image: "",
         expiry: "",
-        brand: ""
+        brand: "",
     });
 
-    const handleAddProduct = () => {
-        if (!product.name || !product.retailPrice || !product.wholesalePrice || !product.quantity || !product.image || !product.expiry || !product.brand) {
-            Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin!");
-            return;
+    const isValidProduct = useCallback(() => {
+        return Object.values(product).every(value =>
+            typeof value === "string" ? value.trim() !== "" : value !== null
+        );
+    }, [product]);
+
+    const handleChange = useCallback((field: keyof Products, value: string) => {
+        setProduct(prev => ({
+            ...prev,
+            [field]: field === "retailPrice" || field === "wholesalePrice" || field === "quantity" 
+                ? parseFloat(value) || 0 
+                : value
+        }));
+    }, []);
+
+    const handleAddProduct = useCallback(async () => {
+        try {
+            console.log("Adding product:", product);
+            await createProduct(product as Products);
+            Alert.alert("Thành công", "Sản phẩm đã được thêm!");
+            router.back();
+        } catch (error: any) {
+            console.error("Lỗi thêm sản phẩm:", error.response?.data || error.message);
+            Alert.alert("Lỗi", error.response?.data?.message || "Không thể thêm sản phẩm, vui lòng thử lại!");
         }
-        Alert.alert("Thành công", "Sản phẩm đã được thêm!");
-        router.back();
-    };
+    }, [product, router]);
+    
 
     return (
         <ScrollView style={styles.container}>
@@ -35,62 +58,56 @@ export default function AddProduct() {
                 </View>
 
                 <View style={styles.card}>
-                    <TouchableOpacity style={styles.imageUpload}>
-                        <View style={styles.imageUploadBox}>
-                            <Entypo name="camera" size={40} color="#696969" />
-                        </View>
-                    </TouchableOpacity>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="URL ảnh"
+                        value={product.image}
+                        onChangeText={text => handleChange("image", text)}
+                    />
                     {product.image ? (
                         <Image source={{ uri: product.image }} style={styles.imagePreview} />
                     ) : null}
                     <TextInput
                         style={styles.input}
-                        placeholder="URL ảnh"
-                        value={product.image}
-                        onChangeText={(text) => setProduct({ ...product, image: text })}
-                    />
-                    <TextInput
-                        style={styles.input}
                         placeholder="Tên sản phẩm"
                         value={product.name}
-                        onChangeText={(text) => setProduct({ ...product, name: text })}
+                        onChangeText={text => handleChange("name", text)}
                     />
                     <TextInput
                         style={styles.input}
                         placeholder="Thương hiệu sản phẩm"
                         value={product.brand}
-                        onChangeText={(text) => setProduct({ ...product, brand: text })}
+                        onChangeText={text => handleChange("brand", text)}
                     />
                     <View style={styles.priceContainer}>
                         <TextInput
                             style={[styles.input, styles.halfInput]}
                             placeholder="Giá bán lẻ (VND)"
                             keyboardType="numeric"
-                            value={product.retailPrice}
-                            onChangeText={(text) => setProduct({ ...product, retailPrice: text })}
+                            value={(product.retailPrice ?? "").toString()}
+                            onChangeText={text => handleChange("retailPrice", text)}
                         />
                         <TextInput
                             style={[styles.input, styles.halfInput]}
                             placeholder="Giá bán buôn (VND)"
                             keyboardType="numeric"
-                            value={product.wholesalePrice}
-                            onChangeText={(text) => setProduct({ ...product, wholesalePrice: text })}
+                            value={(product.wholesalePrice ?? "").toString()}
+                            onChangeText={text => handleChange("wholesalePrice", text)}
                         />
                     </View>
                     <TextInput
                         style={styles.input}
                         placeholder="Số lượng"
                         keyboardType="numeric"
-                        value={product.quantity}
-                        onChangeText={(text) => setProduct({ ...product, quantity: text })}
+                        value={(product.quantity ?? "").toString()}
+                        onChangeText={text => handleChange("quantity", text)}
                     />
                     <TextInput
                         style={styles.input}
                         placeholder="Hạn sử dụng"
                         value={product.expiry}
-                        onChangeText={(text) => setProduct({ ...product, expiry: text })}
+                        onChangeText={text => handleChange("expiry", text)}
                     />
-
                 </View>
 
                 <TouchableOpacity style={styles.addButton} onPress={handleAddProduct} activeOpacity={0.8}>
@@ -99,7 +116,8 @@ export default function AddProduct() {
 
                 <TouchableOpacity style={styles.cancelButton} onPress={() => router.back()} activeOpacity={0.8}>
                     <Text style={styles.buttonTextCancel}>Hủy</Text>
-                </TouchableOpacity></View>
+                </TouchableOpacity>
+            </View>
         </ScrollView>
     );
 }
@@ -115,14 +133,8 @@ const styles = StyleSheet.create({
         paddingBottom: 30,
         paddingTop: 30
     },
-    backButton: {
-        marginRight: 10,
-    },
-    header: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: '#fff',
-    },
+    backButton: { marginRight: 10 },
+    header: { fontSize: 22, fontWeight: 'bold', color: '#fff' },
     card: {
         backgroundColor: "#fff",
         padding: 20,
@@ -134,10 +146,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         margin: 5
     },
-    imageUpload: {
-        alignItems: "center",
-        marginBottom: 15,
-    },
+    imageUpload: { alignItems: "center", marginBottom: 15 },
     imageUploadBox: {
         width: 70,
         height: 70,
@@ -146,12 +155,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    imagePreview: {
-        width: 100,
-        height: 100,
-        alignSelf: "center",
-        marginBottom: 10,
-    },
+    imagePreview: { width: 100, height: 100, alignSelf: "center", marginBottom: 10 },
     input: {
         borderWidth: 1,
         borderColor: "#ddd",
@@ -160,13 +164,8 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         backgroundColor: "#fff",
     },
-    priceContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    halfInput: {
-        width: '48%',
-    },
+    priceContainer: { flexDirection: 'row', justifyContent: 'space-between' },
+    halfInput: { width: '48%' },
     addButton: {
         backgroundColor: "#ed7c44",
         padding: 15,
@@ -189,14 +188,6 @@ const styles = StyleSheet.create({
         borderColor: "#ed7c44",
         borderWidth: 2,
     },
-    buttonText: {
-        color: "#fff",
-        fontWeight: "bold",
-        fontSize: 16,
-    },
-    buttonTextCancel: {
-        color: "#ed7c44",
-        fontWeight: "bold",
-        fontSize: 16,
-    }
+    buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+    buttonTextCancel: { color: "#ed7c44", fontWeight: "bold", fontSize: 16 }
 });

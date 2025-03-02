@@ -30,10 +30,13 @@ export interface Products {
     id: string;
     shopId: string;
     name: string;
-    price: number;
-    quantity: number;
+    price: string;
+    quantity: string;
     status: string;
     image: string;
     expiry: string;
+    retailPrice: string;
+    wholesalePrice: string;
+    brand: string;
 }
 
