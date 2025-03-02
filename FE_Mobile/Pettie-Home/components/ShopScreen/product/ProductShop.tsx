@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-    View, Text, StyleSheet, FlatList, TouchableOpacity,
-    ScrollView, Image, Modal
-} from "react-native";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { Products, Profile } from "@/services/types";
+import { Profile } from "@/services/types";
 import { useRouter } from "expo-router";
-import { getProducts } from "@/services/shop/apiproduct";
+import { getProductsByShop } from "@/services/shop/apiproduct";
 
 interface Product {
     id: string;
@@ -14,7 +11,7 @@ interface Product {
     price: string;
     quantity: number;
     status: string;
-    image: string;
+    imageUrl: string;
 }
 
 const tabs = ["Đang hoạt động", "Hết hàng", "Đang xét duyệt", "Không thành công"];
@@ -28,26 +25,35 @@ export default function ProductShop({ shopId, id }: { shopId: string; id: Profil
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await getProducts(1, 10); // Truyền số trang và số sản phẩm mỗi trang
-                setProducts(response);
+                const productData = await getProductsByShop(1, 10); // Truyền số trang và số sản phẩm mỗi trang
+                const formattedProducts = productData.map((product: any) => ({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: product.quantity,
+                    status: "Đang hoạt động", // Bạn cần logic để xác định trạng thái
+                    imageUrl: product.imageUrl || product.imageFileName, // Sử dụng imageFileName nếu imageUrl null
+                }));
+                setProducts(formattedProducts);
+                console.log("data product:", formattedProducts);
             } catch (error) {
                 console.error("Lỗi khi lấy sản phẩm:", error);
             }
         };
-    
+
         fetchProducts();
     }, []);
 
-    const filteredProducts = useMemo(() => 
-        products.filter(product => product.status === activeTab), 
-    [products, activeTab]);
+    const filteredProducts = useMemo(() =>
+        products.filter(product => product.status === activeTab),
+        [products, activeTab]);
 
     const handleAddProduct = useCallback(() => {
         router.push(`/ProductShop/addproduct`);
     }, [router]);
 
-    const handleEditProduct = useCallback((productId: string) => {
-        router.push(`/ProductShop/[editproduct]?id=${productId}`);
+    const handleEditProduct = useCallback((id: string) => {
+        router.push(`/ProductShop/[editproduct]?id=${id}`);
     }, [router]);
 
     return (
@@ -77,11 +83,16 @@ export default function ProductShop({ shopId, id }: { shopId: string; id: Profil
             </View>
 
             <FlatList
+                style={{ padding: 5 }}
                 data={filteredProducts}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <View style={styles.card}>
-                        <Image source={{ uri: item.image }} style={styles.image} />
+                        <Image
+                            source={{ uri: item.imageUrl ? `https://pettiehome.online/web/${item.imageUrl}` : 'default-image-url.jpg' }}
+                            style={styles.image}
+                        />
+
                         <View style={styles.details}>
                             <Text style={styles.name}>{item.name}</Text>
                             <Text style={styles.price}>Giá: {item.price}đ</Text>
@@ -125,7 +136,7 @@ export default function ProductShop({ shopId, id }: { shopId: string; id: Profil
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#e9f1ff" },
+    container: { flex: 1, backgroundColor: "#e9f1ff", paddingBottom: 20, },
     headerContainer: { flexDirection: "row", justifyContent: "space-between", padding: 15, paddingTop: 40, backgroundColor: "#699BF4" },
     header: { fontSize: 22, fontWeight: "bold", padding: 12, color: "#fff" },
     addButton: { padding: 4 },
@@ -135,10 +146,9 @@ const styles = StyleSheet.create({
     activeTab: { backgroundColor: "#ed7c44" },
     tabText: { color: "#555" },
     activeTabText: { color: "#fff" },
-    listContainer: { paddingHorizontal: 5, marginBottom: 10 },
     card: { flexDirection: "row", alignItems: "center", padding: 12, borderBottomWidth: 1, borderBottomColor: "#ddd", backgroundColor: "white" },
-    image: { width: 80, height: 80, borderRadius: 10 },
-    details: { flex: 1, marginLeft: 15 },
+    image: { width: 80, height: 80, borderRadius: 10, resizeMode: "cover" }, // hoặc "contain" tùy vào yêu cầu ,
+    details: { flex: 1, marginLeft: 15, marginBottom: 35 },
     name: { fontSize: 16, fontWeight: "500", marginBottom: 5 },
     price: { fontSize: 13, color: "#ed7c44" },
     actionButton: { padding: 6, backgroundColor: "#ed7c44", borderRadius: 20 },

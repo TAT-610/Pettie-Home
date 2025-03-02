@@ -1,159 +1,308 @@
-import React, { useState, useEffect } from "react";
-import { View, TextInput, Button, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  View,
+  TextInput,
+  Alert,
+  Image,
+  FlatList,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { editProductById, getAllCategories, getProductById } from "@/services/shop/apiproduct";
 import { AntDesign } from "@expo/vector-icons";
+import DropDownPicker from "react-native-dropdown-picker";
 
-// Định nghĩa kiểu cho sản phẩm
-type Product = {
-  productId: string;
-  name: string;
-  price: number;
-  quantity: number;
-  status: string;
-  image: string;
-  expiry: string;
-  description: string;
-};
-
-const EditProduct = () => {
+export default function EditProduct() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const [product, setProduct] = useState<{
+    id?: string; // Thêm id với kiểu dữ liệu tùy chọn
+    categoryId: string;
+    name: string;
+    price: string;
+    stock: string;
+    image: { uri: string; type: string; fileName: string } | null;
+    expiry: string;
+    brand: string;
+    description: string;
+  }>({
+    id: "", // Giá trị mặc định
+    categoryId: "",
+    name: "",
+    price: "",
+    stock: "",
+    image: null,
+    expiry: "",
+    brand: "",
+    description: "",
+  });
 
-  // Dữ liệu sản phẩm giả định (thay thế bằng dữ liệu thực tế)
-  const productsMock: Product[] = [
-    {
-      productId: "1",
-      name: "Cát đậu nành Cature cho mèo 2.8kg",
-      price: 232000,
-      quantity: 10,
-      status: "Đang hoạt động",
-      image: "https://paddy.vn/cdn/shop/files/Thi_tk_ch_acoten_2.png?v=1690719510",
-      expiry: "2025-12-31",
-      description: "Cát đậu nành chất lượng cao cho mèo."
-    },
-  ];
-
-  // Tìm sản phẩm dựa trên ID
-  const productToEdit = productsMock.find((product) => product.productId === id);
-  const [product, setProduct] = useState<Product | null>(productToEdit || null);
-
-  const [name, setName] = useState(product ? product.name : "");
-  const [price, setPrice] = useState(product ? product.price.toString() : "");
-  const [quantity, setQuantity] = useState(product ? product.quantity.toString() : "");
-  const [expiry, setExpiry] = useState(product ? product.expiry : "");
-  const [image, setImage] = useState(product ? product.image : "");
-  const [desciption, setDescription] = useState(product ? product.description : "");
+  const [open, setOpen] = useState(false);
+  const [category, setCategory] = useState<string | null>(null);
+  const [categories, setCategories] = useState<{ label: string; value: string }[]>([]);
 
   useEffect(() => {
-    if (product) {
-      setName(product.name);
-      setPrice(product.price.toString());
-      setQuantity(product.quantity.toString());
-      setExpiry(product.expiry);
-      setImage(product.image);
-      setDescription(product.description);
+    if (id) {
+      fetchProduct();
     }
-  }, [product]);
+  }, [id]);
 
-  const handleSave = () => {
-    router.push("/");
+  const fetchProduct = async () => {
+    try {
+      const productData = await getProductById(id);
+      if (!productData) {
+        Alert.alert("Error", "Product not found.");
+        return;
+      }
+
+      setProduct({
+        id: productData.id || "",
+        categoryId: productData.categoryId || "",
+        name: productData.name || "",
+        price: productData.price || "",
+        stock: productData.stock || "",
+        expiry: productData.expiry || "",
+        brand: productData.brand || "",
+        description: productData.description || "",
+        image: productData.image || "", // Xử lý nếu `imageUrl` không tồn tại
+      });
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch product data.");
+      console.error("Error fetching product:", error);
+    }
+  };
+
+  useEffect(() => {
+          const fetchCategories = async () => {
+              try {
+                  const data = await getAllCategories();
+                  setCategories(data.map((cat) => ({ label: cat.name, value: cat.id })));
+              } catch (error) {
+                  console.error("Lỗi lấy danh mục:", error);
+              }
+          };
+          fetchCategories();
+      }, []);
+
+  const handleChange = useCallback(
+    (field: keyof typeof product, value: string | number) => {
+      setProduct((prev) => ({
+        ...prev,
+        [field]: field === "price" || field === "stock" ? parseFloat(value as string) || 0 : value,
+      }));
+    },
+    []
+  );
+
+  // Chọn ảnh từ thư viện
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Lỗi", "Bạn cần cấp quyền để chọn ảnh!");
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setProduct((prev) => ({
+        ...prev,
+        image: {
+          uri: result.assets[0].uri,
+          type: "image/jpeg",
+          fileName: result.assets[0].fileName || "upload.jpg",
+        },
+      }));
+    }
+  };
+
+  const handleUpdateProduct = async () => {
+    if (!product) return;
+
+    if (!product.name.trim()) {
+      Alert.alert("Error", "Product name cannot be empty.");
+      return;
+    }
+
+    if (!product.categoryId.trim()) {
+      Alert.alert("Error", "Category ID cannot be empty.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("categoryId", product.categoryId);
+      formData.append("name", product.name);
+      formData.append("price", product.price);
+      formData.append("stock", product.stock);
+      formData.append("expiry", product.expiry);
+      formData.append("brand", product.brand);
+      formData.append("description", product.description);
+
+      if (product.image) {
+        formData.append("image", {
+          uri: product.image.uri,
+          name: product.image.fileName,
+          type: product.image.type,
+        } as any);
+      }
+
+      console.log("🚀 FormData gửi đi:", formData);
+      await editProductById(id, formData as any);
+
+      Alert.alert("Success", "Product updated successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.back(),
+        },
+      ]);
+    } catch (error) {
+      Alert.alert("Error", "Unable to update product. Please try again.");
+      console.error("Error updating product:", error);
+    }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <AntDesign name="left" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.header}>Chỉnh sửa sản phẩm</Text>
-      </View>
-      <View style={{backgroundColor: "#fff", paddingTop: 20, padding: 10,margin: 8}}>
-      {product ? (
-        <>
-          {image ? <Image source={{ uri: image }} style={styles.image} /> : null}
-          <Text style={styles.label}>URL Ảnh:</Text>
-          <TextInput style={styles.input} value={image} onChangeText={setImage} />
-          <Text style={styles.label}>Tên sản phẩm:</Text>
-          <TextInput style={styles.input} value={name} onChangeText={setName} />
-          <Text style={styles.label}>Mô tả: </Text>
-          <TextInput style={styles.input} value={desciption} onChangeText={setDescription} />
-          <Text style={styles.label}>Giá:</Text>
-          <TextInput style={styles.input} value={price} onChangeText={setPrice} keyboardType="numeric" />
-          <Text style={styles.label}>Số lượng:</Text>
-          <TextInput style={styles.input} value={quantity} onChangeText={setQuantity} keyboardType="numeric" />
-          <Text style={styles.label}>Hạn sử dụng:</Text>
-          <TextInput style={styles.input} value={expiry} onChangeText={setExpiry} />
-        </>
-      ) : (
-        <Text style={styles.errorText}>Không tìm thấy sản phẩm</Text>
-      )}</View>
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-            <Text style={styles.buttonText}>Lưu</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={() => router.push("/")}>
-            <Text style={styles.buttonTextCancel}>Hủy</Text>
-          </TouchableOpacity>
-    </ScrollView>
+    <FlatList
+      data={[{ key: "form" }]} // Dummy data để render form trong FlatList
+      renderItem={() => (
+        <View style={{ paddingBottom: 60 }}>
+          <View style={styles.headerContainer}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <AntDesign name="left" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.header}>Chỉnh sửa sản phẩm</Text>
+          </View>
+          <View style={styles.card}>
+            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+              {product.image ? (
+                <Image source={{ uri: product.image.uri }} style={styles.imagePreview} />
+              ) : (
+                <Text>Chọn ảnh</Text>
+              )}
+            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Tên sản phẩm"
+              value={product.name}
+              onChangeText={(text) => handleChange("name", text)}
+            />
+            <View style={{ zIndex: 1000, marginBottom: 17 }}>
+              <DropDownPicker
+                open={open}
+                value={category}
+                items={categories}
+                setOpen={setOpen}
+                setValue={setCategory}
+                setItems={setCategories}
+                placeholder="Chọn danh mục"
+                onChangeValue={(val) => {
+                  if (val) {
+                    setCategory(val);
+                    setProduct((prev) => ({ ...prev, categoryId: val })); // Cập nhật categoryId
+                  }
+                }}
+              />
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Thương hiệu sản phẩm"
+              value={product.brand}
+              onChangeText={(text) => handleChange("brand", text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Giá bán (VND)"
+              keyboardType="numeric"
+              value={product.price.toString()}
+              onChangeText={(text) => handleChange("price", text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Số lượng"
+              keyboardType="numeric"
+              value={product.stock.toString()}
+              onChangeText={(text) => handleChange("stock", text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Chi tiết sản phẩm"
+              value={product.description}
+              onChangeText={(text) => handleChange("description", text)}
+            />
+            <TouchableOpacity style={styles.addButton} onPress={handleUpdateProduct}>
+              <Text style={styles.buttonText}>Cập nhật sản phẩm</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+      keyExtractor={(item) => item.key}
+    />
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#e9f1ff"},
+  container: { flex: 1, backgroundColor: "#e9f1ff" },
   headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
     backgroundColor: "#699BF4",
     padding: 10,
     paddingBottom: 30,
     paddingTop: 30,
   },
-  backButton: {
-    marginRight: 10,
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  label: { fontSize: 16, fontWeight: "bold", marginBottom: 5, color: "#333" },
+  backButton: { marginRight: 10 },
+  header: { fontSize: 22, fontWeight: "bold", color: "#fff" },
+  card: { backgroundColor: "#fff", padding: 20, marginBottom: 20, margin: 5 },
+  imagePreview: { width: 100, height: 100, alignSelf: "center", marginBottom: 10 },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#ddd",
+    padding: 12,
     borderRadius: 8,
-    padding: 10,
+    marginBottom: 15,
     backgroundColor: "#fff",
-    marginBottom: 10,
   },
-  image: { width: 100, height: 100, marginBottom: 10, borderRadius: 10 },
-  button: {
+  dropdown: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, backgroundColor: "#fff" },
+  priceContainer: { flexDirection: "row", justifyContent: "space-between" },
+  halfInput: { width: "48%" },
+  addButton: {
     backgroundColor: "#ed7c44",
-        padding: 15,
-        borderRadius: 8,
-        alignItems: "center",
-        shadowColor: "#699BF4",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 5,
-        margin: 5
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    margin: 5,
   },
   cancelButton: {
     backgroundColor: "#fff",
-        padding: 15,
-        borderRadius: 8,
-        alignItems: "center",
-        marginTop: 10,
-        margin: 5,
-        borderColor: "#ed7c44",
-        borderWidth: 2,
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    margin: 5,
+    borderColor: "#ed7c44",
+    borderWidth: 2,
   },
   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  buttonTextCancel: {
-    color: "#ed7c44",
-    fontWeight: "bold",
-    fontSize: 16,
-},
-  errorText: { color: "red", fontSize: 16, textAlign: "center" },
+  buttonTextCancel: { color: "#ed7c44", fontWeight: "bold", fontSize: 16 },
+  imagePicker: {
+    width: 100,
+    height: 100,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 8,
+    backgroundColor: "#f0f0f0",
+    alignSelf: "center",
+    marginBottom: 10,
+  },
 });
-
-export default EditProduct;

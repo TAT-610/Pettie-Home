@@ -25,18 +25,16 @@ export interface ProfileShop {
     password: string;
 }
 
-
 export interface Products {
-    id: string;
-    shopId: string;
+    id:string;
+    categoryId: string;
     name: string;
     price: string;
-    quantity: string;
-    status: string;
-    image: string;
+    stock: string;
+    image: { uri: string; type: string; fileName?: string } | null;  // Cập nhật kiểu image
     expiry: string;
-    retailPrice: string;
-    wholesalePrice: string;
     brand: string;
-}
+    description: string;
+  }
+  
 
