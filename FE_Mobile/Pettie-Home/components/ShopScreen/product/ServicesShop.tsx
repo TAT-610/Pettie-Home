@@ -9,26 +9,42 @@ const tabs = ["Dịch vụ chó", "Dịch vụ mèo"];
 
 const ServicesShop = ({ shopId, id }: { shopId: string; id: Profile }) => {
     const [activeTab, setActiveTab] = useState(tabs[0]);
-    const [service, setService] = useState<Service[]>([]);
+    const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
     const fetchServices = useCallback(async () => {
+        console.log("start fetch Service");
+    
         try {
             setLoading(true);
-            const servicesData = await getServicesByShop();
-            const formattedServices = servicesData.map((service: any) => ({
+            const response = await getServicesByShop();
+            console.log("API response:", response);
+    
+            // Kiểm tra xem API có trả về thành công không
+            if (!response.success || !Array.isArray(response.data)) {
+                throw new Error("Dữ liệu trả về không hợp lệ hoặc không phải danh sách");
+            }
+    
+            // Lấy dữ liệu từ response.data
+            const servicesData = response.data;
+            console.log("Services Data:", servicesData);
+    
+            // Định dạng dữ liệu
+            const formattedServices = servicesData.map((service: Service) => ({
                 id: service.id,
                 name: service.name,
                 price: service.price,
-                quantity: service.quantity,
-                status: "Dịch vụ chó",
-                imageUrl: service.imageUrl || service.imageFileName,
+                description: service.description,
+                status: "Dịch vụ chó", // Cập nhật dựa trên thực tế
+                imageUrl: service.imageUrl || service.imageFileName, // Ưu tiên ảnh từ imageUrl trước
             }));
-            setService(formattedServices);
-            console.log("data product:", formattedServices);
-        } catch (error) {
-            Alert.alert("Lỗi", "Không thể tải danh sách dịch vụ.");
+    
+            setServices(formattedServices);
+            console.log("Formatted Services:", formattedServices);
+        } catch (error : any) {
+            console.error("Lỗi khi tải danh sách dịch vụ:", error);
+            Alert.alert("Lỗi", error.message || "Không thể tải danh sách dịch vụ.");
         } finally {
             setLoading(false);
         }
@@ -38,9 +54,9 @@ const ServicesShop = ({ shopId, id }: { shopId: string; id: Profile }) => {
         fetchServices();
     }, []);
 
-    const filteredProducts = useMemo(() =>
-        service.filter(service => service.status === activeTab),
-        [service, activeTab]);
+    const filteredServices = useMemo(() =>
+        services.filter(service => service.status === activeTab),
+        [services, activeTab]);
 
     const handleAddService = useCallback(() => {
         router.push(`/ServiceShop/addservice`);
@@ -80,17 +96,18 @@ const ServicesShop = ({ shopId, id }: { shopId: string; id: Profile }) => {
             ) : (
                 <View style={styles.listContainer}>
                     <FlatList
-                        data={filteredProducts}
+                        data={filteredServices}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <View style={styles.card}>
                                 <Image
-                                    source={{ uri: item.image ? `https://pettiehome.online/web/${item.image}` : 'default-image-url.jpg' }}
+                                    source={{ uri: item.imageUrl ? `https://pettiehome.online/web/${item.imageUrl}` : 'default-image-url.jpg' }}
                                     style={styles.image}
                                 />
                                 <View style={styles.details}>
                                     <Text style={styles.name}>{item.name}</Text>
                                     <Text style={styles.price}>Giá: {item.price}.000đ</Text>
+                                    <Text style={styles.description}>{item.description}</Text>
                                 </View>
                                 <TouchableOpacity
                                     style={styles.actionButton}
@@ -147,6 +164,7 @@ const styles = StyleSheet.create({
     },
     name: { fontSize: 16, fontWeight: "medium", marginBottom: 5 },
     price: { fontSize: 13, color: "#ed7c44", marginBottom: 10 },
+    description: { fontSize: 12, color: "#666" },
     actionButton: { padding: 6, backgroundColor: "#ed7c44", borderRadius: 20 },
 });
 

@@ -22,7 +22,7 @@ export const getServicesByShop = async () => {
 
       if (response.data.success) {
           if (response.data) {
-              return response.data.data.items; // Ensure this returns an object with products array
+              return response.data; // Ensure this returns an object with products array
           } else {
               throw new Error("Dữ liệu dịch vụ không hợp lệ.");
           }
@@ -50,14 +50,14 @@ export const createServices = async (serviceData: Partial<Service>): Promise<any
         formData.append("description", serviceData.description || "");
 
         // Kiểm tra nếu có ảnh thì thêm vào FormData
-        if (serviceData.image && typeof serviceData.image === "object" && "uri" in serviceData.image) {
-            const imageUriParts = serviceData.image.uri.split('.');
+        if (serviceData.imageUrl && typeof serviceData.imageUrl === "object" && "uri" in serviceData.imageUrl) {
+            const imageUriParts = serviceData.imageUrl.uri.split('.');
             const imageType = imageUriParts[imageUriParts.length - 1];
 
             formData.append("image", {
-                uri: serviceData.image.uri,
+                uri: serviceData.imageUrl.uri,
                 type: `image/${imageType}`,
-                name: serviceData.image.fileName || `image.${imageType}`,
+                name: serviceData.imageUrl.fileName || `image.${imageType}`,
             } as any); // TypeScript có thể cần `as any` để tránh lỗi kiểu dữ liệu
         }
 
@@ -106,7 +106,7 @@ export const createServices = async (serviceData: Partial<Service>): Promise<any
       }
     };
     
-    export const editServiceById = async (id: string, productData: Partial<Service>): Promise<any> => {
+    export const editServiceById = async (id: string, serviceData: Partial<Service>): Promise<any> => {
       try {
         const access_token = await AsyncStorage.getItem("access_token");
         if (!access_token) {
@@ -117,16 +117,16 @@ export const createServices = async (serviceData: Partial<Service>): Promise<any
         const formData = new FormData();
     
         // Thêm các trường dữ liệu vào FormData
-        if (productData.name) formData.append("name", productData.name);
-        if (productData.price !== undefined) formData.append("price", productData.price.toString());
-        if (productData.description) formData.append("description", productData.description);
+        if (serviceData.name) formData.append("name", serviceData.name);
+        if (serviceData.price !== undefined) formData.append("price", serviceData.price.toString());
+        if (serviceData.description) formData.append("description", serviceData.description);
     
         // Thêm ảnh vào FormData nếu có
-        if (productData.image && typeof productData.image === "object" && "uri" in productData.image) {
+        if (serviceData.imageUrl && typeof serviceData.imageUrl === "object" && "uri" in serviceData.imageUrl) {
           formData.append("image", {
-            uri: productData.image.uri,
-            type: productData.image.type || "image/jpeg", // Mặc định là JPEG nếu không có type
-            name: productData.image.fileName || "image.jpg",
+            uri: serviceData.imageUrl.uri,
+            type: serviceData.imageUrl.type || "image/jpeg", // Mặc định là JPEG nếu không có type
+            name: serviceData.imageUrl.fileName || "image.jpg",
           } as any);
         }
     
