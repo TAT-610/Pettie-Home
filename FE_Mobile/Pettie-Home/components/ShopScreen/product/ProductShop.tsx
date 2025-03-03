@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { Profile } from "@/services/types";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { getProductsByShop } from "@/services/shop/apiproduct";
 
 interface Product {
@@ -22,27 +22,30 @@ export default function ProductShop({ shopId, id }: { shopId: string; id: Profil
     const [isMenuVisible, setMenuVisible] = useState<boolean>(false);
     const router = useRouter();
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const productData = await getProductsByShop(1, 10); // Truyền số trang và số sản phẩm mỗi trang
-                const formattedProducts = productData.map((product: any) => ({
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    quantity: product.quantity,
-                    status: "Đang hoạt động", // Bạn cần logic để xác định trạng thái
-                    imageUrl: product.imageUrl || product.imageFileName, // Sử dụng imageFileName nếu imageUrl null
-                }));
-                setProducts(formattedProducts);
-                console.log("data product:", formattedProducts);
-            } catch (error) {
-                console.error("Lỗi khi lấy sản phẩm:", error);
-            }
-        };
+    useFocusEffect(
+        useCallback(() => {
+            const fetchProducts = async () => {
+                try {
+                    const productData = await getProductsByShop(1, 10);
+                    const formattedProducts = productData.map((product: any) => ({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        quantity: product.quantity,
+                        status: "Đang hoạt động",
+                        imageUrl: product.imageUrl || product.imageFileName,
+                    }));
+                    setProducts(formattedProducts);
+                    console.log("data product:", formattedProducts);
+                } catch (error) {
+                    console.error("Lỗi khi lấy sản phẩm:", error);
+                }
+            };
 
-        fetchProducts();
-    }, []);
+            fetchProducts();
+        }, [])
+    );
+
 
     const filteredProducts = useMemo(() =>
         products.filter(product => product.status === activeTab),

@@ -34,6 +34,7 @@ const Categories = () => {
       return;
     }
     try {
+      console.log("Dữ liệu gửi lên server:", newCategory); // Log dữ liệu
       if (editingCategory) {
         await updateCategory(editingCategory.id, newCategory);
       } else {
@@ -43,8 +44,8 @@ const Categories = () => {
       setNewCategory({ name: "", description: "", isActive: true });
       setEditingCategory(null);
       fetchCategories();
-    } catch (error) {
-      console.error("Lỗi khi thêm hoặc chỉnh sửa danh mục:", error);
+    } catch (error: any) {
+      console.error("Lỗi khi thêm hoặc chỉnh sửa danh mục:", error.response?.data || error.message);
       alert("Đã xảy ra lỗi. Vui lòng thử lại!");
     }
   };

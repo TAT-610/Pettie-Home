@@ -114,9 +114,11 @@ export const getProductById = async (id: string): Promise<Products | null> => {
       if (!access_token) {
         throw new Error("Access token is not found");
       }
+  
       // Tạo FormData
       const formData = new FormData();
-      // Chỉ thêm vào FormData nếu trường đó có giá trị
+  
+      // Thêm các trường dữ liệu vào FormData
       if (productData.name) formData.append("name", productData.name);
       if (productData.price !== undefined) formData.append("price", productData.price.toString());
       if (productData.stock !== undefined) formData.append("stock", productData.stock.toString());
@@ -125,27 +127,30 @@ export const getProductById = async (id: string): Promise<Products | null> => {
       if (productData.description) formData.append("description", productData.description);
       if (productData.expiry) formData.append("expiry", productData.expiry);
   
-      // Kiểm tra nếu có ảnh thì thêm vào FormData
+      // Thêm ảnh vào FormData nếu có
       if (productData.image && typeof productData.image === "object" && "uri" in productData.image) {
         formData.append("image", {
           uri: productData.image.uri,
-          type: productData.image.type,
+          type: productData.image.type || "image/jpeg", // Mặc định là JPEG nếu không có type
           name: productData.image.fileName || "image.jpg",
         } as any);
       }
-      // Log dữ liệu gửi đi (dùng _parts thay vì entries)
+  
+      // Log dữ liệu gửi đi
       console.log("🚀 FormData gửi đi:");
       //@ts-ignore
       formData._parts.forEach((part) => {
         console.log(`${part[0]}:`, part[1]);
       });
   
+      // Gửi request PATCH
       const response = await axios.patch(`${BASE_URL_2}/products/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${access_token}`,
           "Content-Type": "multipart/form-data",
         },
       });
+  
       console.log("✅ Product Edited Successfully:", response.data);
       return response.data;
     } catch (error: any) {
@@ -154,8 +159,6 @@ export const getProductById = async (id: string): Promise<Products | null> => {
     }
   };
   
-
-
   export const getAllCategories = async (): Promise<any[]> => {
     const accessToken = AsyncStorage.getItem("access_token");
     if (!accessToken) throw new Error("Chưa có access_token");

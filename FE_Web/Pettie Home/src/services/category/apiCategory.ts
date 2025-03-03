@@ -21,25 +21,25 @@ export const getAllCategories = async (): Promise<any[]> => {
 };
 
 // Thêm danh mục mới
-export const addCategory = async (category: { name: string; description: string }): Promise<any> => {
-    const accessToken = localStorage.getItem("access_token");
-    if (!accessToken) throw new Error("Chưa có access_token");
-  
-    try {
-      console.log("Gửi request tạo danh mục:", category);
-      const response = await axios.post(`${BASE_URL}/categories`, category, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      });
-      console.log("Phản hồi từ server:", response.data);
-      return response.data;
-    } catch (error: any) {
-      console.error("Lỗi thêm danh mục:", error.response?.data || error.message);
-      throw error;
-    }
-  };
+export const addCategory = async (category: { name: string; description: string}): Promise<any> => {
+  const accessToken = localStorage.getItem("access_token");
+  if (!accessToken) throw new Error("Chưa có access_token");
+
+  try {
+    console.log("Gửi request tạo danh mục:", category);
+    const response = await axios.post(`${BASE_URL}/categories`, category, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("Phản hồi từ server:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("Lỗi thêm danh mục:", error.response?.data || error.message);
+    throw error;
+  }
+};
   
 
 // Lấy danh mục theo ID
@@ -67,7 +67,7 @@ export const getCategoryById = async (id: string): Promise<any> => {
   
     try {
       console.log(`Cập nhật danh mục ID: ${id}`, category);
-      const response = await axios.put(`${BASE_URL}/categories/${id}`, category, {
+      const response = await axios.patch(`${BASE_URL}/categories/${id}`, category, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",

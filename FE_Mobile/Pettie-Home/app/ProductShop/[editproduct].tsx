@@ -19,7 +19,7 @@ export default function EditProduct() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [product, setProduct] = useState<{
-    id?: string; // Thêm id với kiểu dữ liệu tùy chọn
+    id?: string;
     categoryId: string;
     name: string;
     price: string;
@@ -29,7 +29,7 @@ export default function EditProduct() {
     brand: string;
     description: string;
   }>({
-    id: "", // Giá trị mặc định
+    id: "",
     categoryId: "",
     name: "",
     price: "",
@@ -44,49 +44,55 @@ export default function EditProduct() {
   const [category, setCategory] = useState<string | null>(null);
   const [categories, setCategories] = useState<{ label: string; value: string }[]>([]);
 
+  // Fetch product details when the component mounts
   useEffect(() => {
     if (id) {
       fetchProduct();
     }
   }, [id]);
 
-  const fetchProduct = async () => {
-    try {
-      const productData = await getProductById(id);
-      if (!productData) {
-        Alert.alert("Error", "Product not found.");
-        return;
-      }
-
-      setProduct({
-        id: productData.id || "",
-        categoryId: productData.categoryId || "",
-        name: productData.name || "",
-        price: productData.price || "",
-        stock: productData.stock || "",
-        expiry: productData.expiry || "",
-        brand: productData.brand || "",
-        description: productData.description || "",
-        image: productData.image || "", // Xử lý nếu `imageUrl` không tồn tại
-      });
-    } catch (error) {
-      Alert.alert("Error", "Failed to fetch product data.");
-      console.error("Error fetching product:", error);
-    }
-  };
-
+  // Fetch categories when the component mounts
   useEffect(() => {
-          const fetchCategories = async () => {
-              try {
-                  const data = await getAllCategories();
-                  setCategories(data.map((cat) => ({ label: cat.name, value: cat.id })));
-              } catch (error) {
-                  console.error("Lỗi lấy danh mục:", error);
-              }
-          };
-          fetchCategories();
-      }, []);
+    const fetchCategories = async () => {
+      try {
+        const data = await getAllCategories();
+        setCategories(data.map((cat) => ({ label: cat.name, value: cat.id })));
+      } catch (error) {
+        console.error("Lỗi lấy danh mục:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
+  // Fetch product details by ID
+  // Fetch product details by ID
+const fetchProduct = async () => {
+  try {
+    const productData = await getProductById(id as string);
+    if (!productData) {
+      Alert.alert("Lỗi", "Không tìm thấy sản phẩm.");
+      return;
+    }
+    setProduct({
+      id: productData.id || "",
+      categoryId: productData.categoryId || "",
+      name: productData.name || "",
+      price: productData.price ? productData.price.toString() : "",
+      stock: productData.stock ? productData.stock.toString() : "",
+      image: productData.image
+        ? { uri: productData.image.uri, type: productData.image.type, fileName: productData.image.fileName }
+        : null,
+      expiry: productData.expiry || "",
+      brand: productData.brand || "",
+      description: productData.description || "",
+    });
+    setCategory(productData.categoryId);
+  } catch (error) {
+    Alert.alert("Lỗi", "Không thể tải thông tin sản phẩm.");
+  }
+};
+
+  // Handle input changes
   const handleChange = useCallback(
     (field: keyof typeof product, value: string | number) => {
       setProduct((prev) => ({
@@ -97,7 +103,7 @@ export default function EditProduct() {
     []
   );
 
-  // Chọn ảnh từ thư viện
+  // Handle image selection
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
@@ -124,55 +130,25 @@ export default function EditProduct() {
     }
   };
 
+  // Handle product update
   const handleUpdateProduct = async () => {
-    if (!product) return;
-
-    if (!product.name.trim()) {
-      Alert.alert("Error", "Product name cannot be empty.");
-      return;
-    }
-
-    if (!product.categoryId.trim()) {
-      Alert.alert("Error", "Category ID cannot be empty.");
+    if (!product.name || !product.price || !product.stock || !product.categoryId) {
+      Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin sản phẩm.");
       return;
     }
 
     try {
-      const formData = new FormData();
-      formData.append("categoryId", product.categoryId);
-      formData.append("name", product.name);
-      formData.append("price", product.price);
-      formData.append("stock", product.stock);
-      formData.append("expiry", product.expiry);
-      formData.append("brand", product.brand);
-      formData.append("description", product.description);
-
-      if (product.image) {
-        formData.append("image", {
-          uri: product.image.uri,
-          name: product.image.fileName,
-          type: product.image.type,
-        } as any);
-      }
-
-      console.log("🚀 FormData gửi đi:", formData);
-      await editProductById(id, formData as any);
-
-      Alert.alert("Success", "Product updated successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]);
+      await editProductById(id as string, product);
+      Alert.alert("Thành công", "Sản phẩm đã được cập nhật.");
+      router.replace("/product");
     } catch (error) {
-      Alert.alert("Error", "Unable to update product. Please try again.");
-      console.error("Error updating product:", error);
+      Alert.alert("Lỗi", "Cập nhật sản phẩm thất bại.");
     }
   };
 
   return (
     <FlatList
-      data={[{ key: "form" }]} // Dummy data để render form trong FlatList
+      data={[{ key: "form" }]}
       renderItem={() => (
         <View style={{ paddingBottom: 60 }}>
           <View style={styles.headerContainer}>
@@ -207,7 +183,7 @@ export default function EditProduct() {
                 onChangeValue={(val) => {
                   if (val) {
                     setCategory(val);
-                    setProduct((prev) => ({ ...prev, categoryId: val })); // Cập nhật categoryId
+                    setProduct((prev) => ({ ...prev, categoryId: val }));
                   }
                 }}
               />
@@ -282,17 +258,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 5,
   },
-  cancelButton: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    margin: 5,
-    borderColor: "#ed7c44",
-    borderWidth: 2,
-  },
   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  buttonTextCancel: { color: "#ed7c44", fontWeight: "bold", fontSize: 16 },
   imagePicker: {
     width: 100,
     height: 100,
