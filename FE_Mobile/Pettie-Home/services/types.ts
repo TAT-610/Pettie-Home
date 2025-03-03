@@ -1,7 +1,7 @@
 export interface Profile {
-    id: string; 
+    id: string;
     fullname: string;
-    email: string; 
+    email: string;
     emailConfirmed: boolean;
     phoneNumber: string; // Thêm kiểu dữ liệu cho phoneNumber
     image?: string; // Nếu có ảnh đại diện, có thể thêm vào (tuỳ chọn)
@@ -26,7 +26,7 @@ export interface ProfileShop {
 }
 
 export interface Products {
-    id:string;
+    id: string;
     categoryId: string;
     name: string;
     price: string;
@@ -35,6 +35,14 @@ export interface Products {
     expiry: string;
     brand: string;
     description: string;
-  }
-  
+}
+
+export interface Service {
+    id: string;
+    name: string;
+    price: string;
+    status: string;
+    image: { uri: string; type: string; fileName?: string } | null;
+    description: string;
+}
 
