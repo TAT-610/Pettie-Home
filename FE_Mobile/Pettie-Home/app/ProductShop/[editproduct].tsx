@@ -66,31 +66,35 @@ export default function EditProduct() {
 
   // Fetch product details by ID
   // Fetch product details by ID
-const fetchProduct = async () => {
-  try {
-    const productData = await getProductById(id as string);
-    if (!productData) {
-      Alert.alert("Lỗi", "Không tìm thấy sản phẩm.");
-      return;
-    }
-    setProduct({
-      id: productData.id || "",
-      categoryId: productData.categoryId || "",
-      name: productData.name || "",
-      price: productData.price ? productData.price.toString() : "",
-      stock: productData.stock ? productData.stock.toString() : "",
-      image: productData.image
-        ? { uri: productData.image.uri, type: productData.image.type, fileName: productData.image.fileName }
+  const fetchProduct = async () => {
+    try {
+      const productData = await getProductById(id as string);
+      if (!productData) {
+        Alert.alert("Lỗi", "Không tìm thấy sản phẩm.");
+        return;
+      }
+      setProduct({
+        id: productData.id || "",
+        categoryId: productData.categoryId || "",
+        name: productData.name || "",
+        price: productData.price ? productData.price.toString() : "",
+        stock: productData.stock ? productData.stock.toString() : "",
+        image: productData.image
+        ? {
+            uri: productData.image.uri, 
+            type: productData.image.type || "image/jpeg", // Giá trị mặc định
+            fileName: productData.image.fileName || "default.jpg", // Giá trị mặc định
+          }
         : null,
-      expiry: productData.expiry || "",
-      brand: productData.brand || "",
-      description: productData.description || "",
-    });
-    setCategory(productData.categoryId);
-  } catch (error) {
-    Alert.alert("Lỗi", "Không thể tải thông tin sản phẩm.");
-  }
-};
+        expiry: productData.expiry || "",
+        brand: productData.brand || "",
+        description: productData.description || "",
+      });
+      setCategory(productData.categoryId);
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể tải thông tin sản phẩm.");
+    }
+  };
 
   // Handle input changes
   const handleChange = useCallback(
@@ -159,7 +163,7 @@ const fetchProduct = async () => {
           </View>
           <View style={styles.card}>
             <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-              {product.image ? (
+              {product.image?.uri ? (
                 <Image source={{ uri: product.image.uri }} style={styles.imagePreview} />
               ) : (
                 <Text>Chọn ảnh</Text>
