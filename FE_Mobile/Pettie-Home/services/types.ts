@@ -46,3 +46,22 @@ export interface Service {
     description: string;
 }
 
+export interface Shop {
+    id: string;
+    name: string;
+    description: string | null;
+    address: string;
+    phone: string;
+    email: string;
+    balance: number;
+    bankAccountNumber: string;
+    bankName: string;
+    bankAccountName: string;
+    dateOfBirth: string | null;
+    openingTime: string;
+    closingTime: string;
+    imageUrl: string | null;
+    imageFileName: string | null;
+    averageRating: number;
+    totalRating: number;
+}

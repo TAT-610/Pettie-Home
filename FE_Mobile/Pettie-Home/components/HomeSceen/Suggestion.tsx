@@ -93,7 +93,7 @@ export default function Suggestion() {
   );
   const router = useRouter();
   const handleProductPress = (shopId: number) => {
-    router.push(`/ViewShop/${shopId}`); // Navigate to ProductDetail page
+    router.push(`/ViewShop/${shopId}`);
   };
   return (
     <View style={styles.container}>

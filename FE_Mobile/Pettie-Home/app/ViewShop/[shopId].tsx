@@ -26,7 +26,7 @@ import AllService from "../../components/DetailShop/AllService";
 
 export default function ShopDetail() {
   const router = useRouter();
-  const { shopId } = useLocalSearchParams();
+  const { shopId, distance } = useLocalSearchParams();
   const [navBarColor, setNavBarColor] = useState("rgba(0, 0, 0, 0)");
   const handleOrderPress = () => {
     router.push(`/Order/OrderCustomer`); // Navigate to ProductDetail page
@@ -89,7 +89,7 @@ export default function ShopDetail() {
                 <Text style={styles.shopDetails}>
                   Khoảng cách:{" "}
                   <Octicons name="location" size={14} color="#FE5977" />
-                  <Text style={styles.shopDetails2}> 5km</Text>
+                  <Text style={styles.shopDetails2}> {distance}</Text>
                 </Text>
               </View>
             </View>
@@ -220,7 +220,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingVertical: 12,
     paddingHorizontal: 15,
-    marginBottom: 10,
   },
   shopname: {
     fontSize: 16,
@@ -232,18 +231,20 @@ const styles = StyleSheet.create({
     flexDirection: "row", // Đặt icon và tên shop trên cùng một dòng
     alignItems: "center", // Căn giữa icon và tên theo chiều dọc
     justifyContent: "center", // Căn chúng bắt đầu từ bên trái
-    marginBottom: 8, // Khoảng cách bên dưới hàng
+    marginBottom: 8,
+    marginTop: 5, // Khoảng cách bên dưới hàng
   },
   inforshop: {
     alignItems: "flex-start",
-    marginBottom: 5,
+    marginBottom: 8,
   },
   texttitle: {
     fontWeight: "800",
     color: "#666",
     fontSize: 12.5,
-    lineHeight: 16,
+    lineHeight: 17,
     textAlign: "left",
+    marginBottom: 5,
   },
   text: {
     fontWeight: "400",
@@ -254,7 +255,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingBottom: 5,
+    paddingBottom: 8,
   },
   detailItem: {
     flexDirection: "row",
