@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-  Image,
-} from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, } from "react-native";
 import { useRouter } from "expo-router";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 
@@ -81,7 +73,7 @@ export default function OrderDetails() {
         data={[order]}
         keyExtractor={(item) => item.orderId}
         renderItem={() => (
-          <View style={{ padding: 10, marginTop: 80 }}>
+          <View style={{ padding: 10, marginTop: 100 }}>
             <Text style={styles.statusOrder}>Tiệm nhà Bụp</Text>
             <View style={styles.card}>
               <View style={styles.row}>
@@ -222,21 +214,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#699BF4",
     padding: 10,
     paddingBottom: 20,
-    paddingTop: 35,
+    paddingTop: 45,
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
-    zIndex: 10,
+    zIndex: 1000, // Giữ header trên cùng
+    elevation: 10, // Cho Android
   },
   backButton: {
-    marginRight: 10,
     flexDirection: "row",
   },
   header: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
+    marginLeft: 10
   },
   statusOrder: {
     fontSize: 15,

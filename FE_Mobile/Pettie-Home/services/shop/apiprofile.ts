@@ -7,12 +7,12 @@ const BASE_URL_2 = "http://14.225.198.232:8080/api/v1";
 export const getUserAccount = async () => {
   try {
     const access_token = await AsyncStorage.getItem("access_token");
+    console.log("Stored access_token:", access_token); // Kiểm tra token
     if (!access_token) {
       throw new Error ("Access token is not found")
     }
 
-    const response = await axios.get(
-      `${BASE_URL_2}/account/users/me`,
+    const response = await axios.get(`${BASE_URL_2}/account/users/me`,
       {
         headers: {
           Authorization: `Bearer ${access_token}`,
@@ -31,25 +31,37 @@ export const getUserAccount = async () => {
 }
 
 // Hàm lấy thông tin Shop theo ID
-export const getShopById = async (id: string) => {
+export const getShopById = async () => {
   try {
     const access_token = await AsyncStorage.getItem("access_token");
     if (!access_token) {
       throw new Error("Access token is not found");
     }
 
-    const response = await axios.get(
-      `${BASE_URL_2}/shops/profile/${id}`,  // Sửa lại để lấy dữ liệu theo id
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await axios.get(`${BASE_URL_2}/shops/profile`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     console.log("Shop Data: ", response.data);
-    return response.data;
+
+    // Lọc chỉ lấy thông tin profile của shop
+    const shopProfile = {
+      id: response.data.data.id,
+      name: response.data.data.name,
+      description: response.data.data.description,
+      address: response.data.data.address,
+      phone: response.data.data.phone,
+      email: response.data.data.email,
+      openingTime: response.data.data.openingTime,
+      closingTime: response.data.data.closingTime,
+      imageUrl: response.data.data.imageUrl,
+    };
+
+    console.log("Shop Profile Data: ", shopProfile);
+    return shopProfile;
   } catch (error) {
     console.error("Get Shop Data Error: ", error);
     throw error;
@@ -67,8 +79,7 @@ export const updateShopById = async (
       throw new Error("Access token is not found");
     }
 
-    const response = await axios.patch<ProfileShop>(
-      `${BASE_URL_2}/shops/${id}`, // Giữ nguyên logic
+    const response = await axios.patch<ProfileShop>(`${BASE_URL_2}/shops/${id}`, // Giữ nguyên logic
       updateData,
       {
         headers: {

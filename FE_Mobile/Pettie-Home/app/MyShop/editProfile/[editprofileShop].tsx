@@ -4,55 +4,84 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { getShopById, getUserAccount, updateShopById } from '@/services/shop/apiprofile';
 import { ProfileShop } from '@/services/types';
+import * as ImagePicker from 'expo-image-picker';
 
 const EditProfileShop = () => {
-  const {id} = useLocalSearchParams();
+  const { id } = useLocalSearchParams();
   console.log("Id Shop in EditProfileShop", id);
-  
+
   const router = useRouter();
   const [profile, setProfile] = useState<ProfileShop | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [shopId, setShopId] = useState<string | null>(null);
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
+ useEffect(() => {
   const fetchData = async () => {
     setLoading(true);
     try {
       const user = await getUserAccount();
-      if (!user?.id) throw new Error("Không tìm thấy ID người dùng");
-  
-      const shopData = await getShopById(user.id);
-      if (shopData) {
-        setProfile(shopData); // Gán dữ liệu profile cho state
+      console.log("User Data:", user);
+      if (!user?.data?.id) {
+        throw new Error(`Không tìm thấy ID người dùng, dữ liệu nhận được: ${JSON.stringify(user)}`);
       }
+
+      const shopData = await getShopById();
+      if (!shopData || !shopData.id) {
+        throw new Error(`Không tìm thấy dữ liệu shop, dữ liệu nhận được: ${JSON.stringify(shopData)}`);
+      }
+      setProfile(shopData);
+      setShopId(shopData.id);
     } catch (error) {
-      Alert.alert("Lỗi", "Không thể tải dữ liệu hồ sơ.");
+      console.error("Fetch Data Error:", error);
+      Alert.alert("Lỗi","Không thể tải dữ liệu hồ sơ.");
     } finally {
       setLoading(false);
     }
   };
-  
 
-  const handleSave = async () => {
-    if (!shopId || !profile) {
-      Alert.alert("Lỗi", "Dữ liệu không hợp lệ.");
-      return;
-    }
-  
-    try {
-      const updatedProfile = await updateShopById(shopId, profile);
-      setProfile(updatedProfile);
-      setIsSuccessModalVisible(true);
-      setTimeout(() => setIsSuccessModalVisible(false), 2000);
-    } catch (error) {
-      Alert.alert("Lỗi", "Cập nhật hồ sơ thất bại.");
-    }
-  };
-  
+  fetchData();
+}, []);
+
+
+const handleSave = async () => {
+  if (!shopId || !profile) {
+    Alert.alert("Lỗi", "Dữ liệu không hợp lệ.");
+    return;
+  }
+
+  try {
+    const updatedProfile = await updateShopById(shopId, {
+      ...profile, // Gửi toàn bộ dữ liệu profile
+    });
+    setProfile(updatedProfile);
+    setIsSuccessModalVisible(true);
+    setTimeout(() => setIsSuccessModalVisible(false), 2000);
+    router.push(`/homeShop`); // Điều hướng về trang Profile
+  } catch (error) {
+    Alert.alert("Lỗi", "Cập nhật hồ sơ thất bại.");
+  }
+};
+
+const handlePickImage = async () => {
+  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permissionResult.granted) {
+    Alert.alert("Quyền bị từ chối", "Bạn cần cấp quyền truy cập thư viện ảnh.");
+    return;
+  }
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: [ImagePicker.MediaType.IMAGE], // Cập nhật API mới
+    allowsEditing: true,
+    aspect: [1, 1],
+    quality: 0.8,
+  });
+
+  // if (!result.canceled && result.assets?.length > 0) {
+  //   setProfile((prev) => (prev ? { ...prev, imageUrl: result.assets[0].uri } : prev));
+  // }
+};
+
 
   return (
     <ScrollView style={styles.container}>
@@ -61,10 +90,13 @@ const EditProfileShop = () => {
           <AntDesign name="arrowleft" size={24} color="black" />
           <Text style={styles.title}>Chỉnh sửa hồ sơ</Text>
         </TouchableOpacity>
-        <Image
-          source={{ uri: profile?.image || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7_PuGiOv6gDS4J7YTJkyDKGoGL2SzJAEY4A&s' }}
-          style={styles.avatar}
-        />
+        <TouchableOpacity onPress={handlePickImage} style={styles.avatarContainer}>
+          {/* <Image
+            source={{ uri: profile?.imageUrl || 'https://via.placeholder.com/150' }}
+            style={styles.avatar}
+          /> */}
+          <AntDesign name="camera" size={24} color="white" style={styles.cameraIcon} />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.form}>
@@ -75,7 +107,7 @@ const EditProfileShop = () => {
               style={styles.input}
               value={profile?.openingTime || ''}
               onChangeText={(text) => setProfile((prev) => (prev ? { ...prev, openingTime: text } : prev))}
-              />
+            />
           </View>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Giờ đóng cửa</Text>
@@ -83,7 +115,7 @@ const EditProfileShop = () => {
               style={styles.input}
               value={profile?.closingTime || ''}
               onChangeText={(text) => setProfile((prev) => (prev ? { ...prev, closingTime: text } : prev))}
-              />
+            />
           </View>
         </View>
 
@@ -96,7 +128,7 @@ const EditProfileShop = () => {
             maxLength={180}
             value={profile?.description || ''}
             onChangeText={(text) => setProfile((prev) => (prev ? { ...prev, description: text } : prev))}
-            />
+          />
           <Text style={styles.textCounter}>{profile?.description?.length || 0}/180</Text>
         </View>
 
@@ -104,9 +136,9 @@ const EditProfileShop = () => {
           <Text style={styles.label}>Tên Shop</Text>
           <TextInput
             style={styles.input}
-            value={profile?.fullname || ''}
-            onChangeText={(text) => setProfile((prev) => (prev ? { ...prev, fullname: text } : prev))}
-            />
+            value={profile?.name || ''}
+            onChangeText={(text) => setProfile((prev) => (prev ? { ...prev, name: text } : prev))}
+          />
         </View>
 
         <View style={styles.inputContainer}>
@@ -115,7 +147,7 @@ const EditProfileShop = () => {
             style={styles.input}
             value={profile?.phone || ''}
             onChangeText={(text) => setProfile((prev) => (prev ? { ...prev, phone: text } : prev))}
-            />
+          />
         </View>
 
         <View style={styles.inputContainer}>
@@ -125,12 +157,7 @@ const EditProfileShop = () => {
             keyboardType="email-address"
             value={profile?.email || ''}
             onChangeText={(text) => setProfile((prev) => (prev ? { ...prev, email: text } : prev))}
-            />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Ngày sinh</Text>
-          <TextInput style={styles.input} editable={false} value={profile?.birthDate || ''} />
+          />
         </View>
 
         <View style={styles.inputContainer}>
@@ -139,7 +166,7 @@ const EditProfileShop = () => {
             style={styles.input}
             value={profile?.address || ''}
             onChangeText={(text) => setProfile((prev) => (prev ? { ...prev, address: text } : prev))}
-            />
+          />
         </View>
 
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -183,6 +210,8 @@ const styles = StyleSheet.create({
     resizeMode: 'cover'
   },
   title: { fontSize: 18, fontWeight: 'bold', marginLeft: 20 },
+  avatarContainer: { position: 'relative', marginTop: 20 },
+  cameraIcon: { position: 'absolute', bottom: 5, right: 5, backgroundColor: '#00000080', padding: 5, borderRadius: 15 },
   form: { padding: 20 },
   row: { flexDirection: 'row', justifyContent: 'space-between' },
   inputContainer: { marginBottom: 15 },
