@@ -9,16 +9,14 @@ import React, { useState } from "react";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 
 export default function WelcomeUser() {
-  const [searchText, setSearchText] = useState(""); // Lưu nội dung trong TextInput
-  const navigation = useNavigation(); // Sử dụng navigation
+  const [searchText, setSearchText] = useState("");
+  const router = useRouter();
 
   const handleSearch = () => {
-    if (searchText.trim()) {
-      navigation.navigate("SearchResults", { query: searchText }); // Chuyển sang trang khác kèm nội dung
-    }
+    router.push(`/search/search`);
   };
 
   return (
@@ -34,20 +32,13 @@ export default function WelcomeUser() {
           <Ionicons name="notifications" size={25} color="white" />
         </View>
       </View>
+      <TouchableOpacity onPress={handleSearch}>
+        <View style={styles.searchContainer}>
+          <Text style={styles.searchInput}>Tìm kiếm dịch vụ, cửa hàng ...</Text>
 
-      <View style={styles.searchContainer}>
-        {/* <FontAwesome name="search" size={16} color="gray" /> */}
-        <TextInput
-          placeholder="Tìm kiếm dịch vụ, cửa hàng ..."
-          style={styles.searchInput}
-          value={searchText}
-          onChangeText={setSearchText}
-          onSubmitEditing={handleSearch} // Tự động tìm khi nhấn Enter
-        />
-        <TouchableOpacity onPress={handleSearch}>
           <Ionicons name="search" size={20} color="#699BF4" />
-        </TouchableOpacity>
-      </View>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -102,5 +93,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     marginLeft: 5,
+    color: "#888",
   },
 });
