@@ -1,6 +1,6 @@
-import axios from "axios";
 import { Profile } from "@/services/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const BASE_URL_1 = "http://14.225.198.232:8080";
 const BASE_URL_2 = "http://14.225.198.232:8080/api/v1"
@@ -75,7 +75,8 @@ export const getUserAccount = async () => {
 
 // Hàm đăng ký
 export const registerUser = async (
-  userName: string,
+  fullName: string,
+  email: string,
   phoneNumber: string,
   password: string,
   confirmPassword: string,
@@ -88,8 +89,9 @@ export const registerUser = async (
   }
 
   try {
-    const response = await axios.post<Profile>(BASE_URL_1, {
-      userName,
+    const response = await axios.post<Profile>(`${BASE_URL_2}/auth/signup`, {
+      fullName,
+      email,
       phoneNumber,
       password,
       role,

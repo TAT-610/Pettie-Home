@@ -1,23 +1,24 @@
-import {
-  Text,
-  View,
-  StyleSheet,
-  Image,
-  StatusBar,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  ScrollView,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { useState } from "react";
 import { registerUser } from "@/services/user/api";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import logo from "../../assets/images/login.png";
 
 export default function Register() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -28,7 +29,8 @@ export default function Register() {
   const handleRegister = async () => {
     try {
       const user = await registerUser(
-        username,
+        fullName,
+        email,
         phoneNumber,
         password,
         confirmPassword,
@@ -36,7 +38,7 @@ export default function Register() {
         role === "shop" ? bankName : undefined, // Không dùng null
         role === "shop" ? bankAccount : undefined // Không dùng null
       );
-      Alert.alert("Đăng ký thành công", `Chào mừng ${user.userName}`);
+      Alert.alert("Đăng ký thành công", `Chào mừng ${user.fullName}`);
       router.push("/Auths/login");
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Đăng ký thất bại");
@@ -57,9 +59,15 @@ export default function Register() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="UserName"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="FullName"
+          value={fullName}
+          onChangeText={setFullName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
         />
         <TextInput
           style={styles.input}
@@ -137,8 +145,11 @@ export default function Register() {
       </TouchableOpacity>
 
       <Text style={styles.loginText}>
-        Đã có tài khoản! {" "}
-        <Text style={styles.registerLink} onPress={() => router.push("/Auths/login")}>
+        Đã có tài khoản!{" "}
+        <Text
+          style={styles.registerLink}
+          onPress={() => router.push("/Auths/login")}
+        >
           Đăng nhập
         </Text>
       </Text>
