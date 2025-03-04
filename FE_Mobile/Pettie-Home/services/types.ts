@@ -1,6 +1,6 @@
 export interface Profile {
     id: string;
-    fullname: string;
+    fullName: string;
     email: string;
     emailConfirmed: boolean;
     phoneNumber: string; // Thêm kiểu dữ liệu cho phoneNumber
@@ -10,7 +10,7 @@ export interface Profile {
 
 export interface ProfileShop {
     id: string;
-    userName: string;
+    name: string;
     phone: string;
     description: string;
     email: string;
@@ -19,7 +19,7 @@ export interface ProfileShop {
     address: string;
     openingTime: string;
     closingTime: string;
-    image: string;
+    imageUrl: { uri: string; type: string; fileName?: string } | null;
     role: string;
     fullname: string;
     password: string;

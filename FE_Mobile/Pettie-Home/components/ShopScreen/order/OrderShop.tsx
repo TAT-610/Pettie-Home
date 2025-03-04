@@ -8,7 +8,6 @@ const orders = [
     {
         id: "1",
         customerName: "Trần Thị Thanh Thảo",
-        time: "15:00 - 20/10/2024",
         services: [
             { name: "Cắt tỉa lông (Chó/Mèo) < 3kg", quantity: 1 },
             { name: "Tắm và vệ sinh (Chó/Mèo) < 3kg", quantity: 1 },
@@ -22,7 +21,6 @@ const orders = [
     {
         id: "2",
         customerName: "Nguyễn Văn A",
-        time: "10:00 - 21/10/2024",
         services: [
             { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
         ],
@@ -32,7 +30,6 @@ const orders = [
     {
         id: "3",
         customerName: "Nguyễn Văn A",
-        time: "10:00 - 21/10/2024",
         services: [
             { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
         ],
@@ -42,7 +39,6 @@ const orders = [
     {
         id: "4",
         customerName: "Nguyễn Văn A",
-        time: "10:00 - 21/10/2024",
         services: [
             { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
         ],
@@ -52,7 +48,6 @@ const orders = [
     {
         id: "5",
         customerName: "Nguyễn Văn A",
-        time: "10:00 - 21/10/2024",
         services: [
             { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
         ],
@@ -84,7 +79,7 @@ const OrderCard = ({ order, onPress, onToggleExpand, isExpanded }: { order: type
         <TouchableOpacity style={styles.orderCard} onPress={onPress}>
             <View style={styles.buttonorder}>
                 <Text style={styles.orderCustomer}>{order.customerName}</Text>
-                <Text style={styles.orderTime}>{order.time}</Text>
+                <Text style={styles.orderStatus}>{order.status}</Text>
             </View>
 
             <View style={styles.orderServices}>
@@ -282,7 +277,11 @@ const styles = StyleSheet.create({
         marginBottom: 5
     },
     orderCustomer: { fontSize: 16, fontWeight: "medium", color: "#333" },
-    orderTime: { fontSize: 14, color: "#555", marginVertical: 4 },
+    orderStatus: { 
+        fontSize: 14,
+        color: "#ed7c44",
+        marginVertical: 4,
+        fontWeight: "700", },
     orderServices: { marginTop: 8, marginBottom: 5 },
     orderTotal: {
         fontSize: 16,
@@ -291,7 +290,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     orderPrice: {
-        color: '#c12b0d',
+        color: '#ed7c44',
     },
     modalOverlay: {
         flex: 1,

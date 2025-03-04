@@ -18,10 +18,6 @@ const ProfileShop = () => {
 
         setProfile(userData);
         console.log("profile data in ProfileShop", profile);
-
-
-
-
       } catch (error) {
         console.error("Lỗi khi lấy thông tin tài khoản:", error);
       } finally {
@@ -80,7 +76,7 @@ const ProfileShop = () => {
             style={styles.avatar}
           />
           <View>
-            <Text style={styles.shopName}>{profile.fullname}</Text>
+            <Text style={styles.shopName}>{profile.fullName}</Text>
             <View style={styles.ratingContainer}>
               <FontAwesome name="star" size={16} color="#FFD700" />
               <Text style={styles.rating}>{profile.rating || "5.0"}</Text>
