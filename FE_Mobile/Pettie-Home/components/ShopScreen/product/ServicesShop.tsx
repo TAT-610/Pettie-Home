@@ -1,62 +1,62 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { getServicesByShop } from "@/services/shop/apiService";
-import { Profile, Service } from "@/services/types";
+import { Service } from "@/services/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const tabs = ["Dịch vụ chó", "Dịch vụ mèo"];
+const tabs = ["Mèo", "Chó"]; // Cập nhật lại tabs để khớp với dữ liệu API
 
-const ServicesShop = ({ shopId, id }: { shopId: string; id: Profile }) => {
+const ServicesShop = () => {
     const [activeTab, setActiveTab] = useState(tabs[0]);
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-
-    const fetchServices = useCallback(async () => {
-        console.log("start fetch Service");
-    
-        try {
-            setLoading(true);
-            const response = await getServicesByShop();
-            console.log("API response:", response);
-    
-            // Kiểm tra xem API có trả về thành công không
-            if (!response.success || !Array.isArray(response.data)) {
-                throw new Error("Dữ liệu trả về không hợp lệ hoặc không phải danh sách");
-            }
-    
-            // Lấy dữ liệu từ response.data
-            const servicesData = response.data;
-            console.log("Services Data:", servicesData);
-    
-            // Định dạng dữ liệu
-            const formattedServices = servicesData.map((service: Service) => ({
-                id: service.id,
-                name: service.name,
-                price: service.price,
-                description: service.description,
-                status: "Dịch vụ chó", // Cập nhật dựa trên thực tế
-                imageUrl: service.imageUrl || service.imageFileName, // Ưu tiên ảnh từ imageUrl trước
-            }));
-    
-            setServices(formattedServices);
-            console.log("Formatted Services:", formattedServices);
-        } catch (error : any) {
-            console.error("Lỗi khi tải danh sách dịch vụ:", error);
-            Alert.alert("Lỗi", error.message || "Không thể tải danh sách dịch vụ.");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    const [shopId, setShopId] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchServices();
+        const fetchShopId = async () => {
+            const id = await AsyncStorage.getItem("shopId");
+            if (id) {
+                setShopId(id);
+            } else {
+                console.error("❌ Không tìm thấy shopId trong AsyncStorage");
+            }
+        };
+        fetchShopId();
     }, []);
 
+    useFocusEffect(
+            useCallback(() => {
+        if (!shopId) return;
+
+                const fetchServices = async () => {
+                    try {
+                        setLoading(true); // Bắt đầu loading
+                        const serviceData = await getServicesByShop(shopId, 1, 100);
+                        const formattedServices = serviceData.map((service: any) => ({
+                            id: service.id,
+                            name: service.name,
+                            price: service.price,
+                            status: "Mèo",
+                            imageUrl: service.imageUrl || service.imageFileName,
+                        }));
+                        setServices(formattedServices);
+                        console.log("data service:", formattedServices);
+                    } catch (error) {
+                        console.error("Lỗi khi lấy dich vu:", error);
+                    }
+                };
+    
+                fetchServices();
+            }, [shopId])
+        );
+
     const filteredServices = useMemo(() =>
-        services.filter(service => service.status === activeTab),
-        [services, activeTab]);
+        Array.isArray(services) ? services.filter(service => service.status === activeTab) : [],
+        [services, activeTab]
+    );
 
     const handleAddService = useCallback(() => {
         router.push(`/ServiceShop/addservice`);
@@ -101,13 +101,13 @@ const ServicesShop = ({ shopId, id }: { shopId: string; id: Profile }) => {
                         renderItem={({ item }) => (
                             <View style={styles.card}>
                                 <Image
-                                    source={{ uri: item.imageUrl ? `https://pettiehome.online/web/${item.imageUrl}` : 'default-image-url.jpg' }}
+                                    source={{ uri: item.image ? `https://pettiehome.online/web/${item.image}` : 'https://via.placeholder.com/80' }}
                                     style={styles.image}
                                 />
                                 <View style={styles.details}>
                                     <Text style={styles.name}>{item.name}</Text>
                                     <Text style={styles.price}>Giá: {item.price}.000đ</Text>
-                                    <Text style={styles.description}>{item.description}</Text>
+                                    <Text numberOfLines={2} style={styles.description}>{item.description}</Text>
                                 </View>
                                 <TouchableOpacity
                                     style={styles.actionButton}
@@ -116,6 +116,11 @@ const ServicesShop = ({ shopId, id }: { shopId: string; id: Profile }) => {
                                     <AntDesign name="edit" size={20} color="white" />
                                 </TouchableOpacity>
                             </View>
+                        )}
+                        ListEmptyComponent={() => (
+                            <Text style={{ textAlign: "center", marginTop: 20, color: "#999" }}>
+                                Không có dịch vụ nào được tìm thấy.
+                            </Text>
                         )}
                     />
                 </View>

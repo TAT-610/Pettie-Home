@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { getShopById, getUserAccount, updateShopById } from '@/services/shop/apiprofile';
+import { getShopAccount, getUserAccount, updateShopById } from '@/services/shop/apiprofile';
 import { ProfileShop } from '@/services/types';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -11,76 +11,92 @@ const EditProfileShop = () => {
   console.log("Id Shop in EditProfileShop", id);
 
   const router = useRouter();
-  const [profile, setProfile] = useState<ProfileShop | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [shopId, setShopId] = useState<string | null>(null);
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
+  const [profile, setProfile] = useState<{
+    name: string;
+    phone: string;
+    description: string;
+    email: string;
+    address: string;
+    openingTime: string;
+    closingTime: string;
+    imageUrl: { uri: string; type: string; fileName?: string } | null;
+  }>({
+    phone: "",
+    name: "",
+    email: "",
+    openingTime: "",
+    imageUrl: null,
+    address: "",
+    description: "",
+    closingTime: "",
+  });
 
- useEffect(() => {
-  const fetchData = async () => {
-    setLoading(true);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const user = await getUserAccount();
+        console.log("User Data:", user);
+        if (!user?.data?.id) {
+          throw new Error(`Không tìm thấy ID người dùng, dữ liệu nhận được: ${JSON.stringify(user)}`);
+        }
+
+        const shopData = await getShopAccount();
+        if (!shopData || !shopData.id) {
+          throw new Error(`Không tìm thấy dữ liệu shop, dữ liệu nhận được: ${JSON.stringify(shopData)}`);
+        }
+        setProfile(shopData);
+        setShopId(shopData.id);
+      } catch (error) {
+        console.error("Fetch Data Error:", error);
+        Alert.alert("Lỗi", "Không thể tải dữ liệu hồ sơ.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+
+  const handleSave = async () => {
     try {
-      const user = await getUserAccount();
-      console.log("User Data:", user);
-      if (!user?.data?.id) {
-        throw new Error(`Không tìm thấy ID người dùng, dữ liệu nhận được: ${JSON.stringify(user)}`);
-      }
-
-      const shopData = await getShopById();
-      if (!shopData || !shopData.id) {
-        throw new Error(`Không tìm thấy dữ liệu shop, dữ liệu nhận được: ${JSON.stringify(shopData)}`);
-      }
-      setProfile(shopData);
-      setShopId(shopData.id);
+      await updateShopById(profile);
+      Alert.alert("Thành công", "Profile đã được cập nhật.");
+      router.replace("/homeShop");
     } catch (error) {
-      console.error("Fetch Data Error:", error);
-      Alert.alert("Lỗi","Không thể tải dữ liệu hồ sơ.");
-    } finally {
-      setLoading(false);
+      Alert.alert("Lỗi", "Cập nhật profile thất bại.");
     }
   };
 
-  fetchData();
-}, []);
+  const handlePickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Lỗi", "Bạn cần cấp quyền để chọn ảnh!");
+      return;
+    }
 
-
-const handleSave = async () => {
-  if (!shopId || !profile) {
-    Alert.alert("Lỗi", "Dữ liệu không hợp lệ.");
-    return;
-  }
-
-  try {
-    const updatedProfile = await updateShopById(shopId, {
-      ...profile, // Gửi toàn bộ dữ liệu profile
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
     });
-    setProfile(updatedProfile);
-    setIsSuccessModalVisible(true);
-    setTimeout(() => setIsSuccessModalVisible(false), 2000);
-    router.push(`/homeShop`); // Điều hướng về trang Profile
-  } catch (error) {
-    Alert.alert("Lỗi", "Cập nhật hồ sơ thất bại.");
-  }
-};
 
-const handlePickImage = async () => {
-  const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!permissionResult.granted) {
-    Alert.alert("Quyền bị từ chối", "Bạn cần cấp quyền truy cập thư viện ảnh.");
-    return;
-  }
-
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: [ImagePicker.MediaType.IMAGE], // Cập nhật API mới
-    allowsEditing: true,
-    aspect: [1, 1],
-    quality: 0.8,
-  });
-
-  // if (!result.canceled && result.assets?.length > 0) {
-  //   setProfile((prev) => (prev ? { ...prev, imageUrl: result.assets[0].uri } : prev));
-  // }
-};
+    if (!result.canceled) {
+      setProfile((prev) => ({
+        ...prev,
+        image: {
+          uri: result.assets[0].uri,
+          type: "image/jpeg",
+          fileName: result.assets[0].fileName || "upload.jpg",
+        },
+      }));
+    }
+  };
 
 
   return (
@@ -91,10 +107,11 @@ const handlePickImage = async () => {
           <Text style={styles.title}>Chỉnh sửa hồ sơ</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handlePickImage} style={styles.avatarContainer}>
-          {/* <Image
-            source={{ uri: profile?.imageUrl || 'https://via.placeholder.com/150' }}
-            style={styles.avatar}
-          /> */}
+          {profile?.imageUrl ? (
+            <Image source={{ uri: profile.imageUrl ? `https://pettiehome.online/web/${profile.imageUrl}` : 'default-image-url.jpg' }} style={styles.imagePreview} />
+          ) : (
+            <Text>Chọn ảnh</Text>
+          )}
           <AntDesign name="camera" size={24} color="white" style={styles.cameraIcon} />
         </TouchableOpacity>
       </View>
@@ -211,6 +228,8 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 18, fontWeight: 'bold', marginLeft: 20 },
   avatarContainer: { position: 'relative', marginTop: 20 },
+  imagePreview: { width: 100, height: 100, alignSelf: "center", marginBottom: 10 },
+
   cameraIcon: { position: 'absolute', bottom: 5, right: 5, backgroundColor: '#00000080', padding: 5, borderRadius: 15 },
   form: { padding: 20 },
   row: { flexDirection: 'row', justifyContent: 'space-between' },

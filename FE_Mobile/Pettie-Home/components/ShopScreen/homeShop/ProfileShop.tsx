@@ -3,8 +3,8 @@ import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { getUserAccount } from '../../../services/user/api';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Profile } from '@/services/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getShopAccount } from '@/services/shop/apiprofile';
 
 const ProfileShop = () => {
   const router = useRouter();
@@ -14,9 +14,9 @@ const ProfileShop = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const userData = await getUserAccount();
+        const shopData = await getShopAccount();
 
-        setProfile(userData);
+        setProfile(shopData);
         console.log("profile data in ProfileShop", profile);
       } catch (error) {
         console.error("Lỗi khi lấy thông tin tài khoản:", error);
@@ -72,7 +72,7 @@ const ProfileShop = () => {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Image
-            source={{ uri: profile.image || 'https://example.com/default-avatar.png' }}
+            source={{ uri: profile.imageUrl ? `https://pettiehome.online/web/${profile.imageUrl}` : 'default-image-url.jpg' }}
             style={styles.avatar}
           />
           <View>

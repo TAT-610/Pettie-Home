@@ -15,7 +15,6 @@ export interface ProfileShop {
     description: string;
     email: string;
     rating: string;
-    birthDate: string;
     address: string;
     openingTime: string;
     closingTime: string;
@@ -42,8 +41,9 @@ export interface Service {
     name: string;
     price: string;
     status: string;
-    imageUrl: { uri: string; type: string; fileName?: string } | null;
+    image: { uri: string; type: string; fileName?: string } | null;
     imageFileName: string;
     description: string;
+    categoryId: string;
 }
 

@@ -2,15 +2,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView, FlatList } from "react-native";
 import { useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
-import { createProduct, getAllCategories } from "@/services/shop/apiproduct";
+import { createProduct } from "@/services/shop/apiproduct";
 import * as ImagePicker from "expo-image-picker";
-import DropDownPicker from "react-native-dropdown-picker";
 
 export default function AddProduct() {
     const router = useRouter();
 
     const [product, setProduct] = useState<{
-        categoryId: string;
         name: string;
         price: string;
         stock: string;
@@ -19,7 +17,6 @@ export default function AddProduct() {
         brand: string;
         description: string;
     }>({
-        categoryId: "",
         name: "",
         price: "",
         stock: "",
@@ -28,22 +25,6 @@ export default function AddProduct() {
         brand: "",
         description: "",
     });
-
-    const [open, setOpen] = useState(false);
-    const [category, setCategory] = useState<string | null>(null);
-    const [categories, setCategories] = useState<{ label: string; value: string }[]>([]);
-
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const data = await getAllCategories();
-                setCategories(data.map((cat) => ({ label: cat.name, value: cat.id })));
-            } catch (error) {
-                console.error("Lỗi lấy danh mục:", error);
-            }
-        };
-        fetchCategories();
-    }, []);
 
     const handleChange = useCallback(
         (field: keyof typeof product, value: string | number) => {
@@ -83,15 +64,13 @@ export default function AddProduct() {
     };
 
     const handleAddProduct = async () => {
-        if (!product.name || !product.categoryId) {
+        if (!product.name) {
             Alert.alert("Lỗi", "Vui lòng nhập tên sản phẩm và chọn danh mục!");
             return;
         }
     
         try {
             let formData = new FormData();
-    
-            formData.append("categoryId", product.categoryId);
             formData.append("name", product.name);
             formData.append("price", product.price);
             formData.append("stock", product.stock);
@@ -142,23 +121,6 @@ export default function AddProduct() {
                             value={product.name}
                             onChangeText={(text) => handleChange("name", text)}
                         />
-                        <View style={{ zIndex: 1000, marginBottom: 17 }}>
-                            <DropDownPicker
-                                open={open}
-                                value={category}
-                                items={categories}
-                                setOpen={setOpen}
-                                setValue={setCategory}
-                                setItems={setCategories}
-                                placeholder="Chọn danh mục"
-                                onChangeValue={(val) => {
-                                    if (val) {
-                                        setCategory(val);
-                                        setProduct((prev) => ({ ...prev, categoryId: val })); // Cập nhật categoryId
-                                    }
-                                }}
-                            />
-                        </View>
                         <TextInput
                             style={styles.input}
                             placeholder="Thương hiệu sản phẩm"

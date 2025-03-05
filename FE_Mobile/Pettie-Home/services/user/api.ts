@@ -1,3 +1,4 @@
+import { getShopAccount } from "@/services/shop/apiprofile";
 import { Profile } from "@/services/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -33,12 +34,14 @@ export const loginUser = async (username: string, password: string): Promise<any
     
     // gọi hàm getUserAccount để lấy thông tin user
     const userData = await getUserAccount();
+    const shopData = await getShopAccount();
     
     console.log("API Response :", response.data);
     return { 
       access_token, 
       id_token, 
-      userData 
+      userData,
+      shopData 
     };
   } catch (error) {
     console.error("Lỗi đăng nhập:", error);

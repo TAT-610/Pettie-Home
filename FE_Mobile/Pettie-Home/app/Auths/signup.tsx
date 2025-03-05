@@ -59,7 +59,7 @@ export default function Register() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="FullName"
+          placeholder="Họ và tên"
           value={fullName}
           onChangeText={setFullName}
         />

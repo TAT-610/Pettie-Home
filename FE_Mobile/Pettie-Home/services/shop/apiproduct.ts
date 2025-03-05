@@ -4,7 +4,7 @@ import { Products } from "@/services/types";
 
 const BASE_URL_2 = "http://14.225.198.232:8080/api/v1";
 
-export const getProductsByShop = async (pageNumber = 1, pageSize = 10) => {
+export const getProductsByShop = async (pageNumber = 1, pageSize = 100) => {
   try {
       const access_token = await AsyncStorage.getItem("access_token");
       if (!access_token) {
@@ -49,7 +49,6 @@ export const createProduct = async (productData: Partial<Products>): Promise<any
       formData.append("name", productData.name || "");
       formData.append("price", productData.price?.toString() || "0");
       formData.append("stock", productData.stock?.toString() || "0");
-      formData.append("categoryId", productData.categoryId || "");
       formData.append("brand", productData.brand || "");
       formData.append("description", productData.description || "");
       formData.append("expiry", productData.expiry || "");

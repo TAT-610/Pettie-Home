@@ -26,7 +26,7 @@ export default function ProductShop({ shopId, id }: { shopId: string; id: Profil
         useCallback(() => {
             const fetchProducts = async () => {
                 try {
-                    const productData = await getProductsByShop(1, 10);
+                    const productData = await getProductsByShop(1, 100);
                     const formattedProducts = productData.map((product: any) => ({
                         id: product.id,
                         name: product.name,

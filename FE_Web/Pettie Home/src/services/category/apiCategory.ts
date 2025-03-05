@@ -21,18 +21,25 @@ export const getAllCategories = async (): Promise<any[]> => {
 };
 
 // Thêm danh mục mới
-export const addCategory = async (category: { name: string; description: string}): Promise<any> => {
+export const addCategory = async (category: { name: string; description: string }): Promise<any> => {
   const accessToken = localStorage.getItem("access_token");
   if (!accessToken) throw new Error("Chưa có access_token");
 
   try {
-    console.log("Gửi request tạo danh mục:", category);
-    const response = await axios.post(`${BASE_URL}/categories`, category, {
+    // Tạo tên danh mục mới để tránh trùng
+    const uniqueName = `${category.name} (${new Date().getTime()})`;
+
+    console.log("Gửi request tạo danh mục:", uniqueName);
+    const response = await axios.post(`${BASE_URL}/categories`, { 
+      name: uniqueName, 
+      description: category.description 
+    }, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
     });
+
     console.log("Phản hồi từ server:", response.data);
     return response.data;
   } catch (error: any) {
@@ -40,6 +47,7 @@ export const addCategory = async (category: { name: string; description: string}
     throw error;
   }
 };
+
   
 
 // Lấy danh mục theo ID
