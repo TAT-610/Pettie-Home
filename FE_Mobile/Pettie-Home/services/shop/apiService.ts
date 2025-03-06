@@ -64,7 +64,7 @@ export const createServices = async (serviceData: Partial<Service>): Promise<any
 
     console.log("FormData Sent:", formData);
 
-    const response = await axios.post(`${BASE_URL_2}/products`, formData, {
+    const response = await axios.post(`${BASE_URL_2}/shop-services`, formData, {
         headers: {
             Authorization: `Bearer ${access_token}`,
             "Content-Type": "multipart/form-data",

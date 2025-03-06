@@ -91,7 +91,7 @@ export default function AddService() {
     
             // Kiểm tra nếu có hình ảnh thì thêm vào FormData
             if (service.image) {
-                formData.append("image", {
+                formData.append("imageUrl", {
                     uri: service.image.uri,
                     name: service.image.fileName,
                     type: service.image.type,

@@ -46,6 +46,8 @@ const ServicesShop = () => {
                         console.log("data service:", formattedServices);
                     } catch (error) {
                         console.error("Lỗi khi lấy dich vu:", error);
+                    } finally {
+                        setLoading(false)
                     }
                 };
     
@@ -101,7 +103,7 @@ const ServicesShop = () => {
                         renderItem={({ item }) => (
                             <View style={styles.card}>
                                 <Image
-                                    source={{ uri: item.image ? `https://pettiehome.online/web/${item.image}` : 'https://via.placeholder.com/80' }}
+                                    source={{ uri: item.imageUrl ? `https://pettiehome.online/web/${item.imageUrl}` : 'https://via.placeholder.com/80' }}
                                     style={styles.image}
                                 />
                                 <View style={styles.details}>
