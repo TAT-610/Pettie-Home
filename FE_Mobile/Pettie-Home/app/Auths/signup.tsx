@@ -1,4 +1,4 @@
-import { registerUser } from "@/services/user/api";
+import { registerUser } from "@/services/user/auth";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import logo from "../../assets/images/login.png";
+import { emailOtpGeneration } from "@/services/user/auth";
 
 export default function Register() {
   const router = useRouter();
@@ -28,20 +29,25 @@ export default function Register() {
 
   const handleRegister = async () => {
     try {
-      const user = await registerUser(
-        fullName,
-        email,
-        phoneNumber,
-        password,
-        confirmPassword,
-        role,
-        role === "shop" ? bankName : undefined, // Không dùng null
-        role === "shop" ? bankAccount : undefined // Không dùng null
-      );
-      Alert.alert("Đăng ký thành công", `Chào mừng ${user.fullName}`);
-      router.push("/Auths/login");
+      // Gửi yêu cầu OTP với isSignUp: true
+      await emailOtpGeneration({ email, isSignUp: true });
+  
+      // Chuyển hướng đến trang xác nhận OTP và truyền thông tin qua params
+      router.push({
+        pathname: "/Auths/confirm",
+        params: {
+          fullName,
+          email,
+          phoneNumber,
+          password,
+          confirmPassword,
+          role,
+          bankName: role === "shop" ? bankName : undefined,
+          bankAccount: role === "shop" ? bankAccount : undefined,
+        },
+      });
     } catch (error: any) {
-      Alert.alert("Lỗi", error.message || "Đăng ký thất bại");
+      Alert.alert("Lỗi", error.message || "Gửi OTP thất bại");
     }
   };
 

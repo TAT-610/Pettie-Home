@@ -47,3 +47,13 @@ export interface Service {
     categoryId: string;
 }
 
+export interface GenerateEmailOTPRequest {
+    email: string, //($email && minLength: 1)
+    isSignUp: boolean,
+}
+
+export interface VerifyEmailOTPRequest {
+    email: string, //($email && minLength: 1)
+    otp: string, //( minLength: 1 ^\6$)
+    isSignUp: boolean,
+}

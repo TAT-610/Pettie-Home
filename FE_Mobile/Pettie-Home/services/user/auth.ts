@@ -1,5 +1,5 @@
 import { getShopAccount } from "@/services/shop/apiprofile";
-import { Profile } from "@/services/types";
+import { GenerateEmailOTPRequest, Profile, VerifyEmailOTPRequest } from "@/services/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
@@ -106,5 +106,43 @@ export const registerUser = async (
   } catch (error) {
     console.error("Lỗi đăng ký:", error);
     throw error;
+  }
+};
+
+//confirm OTP
+export const emailOtpGeneration = async (request: GenerateEmailOTPRequest) => {
+  try {
+    console.log("Gửi yêu cầu OTP:", request);
+    const response = await axios.post(`${BASE_URL_2}/auth/confirm-email`, {
+      email: request.email, // Email của người dùng
+      isSignUp: request.isSignUp, // Có phải là yêu cầu đăng ký không
+      otp: 0,
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Lỗi gửi OTP:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Gửi OTP thất bại.");
+  }
+};
+
+// Xác minh OTP email
+export const verifyEmailOtp = async (request: VerifyEmailOTPRequest) => {
+  try {
+    console.log("Gửi yêu cầu xác minh OTP:", request);
+    const response = await axios.post(`${BASE_URL_2}/auth/otp/resend`, {
+      otp: parseInt(request.otp, 10), // Chuyển đổi otp thành số nguyên
+      request: {
+        email: request.email, // Email của người dùng
+        isSignUp: request.isSignUp, // Có phải là yêu cầu đăng ký không
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error("Lỗi xác minh OTP:", error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || "Xác minh OTP thất bại.");
   }
 };

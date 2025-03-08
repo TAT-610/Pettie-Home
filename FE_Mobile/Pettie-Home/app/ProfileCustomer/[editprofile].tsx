@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert, Modal } from 'react-native';
 import { router, useLocalSearchParams, useRouter } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { getProfileById, updateProfile } from '../../services/user/api';
+import { getProfileById, updateProfile } from '../../services/user/auth';
 
 const EditProfile = () => {
   // State lưu thông tin hồ sơ
