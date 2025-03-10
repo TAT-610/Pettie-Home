@@ -1,47 +1,103 @@
-import {
-  Text,
-  View,
-  StyleSheet,
-  Image,
-  StatusBar,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-  ScrollView,
-} from "react-native";
+
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { registerUser } from "@/services/user/api";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import logo from "../../assets/images/login.png";
+import { resendOtp, signUpShop, signUpUser } from "@/services/user/auth";
+import { ResendOtpType } from "@/services/types";
+
 
 export default function Register() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [shopName, setShopName] = useState("");
+  const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [address, setAddress] = useState("");
   const [role, setRole] = useState<"user" | "shop">("user"); // State lưu vai trò
   const [bankName, setBankName] = useState(""); // Tên ngân hàng
-  const [bankAccount, setBankAccount] = useState(""); // Số tài khoản ngân hàng
+  const [bankAccountNumber, setBankAccountNumber] = useState(""); // Số tài khoản ngân hàng
+  const [bankAccountName, setBankAccountName] = useState("");
 
-  const handleRegister = async () => {
+  const handleSignUpUser = async () => {
     try {
-      const user = await registerUser(
-        username,
-        phoneNumber,
-        password,
-        confirmPassword,
-        role,
-        role === "shop" ? bankName : undefined, // Không dùng null
-        role === "shop" ? bankAccount : undefined // Không dùng null
-      );
-      Alert.alert("Đăng ký thành công", `Chào mừng ${user.userName}`);
-      router.push("/Auths/login");
+      if (!email || !password || !confirmPassword || !fullName || !phoneNumber) {
+        Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin.");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        Alert.alert("Lỗi", "Mật khẩu xác nhận không khớp.");
+        return;
+      }
+
+      let requestData;
+
+      if (role === "user") {
+        requestData = {
+          fullName,
+          email,
+          phoneNumber,
+          password,
+        };
+        const response = await signUpUser(requestData);
+
+        if ("error" in response && response.error === "EmailNotVerified") {
+          console.log("Gửi lại OTP do email chưa xác thực...");
+          await resendOtp({ email, type: ResendOtpType.ConfirmEmail });
+          Alert.alert("Mã OTP đã được gửi lại", "Vui lòng kiểm tra email của bạn.");
+          router.push(`/Auths/confirm?email=${encodeURIComponent(email)}`);
+          return;
+        }
+      } else {
+        if (!shopName || !address || !bankName || !bankAccountNumber || !bankAccountName) {
+          Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin cửa hàng.");
+          return;
+        }
+
+        requestData = {
+          email,
+          password,
+          shopName,
+          phone: phoneNumber,
+          address,
+          bankAccountNumber,
+          bankName,
+          bankAccountName,
+        };
+
+        const response = await signUpShop(requestData);
+
+        if ("error" in response && response.error === "EmailNotVerified") {
+          console.log("Gửi lại OTP cho Shop...");
+          await resendOtp({ email, type: ResendOtpType.ConfirmEmail });
+          Alert.alert("Mã OTP đã được gửi lại", "Vui lòng kiểm tra email của bạn.");
+          router.push(`/Auths/confirm?email=${encodeURIComponent(email)}`);
+          return;
+        }
+      }
+
+      Alert.alert("Tiếp theo", "Tiếp tục xác thực OTP");
+      router.push(`/Auths/confirm?email=${encodeURIComponent(email)}`);
     } catch (error: any) {
-      Alert.alert("Lỗi", error.message || "Đăng ký thất bại");
+      console.error("Error signing up:", error);
+      Alert.alert("Lỗi", "Có lỗi xảy ra, vui lòng thử lại.");
     }
   };
+
 
   return (
     <ScrollView
@@ -57,9 +113,15 @@ export default function Register() {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="UserName"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="Họ và tên"
+          value={fullName}
+          onChangeText={setFullName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
         />
         <TextInput
           style={styles.input}
@@ -88,6 +150,18 @@ export default function Register() {
           <>
             <TextInput
               style={styles.input}
+              placeholder="Tên cửa hàng"
+              value={shopName}
+              onChangeText={setShopName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Địa chỉ cửa hàng"
+              value={address}
+              onChangeText={setAddress}
+            />
+            <TextInput
+              style={styles.input}
               placeholder="Tên ngân hàng"
               value={bankName}
               onChangeText={setBankName}
@@ -96,11 +170,18 @@ export default function Register() {
               style={styles.input}
               placeholder="Số tài khoản ngân hàng"
               keyboardType="numeric"
-              value={bankAccount}
-              onChangeText={setBankAccount}
+              value={bankAccountNumber}
+              onChangeText={setBankAccountNumber}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Tên chủ tài khoản"
+              value={bankAccountName}
+              onChangeText={setBankAccountName}
             />
           </>
         )}
+
       </View>
 
       {/* Chọn vai trò bằng Ionicons */}
@@ -132,13 +213,16 @@ export default function Register() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+      <TouchableOpacity style={styles.registerButton} onPress={handleSignUpUser}>
         <Text style={styles.registerText}>Đăng ký</Text>
       </TouchableOpacity>
 
       <Text style={styles.loginText}>
-        Đã có tài khoản! {" "}
-        <Text style={styles.registerLink} onPress={() => router.push("/Auths/login")}>
+        Đã có tài khoản!{" "}
+        <Text
+          style={styles.registerLink}
+          onPress={() => router.push("/Auths/login")}
+        >
           Đăng nhập
         </Text>
       </Text>

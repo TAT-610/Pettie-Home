@@ -1,99 +1,151 @@
-import React, { useState, useEffect } from "react";
-import { View, TextInput, Button, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, TextInput, Button, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
+import { editServiceById, getServiceById } from "@/services/shop/apiService";
+import * as ImagePicker from "expo-image-picker";
 
-// Define the type for service
-type Service = {
-  serviceId: string;
-  name: string;
-  price: number;
-  quantity: number;
-  status: string;
-  image: string;
-  expiry: string;
-  description: string;
-};
-
-export default function EditService  ()  {
+export default function EditService() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-
-  // Mock data for services (replace with real data)
-  const servicesMock: Service[] = [
-    {
-      serviceId: "1",
-      name: "Dịch vụ cắt tỉa cho chó",
-      price: 500000,
-      quantity: 5,
-      status: "Đang hoạt động",
-      image: "https://i.pinimg.com/736x/7d/d8/80/7dd8806961628e384c8400a3a130d305.jpg",
-      expiry: "2025-12-31",
-      description: "Dịch vụ cắt tỉa cho chó chất lượng cao.",
-    },
-  ];
-
-  // Find the service by ID
-  const serviceToEdit = servicesMock.find((service) => service.serviceId === id);
-  const [service, setService] = useState<Service | null>(serviceToEdit || null);
-
-  const [name, setName] = useState(service ? service.name : "");
-  const [price, setPrice] = useState(service ? service.price.toString() : "");
-  const [quantity, setQuantity] = useState(service ? service.quantity.toString() : "");
-  const [expiry, setExpiry] = useState(service ? service.expiry : "");
-  const [image, setImage] = useState(service ? service.image : "");
-    const [desciption, setDescription] = useState(service ? service.description : "");
+  const [service, setService] = useState<{
+    id?: string;
+    name: string;
+    price: string;
+    image: { uri: string; type: string; fileName: string } | null;
+    description: string;
+  }>({
+    id: "",
+    name: "",
+    price: "",
+    image: null,
+    description: "",
+  });
 
   useEffect(() => {
-    if (service) {
-      setName(service.name);
-      setPrice(service.price.toString());
-      setQuantity(service.quantity.toString());
-      setExpiry(service.expiry);
-      setImage(service.image);
-      setDescription(service.description);
+    if (id) {
+      fetchService();
     }
-  }, [service]);
+  }, [id]);
 
-  const handleSave = () => {
-    router.push("/"); // Navigate to the homepage or service list
+  const fetchService = async () => {
+    try {
+      const serviceData = await getServiceById(id as string);
+      if (!serviceData) {
+        Alert.alert("Lỗi", "Không tìm thấy sản phẩm.");
+        return;
+      }
+      setService({
+        id: serviceData.id || "",
+        name: serviceData.name || "",
+        price: serviceData.price ? serviceData.price.toString() : "",
+        image: serviceData.imageUrl
+          ? {
+            uri: serviceData.imageUrl.uri,
+            type: serviceData.imageUrl.type || "image/jpeg", // Giá trị mặc định
+            fileName: serviceData.imageUrl.fileName || "default.jpg", // Giá trị mặc định
+          }
+          : null,
+        description: serviceData.description || "",
+      });
+    } catch (error) {
+      Alert.alert("Lỗi", "Không thể tải thông tin dich vu.");
+    }
+  };
+
+  const handleChange = useCallback(
+      (field: keyof typeof service, value: string | number) => {
+        setService((prev) => ({
+          ...prev,
+          [field]: field === "price" ? parseFloat(value as string) || 0 : value,
+        }));
+      },
+      []
+    );
+
+  // Handle image selection
+  const pickImage = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Lỗi", "Bạn cần cấp quyền để chọn ảnh!");
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setService((prev) => ({
+        ...prev,
+        image: {
+          uri: result.assets[0].uri,
+          type: "image/jpeg",
+          fileName: result.assets[0].fileName || "upload.jpg",
+        },
+      }));
+    }
+  };
+
+  // Handle product update
+  const handleUpdateServicet = async () => {
+    if (!service.name || !service.price) {
+      Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin dich vu.");
+      return;
+    }
+
+    try {
+      await editServiceById(id as string, service);
+      Alert.alert("Thành công", "Dich vu đã được cập nhật.");
+      router.replace("/services");
+    } catch (error) {
+      Alert.alert("Lỗi", "Cập nhật dich vu thất bại.");
+    }
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
       <View style={styles.headerContainer}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <AntDesign name="left" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.header}>Chỉnh sửa dịch vụ</Text>
       </View>
-      <View style={{ backgroundColor: "#fff", paddingTop: 20, padding: 10, margin: 8 }}>
-        {service ? (
-          <>
-            {image ? <Image source={{ uri: image }} style={styles.image} /> : null}
-            <Text style={styles.label}>URL Ảnh:</Text>
-            <TextInput style={styles.input} value={image} onChangeText={setImage} />
-            <Text style={styles.label}>Tên dịch vụ:</Text>
-            <TextInput style={styles.input} value={name} onChangeText={setName} />
-            <Text style={styles.label}>Mô tả: </Text>
-            <TextInput style={styles.input} value={desciption} onChangeText={setDescription} />
-            <Text style={styles.label}>Giá:</Text>
-            <TextInput style={styles.input} value={price} onChangeText={setPrice} keyboardType="numeric" />
-            <Text style={styles.label}>Số lượng:</Text>
-            <TextInput style={styles.input} value={quantity} onChangeText={setQuantity} keyboardType="numeric" />
-            <Text style={styles.label}>Hạn sử dụng:</Text>
-            <TextInput style={styles.input} value={expiry} onChangeText={setExpiry} />
-          </>
-        ) : (
-          <Text style={styles.errorText}>Không tìm thấy dịch vụ</Text>
-        )}
+      <View style={styles.card}>
+        <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+          {service.image?.uri ? (
+            <Image source={{ uri: service.image.uri }} style={styles.imagePreview} />
+          ) : (
+            <Text>Chọn ảnh</Text>
+          )}
+        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          placeholder="Tên dịch vụ"
+          value={service.name}
+          onChangeText={(text) => handleChange("name", text)} // ✅ Đúng
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Giá dịch vụ VND"
+          keyboardType="numeric"
+          value={service.price}
+          onChangeText={(text) => handleChange("price", text)} // ✅ Đúng
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Chi tiết dịch vụ"
+          value={service.description}
+          onChangeText={(text) => handleChange("description", text)} // ✅ Đúng
+        />
+
+        <TouchableOpacity style={styles.addButton} onPress={handleUpdateServicet}>
+          <Text style={styles.buttonText}>Chỉnh sửa dịch vụ</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleSave}>
-        <Text style={styles.buttonText}>Lưu</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.cancelButton} onPress={() => router.push("/")}>
-        <Text style={styles.buttonTextCancel}>Hủy</Text>
-      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -103,58 +155,47 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 20,
     backgroundColor: "#699BF4",
     padding: 10,
     paddingBottom: 30,
     paddingTop: 30,
   },
-  backButton: {
-    marginRight: 10,
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  label: { fontSize: 16, fontWeight: "bold", marginBottom: 5, color: "#333" },
+  backButton: { marginRight: 10 },
+  header: { fontSize: 22, fontWeight: "bold", color: "#fff" },
+  card: { backgroundColor: "#fff", padding: 20, marginBottom: 20, margin: 5 },
+  imagePreview: { width: 100, height: 100, alignSelf: "center", marginBottom: 10 },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#ddd",
+    padding: 12,
     borderRadius: 8,
-    padding: 10,
+    marginBottom: 15,
     backgroundColor: "#fff",
-    marginBottom: 10,
   },
-  image: { width: 100, height: 100, marginBottom: 10, borderRadius: 10 },
-  button: {
+  dropdown: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, backgroundColor: "#fff" },
+  priceContainer: { flexDirection: "row", justifyContent: "space-between" },
+  halfInput: { width: "48%" },
+  addButton: {
     backgroundColor: "#ed7c44",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
-    shadowColor: "#699BF4",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
     margin: 5,
-  },
-  cancelButton: {
-    backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 10,
-    margin: 5,
-    borderColor: "#ed7c44",
-    borderWidth: 2,
   },
   buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  buttonTextCancel: {
-    color: "#ed7c44",
-    fontWeight: "bold",
-    fontSize: 16,
+  imagePicker: {
+    width: 100,
+    height: 100,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 8,
+    backgroundColor: "#f0f0f0",
+    alignSelf: "center",
+    marginBottom: 10,
   },
-  errorText: { color: "red", fontSize: 16, textAlign: "center" },
 });
 
 

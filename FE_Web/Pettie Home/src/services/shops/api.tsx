@@ -3,19 +3,19 @@ import axios from "axios";
 const BASE_URL = "http://14.225.198.232:8080/api/v1";
 
 // Lấy danh sách danh mục
-export const getAllCategories = async (): Promise<any[]> => {
+export const getAllShops = async (): Promise<any[]> => {
   const accessToken = localStorage.getItem("access_token");
   if (!accessToken) throw new Error("Chưa có access_token");
 
   try {
-    const response = await axios.get(`${BASE_URL}/categories`, {
+    const response = await axios.get(`${BASE_URL}/shops/admin`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
     return response.data.data.items || [];
   } catch (error) {
-    console.error("Lỗi lấy danh mục:", error);
+    console.error("Lỗi lấy danh sach Shop:", error);
     return [];
   }
 };

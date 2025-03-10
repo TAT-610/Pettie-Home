@@ -31,14 +31,15 @@ const orderDetails = {
       name: "Cắt tỉa lông (Chó/Mèo) <3kg ",
       price: 420000,
       quantity: 1,
-      image: "",
+      image: "https://i.pinimg.com/736x/f7/0d/69/f70d69556578090929bc1e99da269d9f.jpg",
     },
     {
       id: "2",
-      name: "Tạo hình đặc biệt (Theo yêu cầu) ",
       price: 120000,
       quantity: 3,
-      image: "",
+      name: "Combo Spa1: Tắm + Tỉa gọn lông cho mèo",
+      image:
+        "https://i.pinimg.com/736x/cd/cb/6b/cdcb6b1df06746d5802c8baede2b7b49.jpg",
     },
     {
       id: "3",
@@ -82,18 +83,18 @@ export default function OrderDetails() {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.headerContainer}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
           <AntDesign name="left" size={24} color="#fff" />
+          <Text style={styles.header}>Thông tin đơn hàng</Text>
         </TouchableOpacity>
-        <Text style={styles.header}>Thông tin đơn hàng</Text>
       </View>
 
-      <View style={{ padding: 10 }}>
+      <ScrollView style={{ padding: 10, paddingTop: 110, }}>
         <Text style={styles.statusOrder}>Thông tin lịch hẹn</Text>
         <View style={styles.card}>
           <View style={styles.headerCard}>
@@ -193,8 +194,8 @@ export default function OrderDetails() {
           <Text style={styles.sectionHeader}>Lưu ý của khách hàng</Text>
           <Text style={styles.noteText}>{orderDetails.customerNote}</Text>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -209,16 +210,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#699BF4",
     padding: 10,
-    paddingBottom: 30,
-    paddingTop: 30,
+    paddingBottom: 20,
+    paddingTop: 45,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000, // Giữ header trên cùng
+    elevation: 10, // Cho Android
   },
   backButton: {
-    marginRight: 10,
+    flexDirection: "row",
   },
   header: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
+    marginLeft: 10
   },
   statusOrder: {
     fontSize: 15,

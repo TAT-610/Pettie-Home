@@ -1,46 +1,64 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { getServicesByShop } from "@/services/shop/apiService";
-import { Profile, Service } from "@/services/types";
+import { Service } from "@/services/types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const tabs = ["Dịch vụ chó", "Dịch vụ mèo"];
+const tabs = ["Mèo", "Chó"]; // Cập nhật lại tabs để khớp với dữ liệu API
 
-const ServicesShop = ({ shopId, id }: { shopId: string; id: Profile }) => {
+const ServicesShop = () => {
     const [activeTab, setActiveTab] = useState(tabs[0]);
-    const [service, setService] = useState<Service[]>([]);
+    const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-
-    const fetchServices = useCallback(async () => {
-        try {
-            setLoading(true);
-            const servicesData = await getServicesByShop();
-            const formattedServices = servicesData.map((service: any) => ({
-                id: service.id,
-                name: service.name,
-                price: service.price,
-                quantity: service.quantity,
-                status: "Dịch vụ chó",
-                imageUrl: service.imageUrl || service.imageFileName,
-            }));
-            setService(formattedServices);
-            console.log("data product:", formattedServices);
-        } catch (error) {
-            Alert.alert("Lỗi", "Không thể tải danh sách dịch vụ.");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+    const [shopId, setShopId] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchServices();
+        const fetchShopId = async () => {
+            const id = await AsyncStorage.getItem("shopId");
+            if (id) {
+                setShopId(id);
+            } else {
+                console.error("❌ Không tìm thấy shopId trong AsyncStorage");
+            }
+        };
+        fetchShopId();
     }, []);
 
-    const filteredProducts = useMemo(() =>
-        service.filter(service => service.status === activeTab),
-        [service, activeTab]);
+    useFocusEffect(
+            useCallback(() => {
+        if (!shopId) return;
+
+                const fetchServices = async () => {
+                    try {
+                        setLoading(true); // Bắt đầu loading
+                        const serviceData = await getServicesByShop(shopId, 1, 100);
+                        const formattedServices = serviceData.map((service: any) => ({
+                            id: service.id,
+                            name: service.name,
+                            price: service.price,
+                            status: "Mèo",
+                            imageUrl: service.imageUrl || service.imageFileName,
+                        }));
+                        setServices(formattedServices);
+                        console.log("data service:", formattedServices);
+                    } catch (error) {
+                        console.error("Lỗi khi lấy dich vu:", error);
+                    } finally {
+                        setLoading(false)
+                    }
+                };
+    
+                fetchServices();
+            }, [shopId])
+        );
+
+    const filteredServices = useMemo(() =>
+        Array.isArray(services) ? services.filter(service => service.status === activeTab) : [],
+        [services, activeTab]
+    );
 
     const handleAddService = useCallback(() => {
         router.push(`/ServiceShop/addservice`);
@@ -80,17 +98,18 @@ const ServicesShop = ({ shopId, id }: { shopId: string; id: Profile }) => {
             ) : (
                 <View style={styles.listContainer}>
                     <FlatList
-                        data={filteredProducts}
+                        data={filteredServices}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <View style={styles.card}>
                                 <Image
-                                    source={{ uri: item.image ? `https://pettiehome.online/web/${item.image}` : 'default-image-url.jpg' }}
+                                    source={{ uri: item.imageUrl ? `https://pettiehome.online/web/${item.imageUrl}` : 'https://via.placeholder.com/80' }}
                                     style={styles.image}
                                 />
                                 <View style={styles.details}>
                                     <Text style={styles.name}>{item.name}</Text>
                                     <Text style={styles.price}>Giá: {item.price}.000đ</Text>
+                                    <Text numberOfLines={2} style={styles.description}>{item.description}</Text>
                                 </View>
                                 <TouchableOpacity
                                     style={styles.actionButton}
@@ -99,6 +118,11 @@ const ServicesShop = ({ shopId, id }: { shopId: string; id: Profile }) => {
                                     <AntDesign name="edit" size={20} color="white" />
                                 </TouchableOpacity>
                             </View>
+                        )}
+                        ListEmptyComponent={() => (
+                            <Text style={{ textAlign: "center", marginTop: 20, color: "#999" }}>
+                                Không có dịch vụ nào được tìm thấy.
+                            </Text>
                         )}
                     />
                 </View>
@@ -147,6 +171,7 @@ const styles = StyleSheet.create({
     },
     name: { fontSize: 16, fontWeight: "medium", marginBottom: 5 },
     price: { fontSize: 13, color: "#ed7c44", marginBottom: 10 },
+    description: { fontSize: 12, color: "#666" },
     actionButton: { padding: 6, backgroundColor: "#ed7c44", borderRadius: 20 },
 });
 
