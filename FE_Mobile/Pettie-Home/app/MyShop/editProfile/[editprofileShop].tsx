@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter, router } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { getShopAccount, getUserAccount, updateShopById } from '@/services/shop/apiprofile';
-import { ProfileShop } from '@/services/types';
 import * as ImagePicker from 'expo-image-picker';
 import { editProfileShop } from '@/services/user/auth';
 
