@@ -36,3 +36,22 @@ export const getShops = async (search = "", pageNumber = 1, pageSize = 10): Prom
     throw error;
   }
 };
+
+export const getShopDetails = async (shopId: string): Promise<Shop> => {
+  try {
+    const response = await axios.get(`${BASE_URL}/shops/${shopId}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    } else {
+      throw new Error("Dữ liệu cửa hàng không hợp lệ.");
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy chi tiết cửa hàng:", error);
+    throw error;
+  }
+};
