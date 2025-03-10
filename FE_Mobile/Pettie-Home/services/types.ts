@@ -16,12 +16,15 @@ export interface ProfileShop {
     email: string;
     rating: string;
     address: string;
-    openingTime: string;
-    closingTime: string;
+    openingTime: TimeSpan;
+    closingTime: TimeSpan;
     imageUrl: { uri: string; type: string; fileName?: string } | null;
     role: string;
     fullname: string;
     password: string;
+    bankAccountNumber: string,
+    bankName: string,
+    bankAccountName: string,
 }
 
 export interface Products {
@@ -56,4 +59,74 @@ export interface VerifyEmailOTPRequest {
     email: string, //($email && minLength: 1)
     otp: string, //( minLength: 1 ^\6$)
     isSignUp: boolean,
+}
+
+export interface UpdateUserProfile {
+    fullName: string;
+    phoneNumber: string
+}
+
+export interface UpdateShopProfile {
+    name?: string;
+    phone?: string;
+    description?: string;
+    address?: string;
+    openingTime?: TimeSpan;
+    closingTime?: TimeSpan;
+    imageUrl?: { uri: string; type: string; fileName?: string } | null;
+    bankAccountNumber?: string,
+    bankName?: string,
+    bankAccountName?: string,
+}
+
+export interface CreateAccountDTO {
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    password: string;
+}
+
+export interface CreateShopDTO {
+    email: string;
+    password: string;
+    shopName: string;
+    phone: string;
+    address: string;
+    bankAccountNumber: string;
+    bankName: string;
+    bankAccountName: string;
+    openingTime?: TimeSpan;
+    closingTime?: TimeSpan;
+}
+export interface TimeSpan {
+    ticks: number;
+    days?: number;
+    hours?: number;
+    milliseconds?: number;
+    microseconds?: number;
+    nanoseconds?: number;
+    minutes?: number;
+    seconds?: number;
+    totalDays?: number;
+    totalHours?: number;
+    totalMilliseconds?: number;
+    totalMicroseconds?: number;
+    totalNanoseconds?: number;
+    totalMinutes?: number;
+    totalSeconds?: number;
+}
+
+export enum ResendOtpType {
+    ConfirmEmail = "ConfirmEmail",
+    ForgotPassword = "ForgotPassword"
+}
+
+export interface ResendOtpDTO {
+    email: string;
+    type: ResendOtpType;
+}
+
+export interface ConfirmEmailDTO {
+    email: string;
+    otp: number; //($int32)
 }

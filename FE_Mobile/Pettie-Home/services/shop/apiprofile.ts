@@ -4,33 +4,33 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BASE_URL_2 = "http://14.225.198.232:8080/api/v1";
 
-export const getUserAccount = async () => {
-  try {
-    const access_token = await AsyncStorage.getItem("access_token");
-    console.log("Stored access_token:", access_token); // Kiểm tra token
-    if (!access_token) {
-      throw new Error ("Access token is not found")
-    }
+// export const getUserAccount = async () => {
+//   try {
+//     const access_token = await AsyncStorage.getItem("access_token");
+//     console.log("Stored access_token:", access_token); // Kiểm tra token
+//     if (!access_token) {
+//       throw new Error ("Access token is not found")
+//     }
 
-    const response = await axios.get(`${BASE_URL_2}/account/users/me`,
-      {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          "Content-Type": "application/json"
-        }
-      }
-    )
+//     const response = await axios.get(`${BASE_URL_2}/account/users/me`,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${access_token}`,
+//           "Content-Type": "application/json"
+//         }
+//       }
+//     )
     
-    console.log("User Data: ", response.data);
+//     console.log("User Data: ", response.data);
     
-    return response.data;
-  } catch (error) {
-    console.error("Get User Account Error: ", error)
-    throw error;
-  }
-}
+//     return response.data;
+//   } catch (error) {
+//     console.error("Get User Account Error: ", error)
+//     throw error;
+//   }
+// }
 
-// Hàm lấy thông tin Shop theo ID
+// Hàm lấy thông tin Shop 
 export const getShopAccount = async () => {
   try {
     const access_token = await AsyncStorage.getItem("access_token");

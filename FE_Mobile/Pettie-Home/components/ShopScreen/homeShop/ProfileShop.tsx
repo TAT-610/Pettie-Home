@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getShopAccount } from '@/services/shop/apiprofile';
 
@@ -9,27 +9,27 @@ const ProfileShop = () => {
   const router = useRouter();
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
+  // const shopId = profile.id;
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const shopData = await getShopAccount();
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfile = async () => {
+        try {
+          const shopData = await getShopAccount();
+          console.log("shopData in ProfileShop nef", shopData);
+          
+          setProfile(shopData);
+        } catch (error) {
+          console.error("Lỗi khi lấy thông tin tài khoản:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProfile();
 
-        setProfile(shopData);
-        console.log("profile data in ProfileShop", profile);
-      } catch (error) {
-        console.error("Lỗi khi lấy thông tin tài khoản:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-
-    fetchProfile();
-  }, []);
-
-  const shopId = profile?.data?.id;
-  console.log("SHopid", shopId);
+    }, [])
+  )
+  
 
   if (!profile) {
     return <Text>Đang tải...</Text>;
@@ -46,18 +46,16 @@ const ProfileShop = () => {
   };
 
   const handleEditProfile = () => {
-    console.log("navigate editprofile");
-    console.log("Profile id truoc khi truyen: ",shopId);
-
-    if (shopId) {
-      router.push(`/MyShop/editProfile/[editprofileShop]?id=${shopId}`);
+    if (profile?.id) {
+      // encodeURIComponent giúp tránh lỗi khi truyền JSON qua URL.
+      router.push(`/MyShop/editProfile/[editprofileShop]?profile=${encodeURIComponent(JSON.stringify(profile))}`);
     } else {
       console.error("Không có ID để chuyển trang");
     }
   };
   // anh sua lai cau truc thu muc o MyShop, noi na`o ma su dung 2 th` do la phai import lai
   const handleWallet = () => {
-    router.push(`/MyShop/Wallet/[walletshop]?id=${shopId}`);
+    // router.push(`/MyShop/Wallet/[walletshop]?id=${profile.id}`);
   };
   // tab doanh thu đó là component nào e
   const stats = [
@@ -75,7 +73,7 @@ const ProfileShop = () => {
             style={styles.avatar}
           />
           <View>
-            <Text style={styles.shopName}>{profile.fullName}</Text>
+            <Text style={styles.shopName}>{profile.name}</Text>
             <View style={styles.ratingContainer}>
               <FontAwesome name="star" size={16} color="#FFD700" />
               <Text style={styles.rating}>{profile.rating || "5.0"}</Text>

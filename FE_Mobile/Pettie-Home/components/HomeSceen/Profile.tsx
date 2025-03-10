@@ -1,43 +1,35 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Feather, FontAwesome, FontAwesome5, FontAwesome6, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getProfileById } from '@/services/user/auth';
 import { Profile } from '@/services/types';
+import { getUserAccount } from '@/services/user/auth';
 
 const ProfileScreen = () => { 
     const router = useRouter();
     // const [id, setId] = useState<string | null>(null);
-    const {userData} = useLocalSearchParams();
-    console.log("User Data in Profile", userData);
+    // const {userData} = useLocalSearchParams();
      
     const [profile, setProfile] = useState<Profile | null>(null);
 
-    // useEffect(() => {
-    //     const fetchId = async () => {
-    //         try {
-    //             const storedId = await AsyncStorage.getItem('idUser');
-    //             setId(storedId);
-    //         } catch (error) {
-    //             console.error('Error retrieving idUser:', error);
-    //         }
-    //     };
-    //     fetchId();
-    // }, []);
+    useFocusEffect(
+        useCallback(() => {
+            const fetchData = async () => {
+                try {
+                    const userData = await getUserAccount();
+                    console.log("User Data in Profile", userData.data);
+                    setProfile(userData.data);
+                } catch (error) {
+                    console.error("Error to fetch Data User", error)
+                }
+            }
+        fetchData();
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         if (!id) return;
-    //         try {
-    //             const data = await getProfileById(id);
-    //             setProfile(data);
-    //         } catch (error) {
-    //             console.error('Lỗi khi lấy hồ sơ:', error);
-    //         }
-    //     };
-    //     fetchData();
-    // }, [id]);
+        }, [])
+    )
+
+
 
     if (!profile) {
         return <Text>Đang tải...</Text>;
@@ -56,7 +48,8 @@ const ProfileScreen = () => {
         console.log("navigate editprofile");
 
         if (profile?.id) {
-            router.push(`/ProfileCustomer/[editprofile]?id=${profile.id}`);
+            // encodeURIComponent giúp tránh lỗi khi truyền JSON qua URL.
+            router.push(`/ProfileCustomer/[editprofile]?profile=${encodeURIComponent(JSON.stringify(profile))}`);
         } else {
             console.error("Không có ID để chuyển trang");
         }
@@ -74,7 +67,7 @@ const ProfileScreen = () => {
             <View style={styles.header}>
                 <View style={styles.headerContent}>
                     <Image source={{ uri: profile.image }} style={styles.avatar} />
-                    <Text style={styles.shopName}>{profile.fullname}</Text>
+                    <Text style={styles.shopName}>{profile.fullName}</Text>
                 </View>
                 <TouchableOpacity style={styles.notificationIcon}>
                     <FontAwesome name="bell" size={20} color="#fff" />

@@ -1,41 +1,46 @@
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Alert, TextInput, TouchableOpacity, Text, View, StyleSheet } from "react-native";
-import { registerUser } from "@/services/user/auth";
-import { verifyEmailOtp } from "@/services/user/auth";
+
+import { confirmEmail } from "@/services/user/auth";
 
 export default function ConfirmOTP() {
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const requestData = useLocalSearchParams();
+  const email = Array.isArray(requestData.email) ? requestData.email[0] : requestData.email;
+  console.log("requestData in ConfirmOTPScreen: ", requestData);
+
   const [otp, setOtp] = useState("");
 
   const handleConfirmOTP = async () => {
+    if (!otp) {
+      Alert.alert("Lỗi", "Vui lòng nhập mã OTP.");
+      return;
+    }
+  
+    const otpNumber = parseInt(otp, 10); // Chuyển từ string -> number
+  
+    if (isNaN(otpNumber)) {
+      Alert.alert("Lỗi", "Mã OTP không hợp lệ.");
+      return;
+    }
+  
     try {
-      // Xác minh OTP
-      await verifyEmailOtp({
-        email: Array.isArray(params.email) ? params.email[0] : params.email, // Lấy phần tử đầu tiên nếu là mảng
-        otp, // Mã OTP từ người dùng
-        isSignUp: true, // Đây là yêu cầu đăng ký
-      });
+      const response = await confirmEmail({ email, otp: otpNumber }); // Gửi dạng number
   
-      // Nếu OTP hợp lệ, tiến hành đăng ký tài khoản
-      const user = await registerUser(
-        params.fullName as string,
-        params.email as string,
-        params.phoneNumber as string,
-        params.password as string,
-        params.confirmPassword as string,
-        params.role as "user" | "shop",
-        params.role === "shop" ? (params.bankName as string) : undefined,
-        params.role === "shop" ? (params.bankAccount as string) : undefined
-      );
-  
-      // Chuyển hướng đến trang đăng nhập hoặc trang chính
-      router.push("/Auths/login");
+      if (response?.status === 200) {
+        Alert.alert("Thành công", "Xác thực email thành công, vui lòng đăng nhập!");
+        router.push("/Auths/login"); // Chuyển đến trang đăng nhập
+      }
     } catch (error: any) {
-      Alert.alert("Lỗi", error.message || "Xác nhận OTP thất bại");
+      if (error?.response?.data?.detail) {
+        Alert.alert("Lỗi", error.response.data.detail);
+      } else {
+        Alert.alert("Lỗi", "Mã OTP không hợp lệ hoặc đã hết hạn.");
+      }
     }
   };
+  
 
   return (
     <View style={styles.container}>
