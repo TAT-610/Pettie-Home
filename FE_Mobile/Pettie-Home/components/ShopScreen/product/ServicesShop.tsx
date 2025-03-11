@@ -103,7 +103,7 @@ const ServicesShop = () => {
                         renderItem={({ item }) => (
                             <View style={styles.card}>
                                 <Image
-                                    source={{ uri: item.imageUrl ? `https://pettiehome.online/web/${item.imageUrl}` : 'https://via.placeholder.com/80' }}
+                                    source={{ uri: item.imageFileName ? `https://pettiehome.online/web/${item.imageFileName}` : 'https://via.placeholder.com/80' }}
                                     style={styles.image}
                                 />
                                 <View style={styles.details}>

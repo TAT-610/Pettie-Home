@@ -219,15 +219,13 @@ export const editProfileUser = async (request: UpdateUserProfile) => {
 
 }
 // edit profile shop
-export const editProfileShop = async (request: UpdateShopProfile) => {
+export const editProfileShop = async (request: UpdateShopProfile, formData: FormData) => {
   console.log("Req Edit profile:", request);
   try {
     const access_token = await AsyncStorage.getItem("access_token");
     if (!access_token) {
       throw new Error("Access token is not found");
     }
-
-    const formData = new FormData();
     
     if (request.name) formData.append("name", request.name);
     if (request.phone) formData.append("phone", request.phone);

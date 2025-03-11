@@ -74,6 +74,7 @@ export interface UpdateShopProfile {
     openingTime?: TimeSpan;
     closingTime?: TimeSpan;
     imageUrl?: { uri: string; type: string; fileName?: string } | null;
+    imageFileName: string;
     bankAccountNumber?: string,
     bankName?: string,
     bankAccountName?: string,
