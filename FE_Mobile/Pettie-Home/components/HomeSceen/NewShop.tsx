@@ -71,7 +71,6 @@ export default function NewShop() {
             }}
             style={styles.shopImage}
           /> */}
-
           <Image
             source={{
               uri: item.imageUrl
@@ -80,6 +79,14 @@ export default function NewShop() {
             }}
             style={styles.shopImage}
           />
+          {/* <Image
+            source={{
+              uri: item.imageUrl
+                ? `https://pettiehome.online/web/${item.imageUrl}`
+                : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
+            }}
+            style={styles.shopImage}
+          /> */}
 
           <View style={styles.contentshop}>
             <View>

@@ -26,8 +26,6 @@ import AllService from "../../components/DetailShop/AllService";
 import { getShopDetails } from "../../services/shop/apiShop";
 import { Shop } from "../../services/types";
 
-const BASE_URL = "http://14.225.198.232:8080/api/v1"; // Định nghĩa BASE_URL
-
 export default function ShopDetail() {
   const router = useRouter();
   const { shopId, distance } = useLocalSearchParams();
@@ -57,7 +55,9 @@ export default function ShopDetail() {
 
   const initialLayout = { width: Dimensions.get("window").width };
 
-  const data = [{ id: "1", component: <AllService /> }];
+  const data = [
+    { id: "1", component: <AllService shopId={shopId as string} /> },
+  ];
 
   if (!shop) {
     return <Text>Loading...</Text>;
@@ -73,15 +73,17 @@ export default function ShopDetail() {
         scrollEventThrottle={16}
         ListHeaderComponent={
           <>
-            {/* <Image
+            <Image
               source={{
                 uri: shop.imageUrl
-                  ? `${BASE_URL}/uploads/${shop.imageUrl}`
-                  : "https://i.pinimg.com/736x/7f/78/37/7f783761231551f96aadbaece6e7e1d9.jpg",
+                  ? `https://pettiehome.online/web/${shop.imageUrl}`
+                  : shop.imageFileName
+                  ? `https://pettiehome.online/web/${shop.imageFileName}`
+                  : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
               }}
               resizeMode="cover"
               style={styles.shopImage}
-            /> */}
+            />
             <View style={styles.aboutshop}>
               <View style={styles.row}>
                 <Entypo
@@ -96,7 +98,7 @@ export default function ShopDetail() {
                 </Text> */}
               </View>
               <Text style={styles.texttitle}>
-                {/* Giới thiệu: <Text style={styles.text}>{shop.description}</Text> */}
+                Giới thiệu: <Text style={styles.text}>{shop.description}</Text>
               </Text>
               <Text style={styles.texttitle}>
                 Thời gian hoạt động:{" "}
@@ -105,7 +107,7 @@ export default function ShopDetail() {
               <View style={styles.contentshop}>
                 <Text style={styles.shopDetails}>
                   Đánh giá: <AntDesign name="star" size={15} color="#ecc41c" />
-                  <Text style={styles.shopDetails2}> 4.5</Text>
+                  <Text style={styles.shopDetails2}> {shop.averageRating}</Text>
                 </Text>
                 <Text style={styles.shopDetails}>
                   Khoảng cách:{" "}

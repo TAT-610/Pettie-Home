@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   FlatListComponent,
@@ -8,56 +9,46 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React from "react";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useRouter } from "expo-router";
+import { getProductsByShop } from "../../services/shop/apiShop";
+
 interface CatService {
   id: number;
   name: string;
   image: string;
   price: number;
 }
-const CatService = [
-  {
-    id: 1,
-    name: "Cát đậu nành Cature cho mèo 2.8kg",
-    image:
-      "https://paddy.vn/cdn/shop/files/Thi_tk_ch_acoten_2.png?v=1690719510",
-    price: 120,
-  },
 
-  {
-    id: 2,
-    name: "Pate mèo kucinta gói 80g",
-    image:
-      "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
-    price: 10,
-  },
-  {
-    id: 3,
-    name: "Bánh quy cho chó",
-    image:
-      "https://paddy.vn/cdn/shop/files/snack-cho-cho-banh-quy-doggyman_5.jpg?v=1732863422",
-    price: 120,
-  },
-  {
-    id: 4,
-    name: "Cây cào móng chó mèo",
-    image:
-      "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
-    price: 220,
-  },
-];
-const OtherProduct = () => {
+const OtherProduct = ({ shopId }: { shopId: string }) => {
   const router = useRouter();
+  const [products, setProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const productData = await getProductsByShop(shopId);
+      setProducts(productData);
+    };
+
+    fetchProducts();
+  }, [shopId]);
+
   const handleProductPress = (productId: number) => {
     // router.push(`/ViewService/${serviceId}`); // Navigate to ProductDetail page
     router.push(`/ViewProduct/${productId}`);
   };
-  const renderItem = ({ item }: { item: CatService }) => (
+
+  const renderItem = ({ item }: { item: any }) => (
     <View style={styles.itemContainer}>
       <TouchableOpacity onPress={() => handleProductPress(item.id)}>
-        <Image source={{ uri: item.image }} style={styles.image} />
+        <Image
+          source={{
+            uri: item.imageUrl
+              ? `https://pettiehome.online/web/${item.imageUrl}`
+              : `https://pettiehome.online/web/${item.imageFileName}`,
+          }}
+          style={styles.image}
+        />
       </TouchableOpacity>
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
@@ -65,7 +56,7 @@ const OtherProduct = () => {
         </Text>
         <View style={styles.contentcard}>
           <View>
-            <Text style={styles.price}>{item.price}.000</Text>
+            <Text style={styles.price}>{item.price} VND</Text>
             <Text style={styles.detail}>Xem chi tiết</Text>
           </View>
           <Text style={styles.iconadd}>
@@ -75,6 +66,7 @@ const OtherProduct = () => {
       </View>
     </View>
   );
+
   return (
     <View style={styles.container}>
       <Text style={styles.tittle}>
@@ -82,7 +74,7 @@ const OtherProduct = () => {
         phẩm khác:
       </Text>
       <FlatList
-        data={CatService}
+        data={products}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
@@ -92,12 +84,9 @@ const OtherProduct = () => {
   );
 };
 
-export default OtherProduct;
-
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 10,
-
     marginBottom: 100,
     backgroundColor: "white",
   },
@@ -133,7 +122,6 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 15,
-
     fontWeight: "500",
     color: "#ed7c44",
   },
@@ -151,3 +139,5 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
 });
+
+export default OtherProduct;

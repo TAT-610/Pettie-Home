@@ -149,5 +149,5 @@ export interface Shop {
     averageRating: number;
     totalRating: number;
     imageUrl: { uri: string; type: string; fileName?: string } | null;
-
+    imageFileName?: string;
 }
