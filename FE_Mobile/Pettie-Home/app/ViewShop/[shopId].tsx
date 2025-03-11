@@ -26,6 +26,8 @@ import AllService from "../../components/DetailShop/AllService";
 import { getShopDetails } from "../../services/shop/apiShop";
 import { Shop } from "../../services/types";
 
+const BASE_URL = "http://14.225.198.232:8080/api/v1"; // Định nghĩa BASE_URL
+
 export default function ShopDetail() {
   const router = useRouter();
   const { shopId, distance } = useLocalSearchParams();
@@ -71,7 +73,7 @@ export default function ShopDetail() {
         scrollEventThrottle={16}
         ListHeaderComponent={
           <>
-            <Image
+            {/* <Image
               source={{
                 uri: shop.imageUrl
                   ? `${BASE_URL}/uploads/${shop.imageUrl}`
@@ -79,7 +81,7 @@ export default function ShopDetail() {
               }}
               resizeMode="cover"
               style={styles.shopImage}
-            />
+            /> */}
             <View style={styles.aboutshop}>
               <View style={styles.row}>
                 <Entypo

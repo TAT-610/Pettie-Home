@@ -20,8 +20,26 @@ export default function NewShop() {
   useEffect(() => {
     const fetchShops = async () => {
       try {
-        const shops = await getShops();
-        setShopData(shops);
+        const rawShops = await getShops();
+        const formattedShops = rawShops.map((shop: any) => ({
+          id: shop.id,
+          name: shop.name,
+          imageUrl: shop.imageUrl || shop.imageFileName || null, // Kiểm tra hình ảnh
+          totalRating: shop.averageRating ?? 0,
+          description: shop.description || "Chưa có mô tả",
+          address: shop.address || "",
+          phone: shop.phone || "",
+          email: shop.email || "",
+          balance: shop.balance || 0,
+          bankAccountNumber: shop.bankAccountNumber || "",
+          bankName: shop.bankName || "",
+          bankAccountName: shop.bankAccountName || "",
+          dateOfBirth: shop.dateOfBirth || null,
+          openingTime: shop.openingTime || "",
+          closingTime: shop.closingTime || "",
+          averageRating: shop.averageRating || 0,
+        }));
+        setShopData(formattedShops);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách cửa hàng:", error);
       }
@@ -29,6 +47,7 @@ export default function NewShop() {
 
     fetchShops();
   }, []);
+
   const router = useRouter();
   const handleProductPress = (shopId: string, distance: string) => {
     router.push(`/ViewShop/${shopId}?distance=${distance}`);
@@ -41,16 +60,27 @@ export default function NewShop() {
         onPress={() => handleProductPress(item.id, `${randomDistance} km`)}
       >
         <View style={styles.listcontentitem}>
-          <Image
+          {/* <Image
             source={{
               uri:
-                item.imageUrl ||
-                (item.imageFileName
-                  ? `http://your-image-server.com/${item.imageFileName}`
-                  : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg"),
+                item.imageUrl || item.imageFileName
+                  ? `https://pettiehome.online/web/${
+                      item.imageUrl || item.imageFileName
+                    }`
+                  : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
+            }}
+            style={styles.shopImage}
+          /> */}
+
+          <Image
+            source={{
+              uri: item.imageUrl
+                ? `https://pettiehome.online/web/${item.imageUrl}`
+                : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
             }}
             style={styles.shopImage}
           />
+
           <View style={styles.contentshop}>
             <View>
               <Text style={styles.NameShop}>{item.name}</Text>
@@ -65,7 +95,7 @@ export default function NewShop() {
             <View style={styles.detailShop}>
               <Text style={styles.detailitem}>
                 <AntDesign name="star" size={15} color="#ecc41c" />{" "}
-                {item.totalRating > 0 ? item.totalRating : "_ _"}
+                {item.totalRating ?? "__"}
               </Text>
 
               <Text style={styles.detailitem}>
