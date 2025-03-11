@@ -51,19 +51,6 @@ export default function EditProduct() {
     }
   }, [id]);
 
-  // Fetch categories when the component mounts
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const data = await getAllCategories();
-        setCategories(data.map((cat) => ({ label: cat.name, value: cat.id })));
-      } catch (error) {
-        console.error("Lỗi lấy danh mục:", error);
-      }
-    };
-    fetchCategories();
-  }, []);
-
   // Fetch product details by ID
   // Fetch product details by ID
   const fetchProduct = async () => {

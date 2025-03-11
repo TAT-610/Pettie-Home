@@ -9,7 +9,6 @@ const ProfileShop = () => {
   const router = useRouter();
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
-  // const shopId = profile.id;
 
   useFocusEffect(
     useCallback(() => {
@@ -17,7 +16,7 @@ const ProfileShop = () => {
         try {
           const shopData = await getShopAccount();
           console.log("shopData in ProfileShop nef", shopData);
-          
+
           setProfile(shopData);
         } catch (error) {
           console.error("Lỗi khi lấy thông tin tài khoản:", error);
@@ -29,7 +28,7 @@ const ProfileShop = () => {
 
     }, [])
   )
-  
+
 
   if (!profile) {
     return <Text>Đang tải...</Text>;
@@ -59,7 +58,7 @@ const ProfileShop = () => {
   };
   // tab doanh thu đó là component nào e
   const stats = [
-    { label: 'Doanh thu', value: '20.250.000đ' },
+    { label: 'Doanh thu', value: '9.250.000đ' },
     { label: 'Đơn hàng', value: '14' },
     { label: 'Khách truy cập', value: '19' },
   ];
@@ -69,7 +68,11 @@ const ProfileShop = () => {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Image
-            source={{ uri: profile.imageUrl ? `https://pettiehome.online/web/${profile.imageUrl}` : 'default-image-url.jpg' }}
+            source={{
+              uri: profile.imageUrl
+                ? `https://pettiehome.online/web/${profile.imageUrl}`
+                : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaZPYOSQUJW4zOM9FTxASvMzRDAUaVmJCGFQ&s'
+            }}
             style={styles.avatar}
           />
           <View>
@@ -188,6 +191,7 @@ const styles = StyleSheet.create({
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 25
   },
   avatar: {
     width: 90,

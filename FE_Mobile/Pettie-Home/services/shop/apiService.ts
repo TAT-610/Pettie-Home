@@ -4,9 +4,13 @@ import { Service } from "@/services/types";
 
 const BASE_URL_2 = "http://14.225.198.232:8080/api/v1";
 
-export const getServicesByShop = async (shopid : string, pageNumber = 1, pageSize = 100) => {
+export const getServicesByShop = async (
+  shopid: string,
+  pageNumber = 1,
+  pageSize = 100
+) => {
   console.log("ShopId req", shopid);
-  
+
   try {
     const access_token = await AsyncStorage.getItem("access_token");
     if (!access_token) {
@@ -14,26 +18,27 @@ export const getServicesByShop = async (shopid : string, pageNumber = 1, pageSiz
     }
 
     const response = await axios.get(`${BASE_URL_2}/shop-services`, {
-      params: { shopId: shopid, pageNumber: 1, pageSize: 100},
+      params: { shopId: shopid, pageNumber, pageSize },
       headers: {
         Authorization: `Bearer ${access_token}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
     });
 
     console.log("get dịch vụ by shop data:", response.data); // Check the response structure
 
     if (response.data.success) {
-      if (response.data) {
-        return response.data.data.items; // Ensure this returns an object with products array
+      // Kiểm tra cấu trúc dữ liệu trả về
+      if (response.data.data && Array.isArray(response.data.data.items)) {
+        return response.data.data.items; // Trả về danh sách dịch vụ
       } else {
         throw new Error("Dữ liệu dịch vụ không hợp lệ.");
       }
     } else {
-      throw new Error(response.data.message || "Failed to fetch products");
+      throw new Error(response.data.message || "Failed to fetch dich vu");
     }
   } catch (error) {
-    console.error("Error fetching products:", error);
+    console.error("Error fetching dich vu:", error);
     throw error;
   }
 };
@@ -54,11 +59,11 @@ export const createServices = async (serviceData: Partial<Service>): Promise<any
     formData.append("description", serviceData.description || "");
 
     // Kiểm tra nếu có ảnh thì thêm vào FormData
-    if (serviceData.image && typeof serviceData.image === "object" && "uri" in serviceData.image) {
+    if (serviceData.imageUrl && typeof serviceData.imageUrl === "object" && "uri" in serviceData.imageUrl) {
         formData.append("image", {
-            uri: serviceData.image.uri,
-            type: serviceData.image.type,
-            name: serviceData.image.fileName || "image.jpg",
+            uri: serviceData.imageUrl.uri,
+            type: serviceData.imageUrl.type,
+            name: serviceData.imageUrl.fileName || "image.jpg",
         } as any); // TypeScript có thể cần `as any` để tránh lỗi kiểu dữ liệu
     }
 
@@ -125,11 +130,11 @@ export const editServiceById = async (id: string, serviceData: Partial<Service>)
 
 
     // Thêm ảnh vào FormData nếu có
-    if (serviceData.image && typeof serviceData.image === "object" && "uri" in serviceData.image) {
+    if (serviceData.imageUrl && typeof serviceData.imageUrl === "object" && "uri" in serviceData.imageUrl) {
       formData.append("image", {
-        uri: serviceData.image.uri,
-        type: serviceData.image.type || "image/jpeg", // Mặc định là JPEG nếu không có type
-        name: serviceData.image.fileName || "image.jpg",
+        uri: serviceData.imageUrl.uri,
+        type: serviceData.imageUrl.type || "image/jpeg", // Mặc định là JPEG nếu không có type
+        name: serviceData.imageUrl.fileName || "image.jpg",
       } as any);
     }
 

@@ -22,13 +22,14 @@ export const getProductsByShop = async (pageNumber = 1, pageSize = 100) => {
       console.log("get product by shop data:", response.data); // Check the response structure
 
       if (response.data.success) {
-          if (response.data) {
-              return response.data.data.items; // Ensure this returns an object with products array
-          } else {
-              throw new Error("Dữ liệu sản phẩm không hợp lệ.");
-          }
+        // Kiểm tra cấu trúc dữ liệu trả về
+        if (response.data.data && Array.isArray(response.data.data.items)) {
+          return response.data.data.items; // Trả về danh sách dịch vụ
+        } else {
+          throw new Error("Dữ liệu dịch vụ không hợp lệ.");
+        }
       } else {
-          throw new Error(response.data.message || "Failed to fetch products");
+        throw new Error(response.data.message || "Failed to fetch dich vu");
       }
   } catch (error) {
       console.error("Error fetching products:", error);
