@@ -4,33 +4,24 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const BASE_URL_2 = "http://14.225.198.232:8080/api/v1";
 
-// export const getUserAccount = async () => {
-//   try {
-//     const access_token = await AsyncStorage.getItem("access_token");
-//     console.log("Stored access_token:", access_token); // Kiểm tra token
-//     if (!access_token) {
-//       throw new Error ("Access token is not found")
-//     }
+interface ShopData {
+  id: string;
+  name: string;
+  imageFileName?: string;
+  imageUrl?: string | null;
+}
 
-//     const response = await axios.get(`${BASE_URL_2}/account/users/me`,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${access_token}`,
-//           "Content-Type": "application/json"
-//         }
-//       }
-//     )
-    
-//     console.log("User Data: ", response.data);
-    
-//     return response.data;
-//   } catch (error) {
-//     console.error("Get User Account Error: ", error)
-//     throw error;
-//   }
-// }
+const updateImageUrl = (data: ShopData): ShopData => {
+  if (!data) return data;
 
-// Hàm lấy thông tin Shop 
+  // Cập nhật imageUrl cho shop
+  if (!data.imageUrl && data.imageFileName) {
+    data.imageUrl = `${data.imageFileName}`;
+  }
+
+  return data;
+};
+
 export const getShopAccount = async () => {
   try {
     const access_token = await AsyncStorage.getItem("access_token");
@@ -44,35 +35,31 @@ export const getShopAccount = async () => {
         "Content-Type": "application/json",
       },
     });
-    const shopId = response.data.data.id; 
-    await AsyncStorage.setItem("shopId", shopId)
-    console.log("Shop id saved in Async:", AsyncStorage.getItem("shopId"));
-    
-    console.log("Shop Data: ", response.data);
 
-    // Lọc chỉ lấy thông tin profile của shop
-    const shopProfile = {
-      id: response.data.data.id,
-      name: response.data.data.name,
-      description: response.data.data.description,
-      address: response.data.data.address,
-      phone: response.data.data.phone,
-      email: response.data.data.email,
-      openingTime: response.data.data.openingTime,
-      closingTime: response.data.data.closingTime,
-      imageUrl: response.data.data.imageUrl,
-    };
+    if (!response.data.success) {
+      throw new Error(response.data.message || "Failed to fetch profiles");
+    }
 
-    console.log("Shop Profile Data: ", shopProfile);
-    return shopProfile;
+    let shopData = response.data.data;
+
+    // Cập nhật imageUrl nếu bị null
+    shopData = updateImageUrl(shopData);
+
+    // Lưu shopId vào AsyncStorage
+    const shopId = shopData.id;
+    await AsyncStorage.setItem("shopId", shopId);
+    console.log("Shop id saved in AsyncStorage:", shopId);
+
+    console.log("Updated Shop Data:", shopData);
+    return shopData;
   } catch (error) {
-    console.error("Get Shop Data Error: ", error);
+    console.error("Error fetching profiles:", error);
     throw error;
   }
 };
 
 // Hàm cập nhật thông tin Shop theo ID
-export const updateShopById = async ( updateData: Partial<ProfileShop>): Promise<ProfileShop> => {
+export const updateShopById = async (updateData: Partial<ProfileShop>): Promise<ProfileShop> => {
   try {
     const access_token = await AsyncStorage.getItem("access_token");
     if (!access_token) {
@@ -93,9 +80,9 @@ export const updateShopById = async ( updateData: Partial<ProfileShop>): Promise
     if (updateData.imageUrl && typeof updateData.imageUrl === "object" && "uri" in updateData.imageUrl) {
       formData.append("image", {
         uri: updateData.imageUrl.uri,
-        type: updateData.imageUrl.type || "image/jpeg", // Mặc định là JPEG nếu không có type
+        type: updateData.imageUrl.type,
         name: updateData.imageUrl.fileName || "image.jpg",
-      } as any);
+      } as any); // TypeScript có thể cần `as any` để tránh lỗi kiểu dữ liệu
     }
 
     // Log dữ liệu gửi đi

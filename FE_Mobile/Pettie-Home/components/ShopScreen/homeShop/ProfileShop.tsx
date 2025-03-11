@@ -16,7 +16,7 @@ const ProfileShop = () => {
         try {
           const shopData = await getShopAccount();
           console.log("shopData in ProfileShop nef", shopData);
-          
+
           setProfile(shopData);
         } catch (error) {
           console.error("Lỗi khi lấy thông tin tài khoản:", error);
@@ -28,7 +28,7 @@ const ProfileShop = () => {
 
     }, [])
   )
-  
+
 
   if (!profile) {
     return <Text>Đang tải...</Text>;
@@ -68,7 +68,11 @@ const ProfileShop = () => {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Image
-            source={{ uri: profile.imageUrl ? `https://pettiehome.online/web/${profile.imageUrl}` : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaZPYOSQUJW4zOM9FTxASvMzRDAUaVmJCGFQ&s' }}
+            source={{
+              uri: profile.imageUrl
+                ? `https://pettiehome.online/web/${profile.imageUrl}`
+                : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaZPYOSQUJW4zOM9FTxASvMzRDAUaVmJCGFQ&s'
+            }}
             style={styles.avatar}
           />
           <View>

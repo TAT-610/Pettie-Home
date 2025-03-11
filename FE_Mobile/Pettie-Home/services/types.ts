@@ -44,7 +44,7 @@ export interface Service {
     name: string;
     price: string;
     status: string;
-    image: { uri: string; type: string; fileName?: string } | null;
+    imageUrl: { uri: string; type: string; fileName?: string } | null;
     imageFileName: string;
     description: string;
     categoryId: string;

@@ -28,32 +28,32 @@ const ServicesShop = () => {
     }, []);
 
     useFocusEffect(
-            useCallback(() => {
-        if (!shopId) return;
+        useCallback(() => {
+            if (!shopId) return;
 
-                const fetchServices = async () => {
-                    try {
-                        setLoading(true); // Bắt đầu loading
-                        const serviceData = await getServicesByShop(shopId, 1, 100);
-                        const formattedServices = serviceData.map((service: any) => ({
-                            id: service.id,
-                            name: service.name,
-                            price: service.price,
-                            status: "Mèo",
-                            imageUrl: service.imageUrl || service.imageFileName,
-                        }));
-                        setServices(formattedServices);
-                        console.log("data service:", formattedServices);
-                    } catch (error) {
-                        console.error("Lỗi khi lấy dich vu:", error);
-                    } finally {
-                        setLoading(false)
-                    }
-                };
-    
-                fetchServices();
-            }, [shopId])
-        );
+            const fetchServices = async () => {
+                try {
+                    setLoading(true); // Bắt đầu loading
+                    const serviceData = await getServicesByShop(shopId, 1, 100);
+                    const formattedServices = serviceData.map((service: any) => ({
+                        id: service.id,
+                        name: service.name,
+                        price: service.price,
+                        status: "Mèo",
+                        imageUrl: service.imageUrl || service.imageFileName,
+                    }));
+                    setServices(formattedServices);
+                    console.log("data service:", formattedServices);
+                } catch (error) {
+                    console.error("Lỗi khi lấy dich vu:", error);
+                } finally {
+                    setLoading(false)
+                }
+            };
+
+            fetchServices();
+        }, [shopId])
+    );
 
     const filteredServices = useMemo(() =>
         Array.isArray(services) ? services.filter(service => service.status === activeTab) : [],
@@ -103,7 +103,7 @@ const ServicesShop = () => {
                         renderItem={({ item }) => (
                             <View style={styles.card}>
                                 <Image
-                                    source={{ uri: item.imageFileName ? `https://pettiehome.online/web/${item.imageFileName}` : 'https://via.placeholder.com/80' }}
+                                    source={{ uri: item.imageUrl ? `https://pettiehome.online/web/${item.imageUrl}` : 'default-image-url.jpg' }}
                                     style={styles.image}
                                 />
                                 <View style={styles.details}>
