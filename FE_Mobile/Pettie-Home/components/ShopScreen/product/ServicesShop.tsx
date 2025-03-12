@@ -1,24 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import {View,Text,FlatList,Image,TouchableOpacity,StyleSheet,ActivityIndicator,} from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { getServicesByShop } from "@/services/shop/apiService";
-import { Service } from "@/services/types";
+import { Category, Service } from "@/services/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const tabs = ["Mèo", "Chó"]; // Cập nhật lại tabs để khớp với dữ liệu API
+import { getAllCategories } from "@/services/shop/apiService";
 
 const ServicesShop = () => {
-  const [activeTab, setActiveTab] = useState(tabs[0]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("");
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -36,6 +27,21 @@ const ServicesShop = () => {
     fetchShopId();
   }, []);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const categoryData = await getAllCategories();
+        setCategories(categoryData);
+        if (categoryData.length > 0) {
+          setActiveTab(categoryData[0].name);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy danh mục:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       if (!shopId) return;
@@ -44,11 +50,13 @@ const ServicesShop = () => {
         try {
           setLoading(true); // Bắt đầu loading
           const serviceData = await getServicesByShop(shopId, 1, 100);
-          const formattedServices = serviceData.map((service: any) => ({
+          const formattedServices = serviceData
+          .filter((service: any) => service.category.name === activeTab)
+          .map((service: any) => ({
             id: service.id,
             name: service.name,
             price: service.price,
-            status: "Mèo",
+            category: service.category.name,
             imageUrl: service.imageUrl || service.imageFileName,
           }));
           setServices(formattedServices);
@@ -65,10 +73,7 @@ const ServicesShop = () => {
   );
 
   const filteredServices = useMemo(
-    () =>
-      Array.isArray(services)
-        ? services.filter((service) => service.status === activeTab)
-        : [],
+    () => services.filter((service) => service.category === activeTab),
     [services, activeTab]
   );
 
@@ -88,21 +93,21 @@ const ServicesShop = () => {
       <Text style={styles.header}>Dịch vụ</Text>
       <View style={styles.tabContainer}>
         <View style={{ flexDirection: "row" }}>
-          {tabs.map((tab, index) => (
+        {categories.map((category, index) => (
             <TouchableOpacity
               key={index}
-              style={[styles.tab, activeTab === tab && styles.activeTab]}
-              onPress={() => setActiveTab(tab)}
+              style={[styles.tab, activeTab === category.name && styles.activeTab]}
+              onPress={() => setActiveTab(category.name)}
             >
               <Text
                 style={[
                   styles.tabText,
-                  activeTab === tab && styles.activeTabText,
+                  activeTab === category.name && styles.activeTabText,
                 ]}
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {tab}
+                {category.name}
               </Text>
             </TouchableOpacity>
           ))}

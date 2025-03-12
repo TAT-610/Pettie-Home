@@ -2,12 +2,10 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   TextInput,
-  Button,
   Text,
   Image,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
   Alert,
   FlatList,
 } from "react-native";

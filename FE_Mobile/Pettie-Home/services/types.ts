@@ -45,13 +45,19 @@ export interface Service {
     price: string;
     status: string;
     image: { uri: string; type: string; fileName?: string } | null;  // Cập nhật kiểu image
-
-    // imageUrl: { uri: string; type: string; fileName?: string } | null;
+    imageUrl: { uri: string; type: string; fileName?: string } | null;
     // imageFileName: string;
     description: string;
     categoryId: string;
     category:string;
 }
+
+export interface Category {
+    id: string;
+    name: string;
+    description: string;
+    isActive: boolean;
+  };
 
 export interface GenerateEmailOTPRequest {
     email: string, //($email && minLength: 1)
