@@ -160,3 +160,19 @@ export const editServiceById = async (id: string, serviceData: Partial<Service>)
   }
 };
 
+export const getAllCategories = async (): Promise<any[]> => {
+  const accessToken = AsyncStorage.getItem("access_token");
+  if (!accessToken) throw new Error("Chưa có access_token");
+
+  try {
+    const response = await axios.get(`${BASE_URL_2}/categories`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data.data.items || [];
+  } catch (error) {
+    console.error("Lỗi lấy danh mục:", error);
+    return [];
+  }
+};

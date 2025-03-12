@@ -50,6 +50,7 @@ export interface Service {
     // imageFileName: string;
     description: string;
     categoryId: string;
+    category:string;
 }
 
 export interface GenerateEmailOTPRequest {
@@ -152,4 +153,11 @@ export interface Shop {
     totalRating: number;
     imageUrl: { uri: string; type: string; fileName?: string } | null;
     imageFileName?: string;
+}
+
+export interface Category {
+    id: string;
+    name: string;
+    description: string;
+    code: string;
 }

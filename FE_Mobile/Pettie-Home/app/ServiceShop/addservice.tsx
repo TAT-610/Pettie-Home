@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
-import { getAllCategories } from "@/services/shop/apiproduct";
+import { getAllCategories } from "@/services/shop/apiService";
 import * as ImagePicker from "expo-image-picker";
 import DropDownPicker from "react-native-dropdown-picker";
 import { createServices } from "@/services/shop/apiService";
