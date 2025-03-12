@@ -58,14 +58,13 @@ export const createServices = async (serviceData: Partial<Service>): Promise<any
     formData.append("categoryId", serviceData.categoryId || "");
     formData.append("description", serviceData.description || "");
 
-    // Kiểm tra nếu có ảnh thì thêm vào FormData
-    if (serviceData.imageUrl && typeof serviceData.imageUrl === "object" && "uri" in serviceData.imageUrl) {
-        formData.append("image", {
-            uri: serviceData.imageUrl.uri,
-            type: serviceData.imageUrl.type,
-            name: serviceData.imageUrl.fileName || "image.jpg",
-        } as any); // TypeScript có thể cần `as any` để tránh lỗi kiểu dữ liệu
-    }
+    if (serviceData.image && typeof serviceData.image === "object" && "uri" in serviceData.image) {
+      formData.append("image", {
+          uri: serviceData.image.uri,
+          type: serviceData.image.type,
+          name: serviceData.image.fileName || "image.jpg",
+      } as any); // TypeScript có thể cần `as any` để tránh lỗi kiểu dữ liệu
+  }
 
     console.log("FormData Sent:", formData);
 
@@ -130,11 +129,11 @@ export const editServiceById = async (id: string, serviceData: Partial<Service>)
 
 
     // Thêm ảnh vào FormData nếu có
-    if (serviceData.imageUrl && typeof serviceData.imageUrl === "object" && "uri" in serviceData.imageUrl) {
+    if (serviceData.image && typeof serviceData.image === "object" && "uri" in serviceData.image) {
       formData.append("image", {
-        uri: serviceData.imageUrl.uri,
-        type: serviceData.imageUrl.type || "image/jpeg", // Mặc định là JPEG nếu không có type
-        name: serviceData.imageUrl.fileName || "image.jpg",
+        uri: serviceData.image.uri,
+        type: serviceData.image.type || "image/jpeg", // Mặc định là JPEG nếu không có type
+        name: serviceData.image.fileName || "image.jpg",
       } as any);
     }
 
@@ -161,3 +160,19 @@ export const editServiceById = async (id: string, serviceData: Partial<Service>)
   }
 };
 
+export const getAllCategories = async (): Promise<any[]> => {
+  const accessToken = AsyncStorage.getItem("access_token");
+  if (!accessToken) throw new Error("Chưa có access_token");
+
+  try {
+    const response = await axios.get(`${BASE_URL_2}/categories`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return response.data.data.items || [];
+  } catch (error) {
+    console.error("Lỗi lấy danh mục:", error);
+    return [];
+  }
+};

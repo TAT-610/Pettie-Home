@@ -14,6 +14,9 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import axios from "axios";
+
+const BASE_URL = "http://14.225.198.232:8080/api/v1";
 
 // Thêm interface này sau phần imports
 interface Product {
@@ -120,6 +123,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [navBarColor, setNavBarColor] = useState("rgba(0, 0, 0, 0)");
   const [totalPrice, setTotalPrice] = useState(Product.price);
+  const [product, setProduct] = useState<any | null>(null);
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -135,6 +139,15 @@ const ProductDetail = () => {
     setTotalPrice(quantity * Product.price);
   }, [quantity]);
 
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      const productData = await getProductDetails(productId as string);
+      setProduct(productData);
+    };
+
+    fetchProductDetails();
+  }, [productId]);
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
@@ -145,20 +158,24 @@ const ProductDetail = () => {
         <View style={{ paddingBottom: 100, backgroundColor: "white" }}>
           <View>
             <Image
-              source={{ uri: Product.image }}
+              source={{
+                uri: product?.imageUrl
+                  ? `https://pettiehome.online/web/${product.imageUrl}`
+                  : product?.imageFileName
+                  ? `https://pettiehome.online/web/${product.imageFileName}`
+                  : "default-image-url.jpg",
+              }}
               resizeMode="cover"
               style={styles.serviceerviceImage}
             />
             <View style={styles.infoContainer}>
               <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
-                {Product.name}
+                {product?.name || "Tên sản phẩm không có sẵn"}
               </Text>
               <View style={styles.priceRateContainer}>
-                <Text style={styles.price}>{Product.price}.000 VNĐ</Text>
-                {/* <View style={styles.rateContainer}>
-                <AntDesign name="star" size={20} color="#FFD700" />
-                <Text style={styles.rate}>{Product.rate}</Text>
-              </View> */}
+                <Text style={styles.price}>
+                  {product?.price?.toLocaleString() || "0"}.000 VNĐ
+                </Text>
               </View>
             </View>
             <View style={{ backgroundColor: "#e9f1ff", height: 10 }}></View>
@@ -172,13 +189,15 @@ const ProductDetail = () => {
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>
                     Thương hiệu:{" "}
-                    <Text style={styles.detailContent}>{Product.brand}</Text>
+                    <Text style={styles.detailContent}>
+                      {product?.brand || Product.brand}
+                    </Text>
                   </Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>Mô tả:</Text>
                   <Text style={styles.detailContent}>
-                    {Product.description}
+                    {product?.description || Product.description}
                   </Text>
                 </View>
               </View>
@@ -188,7 +207,9 @@ const ProductDetail = () => {
               <View style={styles.ratingHeader}>
                 <Text style={styles.ratingTitle}>Đánh giá của sản phẩm</Text>
                 <View style={styles.ratingValue}>
-                  <Text style={styles.ratingNumber}>{Product.rate}/5</Text>
+                  <Text style={styles.ratingNumber}>
+                    {product?.rate?.toLocaleString() || Product.rate}/5
+                  </Text>
                   <FontAwesome
                     name="star"
                     size={18}
@@ -326,7 +347,7 @@ const ProductDetail = () => {
                 onPress={() => {
                   console.log(`Thêm ${quantity} sản phẩm vào giỏ`);
                   setShowQuantityModal(false);
-                  router.push(`/ViewShop/${Product.shopId}`);
+                  router.push(`/ViewShop/${product?.shopId || Product.shopId}`);
                 }}
               >
                 <Text style={styles.confirmButtonText}>Xác nhận</Text>
@@ -340,6 +361,21 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+
+export const getProductDetails = async (productId: string): Promise<any> => {
+  try {
+    const response = await axios.get(`${BASE_URL}/products/${productId}`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    } else {
+      throw new Error("Dữ liệu sản phẩm không hợp lệ.");
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+    return null;
+  }
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

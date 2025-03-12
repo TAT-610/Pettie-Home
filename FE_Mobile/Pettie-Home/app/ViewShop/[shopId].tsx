@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -23,11 +23,28 @@ import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 // import ServiceOfDog from "../../components/DetailShop/ServiceOfDog";
 // import Product from "../../components/DetailShop/Product";
 import AllService from "../../components/DetailShop/AllService";
+import { getShopDetails } from "../../services/shop/apiShop";
+import { Shop } from "../../services/types";
 
 export default function ShopDetail() {
   const router = useRouter();
-  const { shopId } = useLocalSearchParams();
+  const { shopId, distance } = useLocalSearchParams();
   const [navBarColor, setNavBarColor] = useState("rgba(0, 0, 0, 0)");
+  const [shop, setShop] = useState<Shop | null>(null);
+
+  useEffect(() => {
+    const fetchShopDetails = async () => {
+      try {
+        const shopData = await getShopDetails(shopId as string);
+        setShop(shopData);
+      } catch (error) {
+        console.error("Lỗi khi lấy chi tiết cửa hàng:", error);
+      }
+    };
+
+    fetchShopDetails();
+  }, [shopId]);
+
   const handleOrderPress = () => {
     router.push(`/Order/OrderCustomer`); // Navigate to ProductDetail page
   };
@@ -38,7 +55,13 @@ export default function ShopDetail() {
 
   const initialLayout = { width: Dimensions.get("window").width };
 
-  const data = [{ id: "1", component: <AllService /> }];
+  const data = [
+    { id: "1", component: <AllService shopId={shopId as string} /> },
+  ];
+
+  if (!shop) {
+    return <Text>Loading...</Text>;
+  }
 
   return (
     <View style={styles.container}>
@@ -52,7 +75,11 @@ export default function ShopDetail() {
           <>
             <Image
               source={{
-                uri: "https://i.pinimg.com/736x/7f/78/37/7f783761231551f96aadbaece6e7e1d9.jpg",
+                uri: shop.imageUrl
+                  ? `https://pettiehome.online/web/${shop.imageUrl}`
+                  : shop.imageFileName
+                  ? `https://pettiehome.online/web/${shop.imageFileName}`
+                  : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
               }}
               resizeMode="cover"
               style={styles.shopImage}
@@ -65,17 +92,13 @@ export default function ShopDetail() {
                   color="#ed7c44"
                   style={{ marginRight: 5 }}
                 />
-                <Text style={styles.shopname}>Tiệm Spa nhà Bụp </Text>
+                <Text style={styles.shopname}>{shop.name}</Text>
                 {/* <Text style={styles.texttitle}>
                   ID shop: <Text style={styles.text}>{shopId}</Text>
                 </Text> */}
               </View>
               <Text style={styles.texttitle}>
-                Giới thiệu:{" "}
-                <Text style={styles.text}>
-                  Nhà Bụp với 2 năm kinh nghiệm trong việc spa thú cưng, tụi
-                  mình luôn muốn bạn và thú cưng có trãi nghiệm tốt nhất.
-                </Text>
+                Giới thiệu: <Text style={styles.text}>{shop.description}</Text>
               </Text>
               <Text style={styles.texttitle}>
                 Thời gian hoạt động:{" "}
@@ -84,12 +107,12 @@ export default function ShopDetail() {
               <View style={styles.contentshop}>
                 <Text style={styles.shopDetails}>
                   Đánh giá: <AntDesign name="star" size={15} color="#ecc41c" />
-                  <Text style={styles.shopDetails2}> 4.5</Text>
+                  <Text style={styles.shopDetails2}> {shop.averageRating}</Text>
                 </Text>
                 <Text style={styles.shopDetails}>
                   Khoảng cách:{" "}
                   <Octicons name="location" size={14} color="#FE5977" />
-                  <Text style={styles.shopDetails2}> 5km</Text>
+                  <Text style={styles.shopDetails2}> {distance}</Text>
                 </Text>
               </View>
             </View>
@@ -220,7 +243,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingVertical: 12,
     paddingHorizontal: 15,
-    marginBottom: 10,
   },
   shopname: {
     fontSize: 16,
@@ -232,18 +254,20 @@ const styles = StyleSheet.create({
     flexDirection: "row", // Đặt icon và tên shop trên cùng một dòng
     alignItems: "center", // Căn giữa icon và tên theo chiều dọc
     justifyContent: "center", // Căn chúng bắt đầu từ bên trái
-    marginBottom: 8, // Khoảng cách bên dưới hàng
+    marginBottom: 8,
+    marginTop: 5, // Khoảng cách bên dưới hàng
   },
   inforshop: {
     alignItems: "flex-start",
-    marginBottom: 5,
+    marginBottom: 8,
   },
   texttitle: {
     fontWeight: "800",
     color: "#666",
     fontSize: 12.5,
-    lineHeight: 16,
+    lineHeight: 17,
     textAlign: "left",
+    marginBottom: 5,
   },
   text: {
     fontWeight: "400",
@@ -254,7 +278,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingBottom: 5,
+    paddingBottom: 8,
   },
   detailItem: {
     flexDirection: "row",

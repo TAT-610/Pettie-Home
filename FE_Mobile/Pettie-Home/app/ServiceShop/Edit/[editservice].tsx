@@ -1,5 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, TextInput, Button, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Alert, FlatList } from "react-native";
+import {
+  View,
+  TextInput,
+  Button,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  FlatList,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 import { editServiceById, getServiceById } from "@/services/shop/apiService";
@@ -11,7 +22,9 @@ export default function EditService() {
   const { id } = useLocalSearchParams();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<string | null>(null);
-  const [categories, setCategories] = useState<{ label: string; value: string }[]>([]);
+  const [categories, setCategories] = useState<
+    { label: string; value: string }[]
+  >([]);
   const [service, setService] = useState<{
     id?: string;
     name: string;
@@ -46,12 +59,12 @@ export default function EditService() {
         name: serviceData.name || "",
         categoryId: serviceData.categoryId || "",
         price: serviceData.price ? serviceData.price.toString() : "",
-        image: serviceData.imageUrl
+        image: serviceData.image
           ? {
-            uri: serviceData.imageUrl.uri,
-            type: serviceData.imageUrl.type || "image/jpeg", // Giá trị mặc định
-            fileName: serviceData.imageUrl.fileName || "default.jpg", // Giá trị mặc định
-          }
+              uri: serviceData.image.uri,
+              type: serviceData.image.type || "image/jpeg", // Giá trị mặc định
+              fileName: serviceData.image.fileName || "default.jpg", // Giá trị mặc định
+            }
           : null,
         description: serviceData.description || "",
       });
@@ -73,7 +86,8 @@ export default function EditService() {
 
   // Handle image selection
   const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permissionResult.granted) {
       Alert.alert("Lỗi", "Bạn cần cấp quyền để chọn ảnh!");
       return;
@@ -121,7 +135,10 @@ export default function EditService() {
       renderItem={() => (
         <View style={{ paddingBottom: 60 }}>
           <View style={styles.headerContainer}>
-            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
               <AntDesign name="left" size={24} color="#fff" />
             </TouchableOpacity>
             <Text style={styles.header}>Chỉnh sửa dịch vụ</Text>
@@ -129,7 +146,10 @@ export default function EditService() {
           <View style={styles.card}>
             <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
               {service.image?.uri ? (
-                <Image source={{ uri: service.image.uri }} style={styles.imagePreview} />
+                <Image
+                  source={{ uri: service.image.uri }}
+                  style={styles.imagePreview}
+                />
               ) : (
                 <Text>Chọn ảnh</Text>
               )}
@@ -170,14 +190,17 @@ export default function EditService() {
               value={service.description}
               onChangeText={(text) => handleChange("description", text)}
             />
-            <TouchableOpacity style={styles.addButton} onPress={handleUpdateServicet}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={handleUpdateServicet}
+            >
               <Text style={styles.buttonText}>Chỉnh sửa dịch vụ</Text>
             </TouchableOpacity>
           </View>
         </View>
       )}
     />
-  );  
+  );
 }
 
 const styles = StyleSheet.create({
@@ -194,7 +217,12 @@ const styles = StyleSheet.create({
   backButton: { marginRight: 10 },
   header: { fontSize: 22, fontWeight: "bold", color: "#fff" },
   card: { backgroundColor: "#fff", padding: 20, marginBottom: 20, margin: 5 },
-  imagePreview: { width: 100, height: 100, alignSelf: "center", marginBottom: 10 },
+  imagePreview: {
+    width: 100,
+    height: 100,
+    alignSelf: "center",
+    marginBottom: 10,
+  },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
@@ -203,7 +231,12 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: "#fff",
   },
-  dropdown: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, backgroundColor: "#fff" },
+  dropdown: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    backgroundColor: "#fff",
+  },
   priceContainer: { flexDirection: "row", justifyContent: "space-between" },
   halfInput: { width: "48%" },
   addButton: {
@@ -227,5 +260,3 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
-
-

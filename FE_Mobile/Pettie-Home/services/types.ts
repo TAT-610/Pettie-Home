@@ -44,10 +44,13 @@ export interface Service {
     name: string;
     price: string;
     status: string;
-    imageUrl: { uri: string; type: string; fileName?: string } | null;
-    imageFileName: string;
+    image: { uri: string; type: string; fileName?: string } | null;  // Cập nhật kiểu image
+
+    // imageUrl: { uri: string; type: string; fileName?: string } | null;
+    // imageFileName: string;
     description: string;
     categoryId: string;
+    category:string;
 }
 
 export interface GenerateEmailOTPRequest {
@@ -130,4 +133,31 @@ export interface ResendOtpDTO {
 export interface ConfirmEmailDTO {
     email: string;
     otp: number; //($int32)
+}
+export interface Shop {
+    id: string;
+    name: string;
+    description: string | null;
+    address: string;
+    phone: string;
+    email: string;
+    balance: number;
+    bankAccountNumber: string;
+    bankName: string;
+    bankAccountName: string;
+    dateOfBirth: string | null;
+    openingTime: string;
+    closingTime: string;
+   
+    averageRating: number;
+    totalRating: number;
+    imageUrl: { uri: string; type: string; fileName?: string } | null;
+    imageFileName?: string;
+}
+
+export interface Category {
+    id: string;
+    name: string;
+    description: string;
+    code: string;
 }
