@@ -9,56 +9,45 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { getServicesByShop } from "../../services/shop/apiShop";
 
-interface CatService {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-}
-const CatService = [
-  {
-    id: 1,
-    name: "Tắm cơ bản cho mèo dưới 5kg",
-    image:
-      "https://i.pinimg.com/736x/e1/7e/69/e17e69221a1a707186aef0f086711cd0.jpg",
-    price: 120,
-  },
-
-  {
-    id: 2,
-    name: "Combo Spa1: Tắm + Tỉa gọn lông cho mèo",
-    image:
-      "https://i.pinimg.com/736x/cd/cb/6b/cdcb6b1df06746d5802c8baede2b7b49.jpg",
-    price: 220,
-  },
-  {
-    id: 3,
-    name: "Combo Spa2: Tắm + Tạo kiểu cho mèo",
-    image:
-      "https://i.pinimg.com/736x/08/c1/16/08c116f72aaef1ba5f383cd2ad351046.jpg",
-    price: 320,
-  },
-  {
-    id: 44,
-    name: "Nhuộm lông + tạo kiểu cho mèo",
-    image:
-      "https://i.pinimg.com/736x/31/24/29/312429037fa87a4e035002e82a1b966d.jpg",
-    price: 350,
-  },
-];
-const ServicesOfCat = () => {
+const ServicesOfCat = ({ shopId }: { shopId: string }) => {
   const router = useRouter();
+  const [services, setServices] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const serviceData = await getServicesByShop(shopId);
+        const catServices = serviceData.filter(
+          (service: any) => service.category.name === "Mèo"
+        );
+        setServices(catServices);
+      } catch (error) {
+        console.error("Lỗi khi lấy dịch vụ cho mèo:", error);
+      }
+    };
+
+    fetchServices();
+  }, [shopId]);
+
   const handleProductPress = (serviceId: number) => {
-    router.push(`/ViewService/${serviceId}`); // Navigate to ProductDetail page
+    router.push(`/ViewService/${serviceId}?shopId=${shopId}`); // Navigate to ProductDetail page
   };
 
-  const renderItem = ({ item }: { item: CatService }) => (
+  const renderItem = ({ item }: { item: any }) => (
     <View style={styles.itemContainer}>
       <TouchableOpacity onPress={() => handleProductPress(item.id)}>
-        <Image source={{ uri: item.image }} style={styles.image} />
+        <Image
+          source={{
+            uri: item.image
+              ? `https://pettiehome.online/web/${item.image}`
+              : `https://pettiehome.online/web/${item.imageFileName}`,
+          }}
+          style={styles.image}
+        />
       </TouchableOpacity>
       <View style={styles.info}>
         <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
@@ -83,7 +72,7 @@ const ServicesOfCat = () => {
         <FontAwesome5 name="cat" size={16} color="black" /> Dịch vụ cho mèo:
       </Text>
       <FlatList
-        data={CatService}
+        data={services}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.list}

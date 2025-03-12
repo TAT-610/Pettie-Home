@@ -22,7 +22,10 @@ const ServiceOfDog = ({ shopId }: { shopId: string }) => {
     const fetchServices = async () => {
       try {
         const serviceData = await getServicesByShop(shopId);
-        setServices(serviceData);
+        const dogServices = serviceData.filter(
+          (service: any) => service.category.name === "Chó"
+        );
+        setServices(dogServices);
       } catch (error) {
         console.error("Lỗi khi lấy dịch vụ cho chó:", error);
       }
@@ -32,7 +35,7 @@ const ServiceOfDog = ({ shopId }: { shopId: string }) => {
   }, [shopId]);
 
   const handleProductPress = (serviceId: number) => {
-    router.push(`/ViewService/${serviceId}`); // Navigate to ProductDetail page
+    router.push(`/ViewService/${serviceId}?shopId=${shopId}`); // Navigate to ProductDetail page with shopId
   };
 
   const renderItem = ({ item }: { item: any }) => (
@@ -53,7 +56,7 @@ const ServiceOfDog = ({ shopId }: { shopId: string }) => {
         </Text>
         <View style={styles.contentcard}>
           <View>
-            <Text style={styles.price}>{item.price}đ</Text>
+            <Text style={styles.price}>{item.price}.000đ</Text>
             <TouchableOpacity onPress={() => handleProductPress(item.id)}>
               <Text style={styles.detail}>Xem chi tiết</Text>
             </TouchableOpacity>

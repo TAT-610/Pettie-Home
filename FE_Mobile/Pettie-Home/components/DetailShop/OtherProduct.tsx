@@ -35,7 +35,7 @@ const OtherProduct = ({ shopId }: { shopId: string }) => {
 
   const handleProductPress = (productId: number) => {
     // router.push(`/ViewService/${serviceId}`); // Navigate to ProductDetail page
-    router.push(`/ViewProduct/${productId}`);
+    router.push(`/ViewProduct/${productId}?shopId=${shopId}`);
   };
 
   const renderItem = ({ item }: { item: any }) => (
