@@ -13,7 +13,6 @@ import * as ImagePicker from "expo-image-picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { editProductById, getAllCategories, getProductById } from "@/services/shop/apiproduct";
 import { AntDesign } from "@expo/vector-icons";
-import DropDownPicker from "react-native-dropdown-picker";
 
 export default function EditProduct() {
   const router = useRouter();
