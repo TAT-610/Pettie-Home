@@ -40,10 +40,6 @@ export default function EditProduct() {
     description: "",
   });
 
-  const [open, setOpen] = useState(false);
-  const [category, setCategory] = useState<string | null>(null);
-  const [categories, setCategories] = useState<{ label: string; value: string }[]>([]);
-
   // Fetch product details when the component mounts
   useEffect(() => {
     if (id) {
@@ -77,7 +73,6 @@ export default function EditProduct() {
         brand: productData.brand || "",
         description: productData.description || "",
       });
-      setCategory(productData.categoryId);
     } catch (error) {
       Alert.alert("Lỗi", "Không thể tải thông tin sản phẩm.");
     }
@@ -162,23 +157,6 @@ export default function EditProduct() {
               value={product.name}
               onChangeText={(text) => handleChange("name", text)}
             />
-            <View style={{ zIndex: 1000, marginBottom: 17 }}>
-              <DropDownPicker
-                open={open}
-                value={category}
-                items={categories}
-                setOpen={setOpen}
-                setValue={setCategory}
-                setItems={setCategories}
-                placeholder="Chọn danh mục"
-                onChangeValue={(val) => {
-                  if (val) {
-                    setCategory(val);
-                    setProduct((prev) => ({ ...prev, categoryId: val }));
-                  }
-                }}
-              />
-            </View>
             <TextInput
               style={styles.input}
               placeholder="Thương hiệu sản phẩm"
