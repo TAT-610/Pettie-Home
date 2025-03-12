@@ -4,22 +4,28 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 import { editServiceById, getServiceById } from "@/services/shop/apiService";
 import * as ImagePicker from "expo-image-picker";
+import DropDownPicker from "react-native-dropdown-picker";
 
 export default function EditService() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
+  const [open, setOpen] = useState(false);
+  const [category, setCategory] = useState<string | null>(null);
+  const [categories, setCategories] = useState<{ label: string; value: string }[]>([]);
   const [service, setService] = useState<{
     id?: string;
     name: string;
     price: string;
     image: { uri: string; type: string; fileName: string } | null;
     description: string;
+    categoryId: string;
   }>({
     id: "",
     name: "",
     price: "",
     image: null,
     description: "",
+    categoryId: "",
   });
 
   useEffect(() => {
@@ -38,6 +44,7 @@ export default function EditService() {
       setService({
         id: serviceData.id || "",
         name: serviceData.name || "",
+        categoryId: serviceData.categoryId || "",
         price: serviceData.price ? serviceData.price.toString() : "",
         image: serviceData.imageUrl
           ? {
@@ -48,20 +55,21 @@ export default function EditService() {
           : null,
         description: serviceData.description || "",
       });
+      setCategory(serviceData.categoryId);
     } catch (error) {
       Alert.alert("Lỗi", "Không thể tải thông tin dich vu.");
     }
   };
 
   const handleChange = useCallback(
-      (field: keyof typeof service, value: string | number) => {
-        setService((prev) => ({
-          ...prev,
-          [field]: field === "price" ? parseFloat(value as string) || 0 : value,
-        }));
-      },
-      []
-    );
+    (field: keyof typeof service, value: string | number) => {
+      setService((prev) => ({
+        ...prev,
+        [field]: field === "price" ? parseFloat(value as string) || 0 : value,
+      }));
+    },
+    []
+  );
 
   // Handle image selection
   const pickImage = async () => {
@@ -107,48 +115,70 @@ export default function EditService() {
   };
 
   return (
-    <ScrollView contentContainerStyle={{ paddingBottom: 60 }}>
-      <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <AntDesign name="left" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.header}>Chỉnh sửa dịch vụ</Text>
-      </View>
-      <View style={styles.card}>
-        <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
-          {service.image?.uri ? (
-            <Image source={{ uri: service.image.uri }} style={styles.imagePreview} />
-          ) : (
-            <Text>Chọn ảnh</Text>
-          )}
-        </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          placeholder="Tên dịch vụ"
-          value={service.name}
-          onChangeText={(text) => handleChange("name", text)} // ✅ Đúng
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Giá dịch vụ VND"
-          keyboardType="numeric"
-          value={service.price}
-          onChangeText={(text) => handleChange("price", text)} // ✅ Đúng
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Chi tiết dịch vụ"
-          value={service.description}
-          onChangeText={(text) => handleChange("description", text)} // ✅ Đúng
-        />
-
-        <TouchableOpacity style={styles.addButton} onPress={handleUpdateServicet}>
-          <Text style={styles.buttonText}>Chỉnh sửa dịch vụ</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
-};
+    <FlatList
+      data={[{ key: "form" }]}
+      keyExtractor={(item) => item.key} // ✅ Đặt đúng vị trí
+      renderItem={() => (
+        <View style={{ paddingBottom: 60 }}>
+          <View style={styles.headerContainer}>
+            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+              <AntDesign name="left" size={24} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.header}>Chỉnh sửa dịch vụ</Text>
+          </View>
+          <View style={styles.card}>
+            <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+              {service.image?.uri ? (
+                <Image source={{ uri: service.image.uri }} style={styles.imagePreview} />
+              ) : (
+                <Text>Chọn ảnh</Text>
+              )}
+            </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Tên dịch vụ"
+              value={service.name}
+              onChangeText={(text) => handleChange("name", text)}
+            />
+            <View style={{ zIndex: 1000, marginBottom: 17 }}>
+              <DropDownPicker
+                open={open}
+                value={category}
+                items={categories}
+                setOpen={setOpen}
+                setValue={setCategory}
+                setItems={setCategories}
+                placeholder="Chọn danh mục"
+                onChangeValue={(val) => {
+                  if (val) {
+                    setCategory(val);
+                    setService((prev) => ({ ...prev, categoryId: val }));
+                  }
+                }}
+              />
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Giá dịch vụ VND"
+              keyboardType="numeric"
+              value={service.price}
+              onChangeText={(text) => handleChange("price", text)}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Chi tiết dịch vụ"
+              value={service.description}
+              onChangeText={(text) => handleChange("description", text)}
+            />
+            <TouchableOpacity style={styles.addButton} onPress={handleUpdateServicet}>
+              <Text style={styles.buttonText}>Chỉnh sửa dịch vụ</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+    />
+  );  
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#e9f1ff" },
