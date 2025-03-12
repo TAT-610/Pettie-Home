@@ -16,7 +16,7 @@ import { getProductsByShop } from "../../services/shop/apiShop";
 interface CatService {
   id: number;
   name: string;
-  image: string;
+  image: { uri: string; type: string; fileName: string } | null;
   price: number;
 }
 

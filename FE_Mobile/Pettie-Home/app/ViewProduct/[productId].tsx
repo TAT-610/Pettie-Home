@@ -18,7 +18,6 @@ import axios from "axios";
 
 const BASE_URL = "http://14.225.198.232:8080/api/v1";
 
-// Thêm interface này sau phần imports
 interface Product {
   id: number;
   name: string;

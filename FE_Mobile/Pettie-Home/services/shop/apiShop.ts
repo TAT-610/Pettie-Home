@@ -58,3 +58,16 @@ export const getProductsByShop = async (shopId: string): Promise<any[]> => {
     return [];
   }
 };
+export const getServicesByShop = async (shopId: string): Promise<any[]> => {
+  try {
+    const response = await axios.get(`${BASE_URL}/shops/${shopId}`);
+    if (response.data.success && response.data.data) {
+      return response.data.data.services;
+    } else {
+      throw new Error("Dữ liệu sản phẩm không hợp lệ.");
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy sản phẩm:", error);
+    return [];
+  }
+};
