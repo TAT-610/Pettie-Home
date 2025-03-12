@@ -44,8 +44,10 @@ export interface Service {
     name: string;
     price: string;
     status: string;
-    imageUrl: { uri: string; type: string; fileName?: string } | null;
-    imageFileName: string;
+    image: { uri: string; type: string; fileName?: string } | null;  // Cập nhật kiểu image
+
+    // imageUrl: { uri: string; type: string; fileName?: string } | null;
+    // imageFileName: string;
     description: string;
     categoryId: string;
 }
