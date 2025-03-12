@@ -1,26 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  View,
-  TextInput,
-  Alert,
-  Image,
-  FlatList,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-} from "react-native";
+import { View, TextInput, Alert, Image, FlatList, TouchableOpacity, Text, StyleSheet,} from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { editProductById, getAllCategories, getProductById } from "@/services/shop/apiproduct";
+import { editProductById, getProductById } from "@/services/shop/apiproduct";
 import { AntDesign } from "@expo/vector-icons";
-import DropDownPicker from "react-native-dropdown-picker";
 
 export default function EditProduct() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [product, setProduct] = useState<{
     id?: string;
-    categoryId: string;
     name: string;
     price: string;
     stock: string;
@@ -30,7 +19,6 @@ export default function EditProduct() {
     description: string;
   }>({
     id: "",
-    categoryId: "",
     name: "",
     price: "",
     stock: "",
@@ -48,7 +36,6 @@ export default function EditProduct() {
   }, [id]);
 
   // Fetch product details by ID
-  // Fetch product details by ID
   const fetchProduct = async () => {
     try {
       const productData = await getProductById(id as string);
@@ -58,7 +45,6 @@ export default function EditProduct() {
       }
       setProduct({
         id: productData.id || "",
-        categoryId: productData.categoryId || "",
         name: productData.name || "",
         price: productData.price ? productData.price.toString() : "",
         stock: productData.stock ? productData.stock.toString() : "",
@@ -118,7 +104,7 @@ export default function EditProduct() {
 
   // Handle product update
   const handleUpdateProduct = async () => {
-    if (!product.name || !product.price || !product.stock || !product.categoryId) {
+    if (!product.name || !product.price || !product.stock) {
       Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin sản phẩm.");
       return;
     }
