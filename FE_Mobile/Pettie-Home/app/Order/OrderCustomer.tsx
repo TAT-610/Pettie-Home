@@ -9,7 +9,7 @@ import {
   Modal,
   FlatList,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
@@ -17,6 +17,9 @@ import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { getUserAccount } from "@/services/user/auth";
+import { Profile } from "@/services/types";
+import { getCart } from "@/services/user/cart";
 const orderSummary = [
   {
     serviceId: 1,
@@ -89,10 +92,30 @@ const OrderCustomer = () => {
   const [selectedTime, setSelectedTime] = useState("15:00");
   const [isModalVisible, setModalVisible] = useState(false);
   const [isPhoneModalVisible, setPhoneModalVisible] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("0886133779");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [newPhoneNumber, setNewPhoneNumber] = useState(phoneNumber);
   const defaultAddress =
     "Tòa Bs16, 88 Phước Thiện, Khu phố 29, Quận 9, Hồ Chí Minh";
+  const [userInfo, setUserInfo] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await getUserAccount();
+        const data: Profile = response.data; // Lấy dữ liệu từ thuộc tính `data`
+        setUserInfo(data);
+        setPhoneNumber(data.phoneNumber); // Gán giá trị cho phoneNumber sau khi userInfo đã được gán
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  if (!userInfo) {
+    return <Text>Loading user information...</Text>;
+  }
 
   const handleChooseAddress = () => {
     router.push("/Order/Address");
@@ -265,6 +288,20 @@ const OrderCustomer = () => {
             elevation: 5,
           }}
         >
+          <View style={styles.content}>
+            <Text style={styles.sectionTitle}>
+              <FontAwesome6 name="user" size={16} color="#ed7c44" /> Thông tin
+              người dùng:
+            </Text>
+            <Text style={styles.addressText}>
+              Họ và tên: {userInfo.fullName}
+            </Text>
+            <Text style={styles.addressText}>Email: {userInfo.email}</Text>
+            <Text style={styles.addressText}>
+              Số điện thoại: {userInfo.phoneNumber}
+            </Text>
+          </View>
+
           <View style={styles.content}>
             <Text style={styles.sectionTitle}>
               <FontAwesome6 name="location-dot" size={16} color="#ed7c44" /> Địa
