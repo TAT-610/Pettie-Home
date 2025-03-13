@@ -131,7 +131,7 @@ export default function ShopDetail() {
   }, [shopId]);
 
   const handleOrderPress = () => {
-    router.push(`/Order/OrderCustomer`);
+    router.push(`/Order/OrderCustomer?shopId=${shopId}`);
   };
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
