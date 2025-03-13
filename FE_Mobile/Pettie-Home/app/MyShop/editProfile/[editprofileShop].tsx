@@ -51,7 +51,7 @@ const EditProfileShop = () => {
   const handleSaveProfile = async () => {
     try {
       setUploading(true);
-      
+
       const formData = new FormData();
       formData.append("name", profileData.name);
       formData.append("phone", profileData.phone);
@@ -62,7 +62,7 @@ const EditProfileShop = () => {
       formData.append("bankAccountNumber", profileData.bankAccountNumber);
       formData.append("bankName", profileData.bankName);
       formData.append("bankAccountName", profileData.bankAccountName);
-  
+
       // Nếu có ảnh mới, thêm vào FormData
       if (selectedImage) {
         formData.append("image", {
@@ -71,9 +71,9 @@ const EditProfileShop = () => {
           type: selectedImage.type,
         });
       }
-  
+
       const response = await editProfileShop(profileData, formData);
-  
+
       if (response?.data) {
         setProfileData(response.data);
         setSuccessModalVisible(true);
@@ -85,7 +85,7 @@ const EditProfileShop = () => {
       setUploading(false);
     }
   };
-  
+
 
   return (
     <ScrollView style={styles.container}>
@@ -97,16 +97,16 @@ const EditProfileShop = () => {
 
         {/* Avatar */}
         <TouchableOpacity onPress={handlePickImage} disabled={isUploading}>
-        <Image
-  source={{
-    uri: selectedImage
-      ? selectedImage.uri
-      : profileData.imageUrl
-      ? `https://pettiehome.online/web/${profileData.imageUrl}`
-      : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaZPYOSQUJW4zOM9FTxASvMzRDAUaVmJCGFQ&s',
-  }}
-  style={styles.avatar}
-/>
+          <Image
+            source={{
+              uri: selectedImage
+                ? selectedImage.uri
+                : profileData.imageUrl
+                  ? `https://pettiehome.online/web/${profileData.imageUrl}`
+                  : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaZPYOSQUJW4zOM9FTxASvMzRDAUaVmJCGFQ&s',
+            }}
+            style={styles.avatar}
+          />
           {isUploading && <Text style={styles.uploadingText}>Đang tải...</Text>}
         </TouchableOpacity>
       </View>

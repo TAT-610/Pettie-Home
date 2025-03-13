@@ -158,21 +158,25 @@ export const getProductById = async (id: string): Promise<Products | null> => {
       throw error;
     }
   };
-  
-  export const getAllCategories = async (): Promise<any[]> => {
-    const accessToken = AsyncStorage.getItem("access_token");
-    if (!accessToken) throw new Error("Chưa có access_token");
-  
+
+  export const deleteProduct = async (id: string): Promise<any> => {
     try {
-      const response = await axios.get(`${BASE_URL_2}/categories`, {
+      const access_token = await AsyncStorage.getItem("access_token");
+      if (!access_token) {
+        throw new Error("Access token is not found");
+      }
+  
+      const response = await axios.delete(`${BASE_URL_2}/products/${id}`, {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Bearer ${access_token}`,
+          "Content-Type": "application/json",
         },
       });
-      return response.data.data.items || [];
-    } catch (error) {
-      console.error("Lỗi lấy danh mục:", error);
-      return [];
+  
+      console.log("✅ Product Deleted Successfully:", response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error("❌ Lỗi khi xóa sản phẩm:", error);
+      throw error;
     }
   };
-  

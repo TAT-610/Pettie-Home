@@ -160,6 +160,28 @@ export const editServiceById = async (id: string, serviceData: Partial<Service>)
   }
 };
 
+export const deleteService = async (id: string): Promise<any> => {
+  try {
+    const access_token = await AsyncStorage.getItem("access_token");
+    if (!access_token) {
+      throw new Error("Access token is not found");
+    }
+
+    const response = await axios.delete(`${BASE_URL_2}/shops-services/${id}`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("✅ Services Deleted Successfully:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.error("❌ Lỗi khi xóa dịch vụ:", error);
+    throw error;
+  }
+};
+
 export const getAllCategories = async (): Promise<any[]> => {
   const accessToken = AsyncStorage.getItem("access_token");
   if (!accessToken) throw new Error("Chưa có access_token");
