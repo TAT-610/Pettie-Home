@@ -5,15 +5,16 @@ import ServicesShop from "@/components/ShopScreen/product/ServicesShop";
 export default function home() {
   return (
     <FlatList
-          data={[]}
-          renderItem={null}
-          ListFooterComponent={() => (
-            <>
-              <View style={{ backgroundColor: "#e9f1ff"}}>
-                <ServicesShop />
-              </View>
-            </>
-          )}
-        />
+      style={{ backgroundColor: "#e9f1ff" }}
+      data={[]}
+      renderItem={null}
+      ListFooterComponent={() => (
+        <>
+          <View>
+            <ServicesShop />
+          </View>
+        </>
+      )}
+    />
   );
 }

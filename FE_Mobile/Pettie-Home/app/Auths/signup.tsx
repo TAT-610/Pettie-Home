@@ -1,4 +1,3 @@
-
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -12,11 +11,12 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Linking,
 } from "react-native";
 import logo from "../../assets/images/login.png";
 import { resendOtp, signUpShop, signUpUser } from "@/services/user/auth";
 import { ResendOtpType } from "@/services/types";
-
+import * as WebBrowser from "expo-web-browser";
 
 export default function Register() {
   const router = useRouter();
@@ -31,6 +31,17 @@ export default function Register() {
   const [bankName, setBankName] = useState(""); // Tên ngân hàng
   const [bankAccountNumber, setBankAccountNumber] = useState(""); // Số tài khoản ngân hàng
   const [bankAccountName, setBankAccountName] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false); // State cho việc chấp nhận điều khoản
+
+  // Hàm mở WebView với URL điều khoản
+  const openPrivacyPolicy = async () => {
+    try {
+      await WebBrowser.openBrowserAsync("http://14.225.198.232:8080/api/v1/privacy-policy");
+    } catch (error) {
+      console.error("Error opening privacy policy:", error);
+      Alert.alert("Lỗi", "Không thể mở trang điều khoản. Vui lòng thử lại sau.");
+    }
+  };
 
   const handleSignUpUser = async () => {
     try {
@@ -41,6 +52,11 @@ export default function Register() {
 
       if (password !== confirmPassword) {
         Alert.alert("Lỗi", "Mật khẩu xác nhận không khớp.");
+        return;
+      }
+
+      if (!acceptTerms) {
+        Alert.alert("Lỗi", "Vui lòng chấp nhận điều khoản và điều kiện để tiếp tục.");
         return;
       }
 
@@ -97,7 +113,6 @@ export default function Register() {
       Alert.alert("Lỗi", "Có lỗi xảy ra, vui lòng thử lại.");
     }
   };
-
 
   return (
     <ScrollView
@@ -181,7 +196,6 @@ export default function Register() {
             />
           </>
         )}
-
       </View>
 
       {/* Chọn vai trò bằng Ionicons */}
@@ -213,7 +227,34 @@ export default function Register() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.registerButton} onPress={handleSignUpUser}>
+      {/* Phần chấp nhận điều khoản */}
+      <View style={styles.termsContainer}>
+        <TouchableOpacity
+          style={styles.checkboxContainer}
+          onPress={() => setAcceptTerms(!acceptTerms)}
+        >
+          <Ionicons
+            name={acceptTerms ? "checkbox" : "square-outline"}
+            size={24}
+            color={acceptTerms ? "#ed7c44" : "#666"}
+          />
+          <Text style={styles.termsText}>
+            Tôi đồng ý với{" "}
+            <Text style={styles.termsLink} onPress={openPrivacyPolicy}>
+              điều khoản và điều kiện
+            </Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity 
+        style={[
+          styles.registerButton, 
+          !acceptTerms && styles.disabledButton
+        ]} 
+        onPress={handleSignUpUser}
+        disabled={!acceptTerms}
+      >
         <Text style={styles.registerText}>Đăng ký</Text>
       </TouchableOpacity>
 
@@ -267,6 +308,25 @@ const styles = StyleSheet.create({
   },
   radioOption: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
   radioText: { fontSize: 16, marginLeft: 10 },
+  termsContainer: {
+    width: "85%",
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  termsText: {
+    marginLeft: 10,
+    fontSize: 14,
+    flexShrink: 1,
+  },
+  termsLink: {
+    color: "#ed7c44",
+    textDecorationLine: "underline",
+    fontWeight: "bold",
+  },
   registerButton: {
     backgroundColor: "#ed7c44",
     paddingVertical: 12,
@@ -276,7 +336,10 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginBottom: 5,
   },
+  disabledButton: {
+    backgroundColor: "#cccccc",
+  },
   registerText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  loginText: { textAlign: "center", marginTop: 20, fontSize: 14 },
+  loginText: { textAlign: "center", marginTop: 20, fontSize: 14, marginBottom: 20 },
   registerLink: { fontWeight: "bold", color: "#000" },
 });

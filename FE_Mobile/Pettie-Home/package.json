@@ -37,7 +37,7 @@
     "expo-status-bar": "~2.0.0",
     "expo-symbols": "~0.2.0",
     "expo-system-ui": "~4.0.6",
-    "expo-web-browser": "~14.0.1",
+    "expo-web-browser": "~14.0.2",
     "jwt-decode": "^4.0.0",
     "pettie-home": "file:",
     "react": "18.3.1",

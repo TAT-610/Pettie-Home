@@ -54,7 +54,7 @@ const ProfileShop = () => {
   };
   // anh sua lai cau truc thu muc o MyShop, noi na`o ma su dung 2 th` do la phai import lai
   const handleWallet = () => {
-    // router.push(`/MyShop/Wallet/[walletshop]?id=${profile.id}`);
+    router.push(`/MyShop/Wallet/[walletshop]?id=${profile.id}`);
   };
   // tab doanh thu đó là component nào e
   const stats = [
@@ -100,49 +100,27 @@ const ProfileShop = () => {
         </View>
       </View>
 
-      {/* Menu */}
-      <TouchableOpacity style={styles.menuItem} >
-        <View style={styles.menuItemLeft}>
-          <FontAwesome name="shopping-cart" size={20} color="#ed7c44" />
-          <Text style={styles.menuText}>Thông tin đơn hàng</Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.menuItem} >
-        <View style={styles.menuItemLeft}>
-          <Ionicons name="add-circle" size={20} color="#ed7c44" />
-          <Text style={styles.menuText}>Thêm sản phẩm</Text>
-        </View>
-      </TouchableOpacity>
-
       <TouchableOpacity style={styles.menuItem} onPress={handleWallet}>
         <View style={styles.menuItemLeft}>
           <FontAwesome5 name="money-bill-wave" size={19} style={{ marginRight: -2 }} color="#ed7c44" />
           <Text style={styles.menuText}>Doanh thu</Text>
         </View>
-        <Text style={styles.menuValue}>20.250.000 đ</Text>
+        <Text style={styles.menuValue}>9.250.000 đ</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.menuItem} >
-        <View style={styles.menuItemLeft}>
-          <Ionicons name="storefront-sharp" size={20} color="#ed7c44" />
-          <Text style={styles.menuText}>Đăng ký mở cửa hàng</Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.menuItem}>
+      <View style={styles.menuItem}>
         <View style={styles.menuItemLeft}>
           <FontAwesome name="question-circle-o" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Hỗ trợ</Text>
         </View>
-      </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity style={styles.menuItem} >
+      <View style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
           <FontAwesome name="cogs" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Cài đặt</Text>
         </View>
-      </TouchableOpacity>
+      </View>
 
       <TouchableOpacity style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
@@ -155,13 +133,6 @@ const ProfileShop = () => {
         <View style={styles.menuItemLeft}>
           <FontAwesome name="edit" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Chỉnh sửa thông tin</Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.menuItem} >
-        <View style={styles.menuItemLeft}>
-          <FontAwesome5 name="briefcase-medical" size={20} color="#ed7c44" />
-          <Text style={styles.menuText}>Thêm dịch vụ</Text>
         </View>
       </TouchableOpacity>
 
