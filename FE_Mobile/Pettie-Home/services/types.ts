@@ -43,13 +43,12 @@ export interface Service {
     id: string;
     name: string;
     price: string;
-    status: string;
     image: { uri: string; type: string; fileName?: string } | null;  // Cập nhật kiểu image
     imageUrl: { uri: string; type: string; fileName?: string } | null;
-    // imageFileName: string;
-    description: string;
-    categoryId: string;
-    category:string;
+    status?: string; // Tùy chọn
+    description?: string; // Tùy chọn
+    categoryId?: string;
+    category: string;
 }
 
 export interface Category {
@@ -57,7 +56,36 @@ export interface Category {
     name: string;
     description: string;
     isActive: boolean;
-  };
+};
+
+interface OrderDetail {
+    code: string;
+    shopService: Service;
+    product: Products;
+    quantity: number;
+    price: number;
+}
+type OrderStatus = "Pending" | "AwaitingSchedule" | "InProgress" | "Completed" | "Canceled";
+
+export interface Orders {
+    id: string;
+    orderNumber: string;
+    buyerName: string;
+    buyerPhone: string;
+    buyerAddress: string;
+    buyerEmail: string;
+    note: string | null;
+    paymentMethod: string;
+    paymentStatus: string;
+    shippingName: string | null;
+    shippingFee: number;
+    status: OrderStatus; // Sử dụng kiểu OrderStatus
+    totalAmount: number;
+    appointmentDate: string;
+    cancelReason: string | null;
+    orderDetails: OrderDetail[];
+}
+
 
 export interface GenerateEmailOTPRequest {
     email: string, //($email && minLength: 1)
@@ -154,7 +182,7 @@ export interface Shop {
     dateOfBirth: string | null;
     openingTime: string;
     closingTime: string;
-   
+
     averageRating: number;
     totalRating: number;
     imageUrl: { uri: string; type: string; fileName?: string } | null;
@@ -167,9 +195,9 @@ export interface Category {
     description: string;
     code: string;
 }
-export interface Cart{
-    shopId:string;
-    ShopServiceId:string;
-    productId:string;
-    quantity:number;
+export interface Cart {
+    shopId: string;
+    ShopServiceId: string;
+    productId: string;
+    quantity: number;
 }

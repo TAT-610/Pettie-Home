@@ -48,31 +48,38 @@ const ServicesShop = () => {
   useFocusEffect(
     useCallback(() => {
       if (!shopId) return;
-
+  
       const fetchServices = async () => {
         try {
           setLoading(true); // Bắt đầu loading
           const serviceData = await getServicesByShop(shopId, 1, 100);
-          const formattedServices = serviceData
-            .filter((service: any) => service.category.name === activeTab)
-            .map((service: any) => ({
-              id: service.id,
-              name: service.name,
-              price: service.price,
-              category: service.category.name,
-              imageUrl: service.imageUrl || service.imageFileName,
-            }));
-          setServices(formattedServices);
-          console.log("data service:", formattedServices);
+  
+          if (Array.isArray(serviceData)) {
+            const formattedServices = serviceData
+              .filter((service: any) => service.category.name === activeTab)
+              .map((service: any) => ({
+                id: service.id,
+                name: service.name,
+                price: service.price,
+                category: service.category.name,
+                imageUrl: service.imageUrl || service.imageFileName,
+                image: service.imageUrl || service.imageFileName,
+              }));
+            setServices(formattedServices);
+            console.log("data service:", formattedServices);
+          } else {
+            console.error("serviceData không phải là một mảng");
+            setServices([]);
+          }
         } catch (error) {
-          console.error("Lỗi khi lấy dich vu:", error);
+          console.error("Lỗi khi lấy dịch vụ:", error);
         } finally {
           setLoading(false);
         }
       };
-
+  
       fetchServices();
-    }, [shopId])
+    }, [shopId, activeTab])
   );
 
   const filteredServices = useMemo(

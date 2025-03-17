@@ -5,12 +5,10 @@ import { Service } from "@/services/types";
 const BASE_URL_2 = "http://14.225.198.232:8080/api/v1";
 
 export const getServicesByShop = async (
-  shopid: string,
+  shopId: string,
   pageNumber = 1,
   pageSize = 100
 ) => {
-  console.log("ShopId req", shopid);
-
   try {
     const access_token = await AsyncStorage.getItem("access_token");
     if (!access_token) {
@@ -18,27 +16,22 @@ export const getServicesByShop = async (
     }
 
     const response = await axios.get(`${BASE_URL_2}/shop-services`, {
-      params: { shopId: shopid, pageNumber, pageSize },
+      params: { shopId, pageNumber, pageSize },
       headers: {
         Authorization: `Bearer ${access_token}`,
         "Content-Type": "application/json",
       },
     });
 
-    console.log("get dịch vụ by shop data:", response.data); // Check the response structure
+    console.log("get dịch vụ by shop data:", response.data);
 
     if (response.data.success) {
-      // Kiểm tra cấu trúc dữ liệu trả về
-      if (response.data.data && Array.isArray(response.data.data.items)) {
-        return response.data.data.items; // Trả về danh sách dịch vụ
-      } else {
-        throw new Error("Dữ liệu dịch vụ không hợp lệ.");
-      }
+      return response.data.data.items; // Trả về mảng các dịch vụ
     } else {
-      throw new Error(response.data.message || "Failed to fetch dich vu");
+      throw new Error(response.data.message || "Failed to fetch dịch vụ");
     }
   } catch (error) {
-    console.error("Error fetching dich vu:", error);
+    console.error("Error fetching dịch vụ:", error);
     throw error;
   }
 };
@@ -48,7 +41,7 @@ export const createServices = async (serviceData: Partial<Service>): Promise<any
   try {
     const access_token = await AsyncStorage.getItem("access_token");
     if (!access_token) {
-        throw new Error("Access token is missing. Please log in again.");
+      throw new Error("Access token is missing. Please log in again.");
     }
 
     // Tạo FormData
@@ -60,24 +53,24 @@ export const createServices = async (serviceData: Partial<Service>): Promise<any
 
     if (serviceData.image && typeof serviceData.image === "object" && "uri" in serviceData.image) {
       formData.append("image", {
-          uri: serviceData.image.uri,
-          type: serviceData.image.type,
-          name: serviceData.image.fileName || "image.jpg",
+        uri: serviceData.image.uri,
+        type: serviceData.image.type,
+        name: serviceData.image.fileName || "image.jpg",
       } as any); // TypeScript có thể cần `as any` để tránh lỗi kiểu dữ liệu
-  }
+    }
 
     console.log("FormData Sent:", formData);
 
     const response = await axios.post(`${BASE_URL_2}/shop-services`, formData, {
-        headers: {
-            Authorization: `Bearer ${access_token}`,
-            "Content-Type": "multipart/form-data",
-        },
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "multipart/form-data",
+      },
     });
 
     console.log("Product Created Successfully:", response.data);
     return response.data;
-} catch (error: any) {
+  } catch (error: any) {
     console.error("Lỗi khi thêm dich vu:", error);
     throw error;
   }

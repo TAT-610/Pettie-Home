@@ -83,9 +83,9 @@ const ProfileShop = () => {
             </View>
           </View>
         </View>
-        <TouchableOpacity style={styles.notificationIcon}>
+        <View style={styles.notificationIcon}>
           <FontAwesome name="bell" size={20} color="#fff" />
-        </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.statsContainer}>
@@ -122,12 +122,12 @@ const ProfileShop = () => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.menuItem} >
+      <View style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
           <FontAwesome name="file-text" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Điều khoản & Chính sách</Text>
         </View>
-      </TouchableOpacity>
+      </View>
 
       <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
         <View style={styles.menuItemLeft}>

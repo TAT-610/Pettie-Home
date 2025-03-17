@@ -1,67 +1,123 @@
+import React, { useCallback, useMemo, useState, useEffect } from "react";
+import { Alert, Dimensions, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { Animated, Dimensions, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View, } from "react-native";
+import { getOrderByShop, updateOrderStatus } from "@/services/shop/apiOrder";
+import { Orders } from "@/services/types";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const orders = [
-    {
-        id: "1",
-        customerName: "Trần Thị Thanh Thảo",
-        services: [
-            { name: "Cắt tỉa lông (Chó/Mèo) < 3kg", quantity: 1 },
-            { name: "Tắm và vệ sinh (Chó/Mèo) < 3kg", quantity: 1 },
-            { name: "Nhuọm lông (Chó/Mèo) < 6kg", quantity: 1 },
-            { name: "Hạt mèo", quantity: 1 },
-            { name: "Nệm nằm cho mèo", quantity: 1 },
-        ],
-        total: "900.000 VNĐ",
-        status: "Chờ xác nhận",
-    },
-    {
-        id: "2",
-        customerName: "Nguyễn Văn A",
-        services: [
-            { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
-        ],
-        total: "935.000 VNĐ",
-        status: "Chờ xác nhận",
-    },
-    {
-        id: "3",
-        customerName: "Nguyễn Văn A",
-        services: [
-            { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
-        ],
-        total: "935.000 VNĐ",
-        status: "Chờ xác nhận",
-    },
-    {
-        id: "4",
-        customerName: "Nguyễn Văn A",
-        services: [
-            { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
-        ],
-        total: "935.000 VNĐ",
-        status: "Chờ ngày hẹn",
-    },
-    {
-        id: "5",
-        customerName: "Nguyễn Văn A",
-        services: [
-            { name: "Tắm và vệ sinh (Chó/Mèo) 3kg-10kg", quantity: 2 },
-        ],
-        total: "935.000 VNĐ",
-        status: "Đang diễn ra",
-    },
-];
-
 const tabs = ["Chờ xác nhận", "Chờ ngày hẹn", "Đang diễn ra", "Đã hoàn thành", "Đã hủy"];
+type OrderStatus = "Pending" | "AwaitingSchedule" | "InProgress" | "Completed" | "Canceled";
 
-const OrderActions = ({ onAccept, onCancel }: { onAccept: () => void; onCancel: () => void }) => {
+// Hàm ánh xạ activeTab sang status
+const mapTabToStatus = (tab: string) => {
+    switch (tab) {
+        case "Chờ xác nhận":
+            return "Pending";
+        case "Chờ ngày hẹn":
+            return "AwaitingSchedule";
+        case "Đang diễn ra":
+            return "InProgress";
+        case "Đã hoàn thành":
+            return "Completed";
+        case "Đã hủy":
+            return "Canceled";
+        default:
+            return undefined;
+    }
+};
+
+// Hàm chuyển đổi trạng thái từ tiếng Anh sang tiếng Việt
+const mapStatusToVietnamese = (status: string) => {
+    switch (status) {
+        case "Pending":
+            return "Chờ xác nhận";
+        case "AwaitingSchedule":
+            return "Chờ ngày hẹn";
+        case "InProgress":
+            return "Đang diễn ra";
+        case "Completed":
+            return "Đã hoàn thành";
+        case "Canceled":
+            return "Đã hủy";
+        default:
+            return status;
+    }
+};
+
+const getNextStatus = (currentStatus: OrderStatus): OrderStatus | undefined => {
+    switch (currentStatus) {
+        case "Pending":
+            return "AwaitingSchedule";
+        case "AwaitingSchedule":
+            return "InProgress";
+        case "InProgress":
+            return "Completed";
+        case "Completed":
+            return undefined;
+        case "Canceled":
+            return undefined;
+        default:
+            return undefined;
+    }
+};
+
+const TabBar = ({ tabs, activeTab, onTabPress }: { 
+    tabs: string[]; 
+    activeTab: string; 
+    onTabPress: (tab: string) => void; 
+}) => {
+    return (
+        <View style={styles.stickyHeader}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
+                {tabs.map((tab) => (
+                    <TouchableOpacity
+                        key={tab}
+                        onPress={() => onTabPress(tab)}
+                        style={[styles.tab, activeTab === tab && styles.activeTab]}
+                    >
+                        <Text style={activeTab === tab ? styles.activeTabText : styles.tabText}>{tab}</Text>
+                    </TouchableOpacity>
+                ))}
+            </ScrollView>
+        </View>
+    );
+};
+
+const OrderActions = ({ 
+    orderId, 
+    currentStatus, 
+    onAccept, 
+    onCancel 
+}: { 
+    orderId: string; 
+    currentStatus: string; 
+    onAccept: () => void; 
+    onCancel: () => void; 
+}) => {
+    const handleAccept = async () => {
+        try {
+            const nextStatus = getNextStatus(currentStatus as OrderStatus);
+            if (!nextStatus) {
+                Alert.alert("Lỗi", "Không thể chuyển trạng thái.");
+                return;
+            }
+            await updateOrderStatus(orderId, nextStatus);
+            onAccept();
+            Alert.alert("Thành công", "Đơn hàng đã được cập nhật trạng thái.");
+        } catch (error) {
+            console.error("Lỗi khi cập nhật trạng thái:", error);
+            Alert.alert("Lỗi", "Không thể cập nhật trạng thái.");
+        }
+    };
+
+    if (currentStatus !== "Pending") {
+        return null;
+    }
+
     return (
         <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.acceptButton} onPress={onAccept}>
+            <TouchableOpacity style={styles.acceptButton} onPress={handleAccept}>
                 <Text style={styles.buttonText}>Nhận Đơn</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cancelButton} onPress={onCancel}>
@@ -71,22 +127,35 @@ const OrderActions = ({ onAccept, onCancel }: { onAccept: () => void; onCancel: 
     );
 };
 
-const OrderCard = ({ order, onPress, onToggleExpand, isExpanded }: { order: typeof orders[0]; onPress: () => void; onToggleExpand: () => void; isExpanded: boolean }) => {
-    const visibleServices = isExpanded ? order.services : order.services.slice(0, 2);
-    const shouldShowToggle = order.services.length > 2;
+const OrderCard = ({ 
+    order, 
+    onPress, 
+    onToggleExpand, 
+    isExpanded,
+    onStatusUpdate 
+}: { 
+    order: Orders; 
+    onPress: () => void; 
+    onToggleExpand: () => void; 
+    isExpanded: boolean;
+    onStatusUpdate: () => void; 
+}) => {
+    const orderDetails = Array.isArray(order.orderDetails) ? order.orderDetails : [];
+    const visibleOrderDetails = isExpanded ? orderDetails : orderDetails.slice(0, 2);
+    const shouldShowToggle = orderDetails.length > 2;
 
     return (
         <TouchableOpacity style={styles.orderCard} onPress={onPress}>
             <View style={styles.buttonorder}>
-                <Text style={styles.orderCustomer}>{order.customerName}</Text>
-                <Text style={styles.orderStatus}>{order.status}</Text>
+                <Text style={styles.orderCustomer}>{order.buyerName}</Text>
+                <Text style={styles.orderStatus}>{mapStatusToVietnamese(order.status)}</Text>
             </View>
 
             <View style={styles.orderServices}>
-                {visibleServices.map((service, index) => (
+                {visibleOrderDetails.map((detail, index) => (
                     <View key={index} style={styles.orderServiceRow}>
-                        <Text style={styles.serviceQuantity}>x{service.quantity}</Text>
-                        <Text style={styles.serviceName}>{service.name}</Text>
+                        <Text style={styles.serviceQuantity}>x{detail.quantity}</Text>
+                        <Text style={styles.serviceName}>{detail.shopService?.name || "Không có tên"}</Text>
                     </View>
                 ))}
             </View>
@@ -104,50 +173,66 @@ const OrderCard = ({ order, onPress, onToggleExpand, isExpanded }: { order: type
                     </Text>
                 </TouchableOpacity>
             )}
-
-            <Text style={styles.orderTotal}>Tổng đơn hàng: <Text style={styles.orderPrice}>{order.total}</Text></Text>
-            <OrderActions onAccept={() => {}} onCancel={() => {}} />
+            <Text style={styles.orderTotal}>Tổng đơn hàng: <Text style={styles.orderPrice}>{order.totalAmount.toLocaleString()} VND</Text></Text>
+            <OrderActions 
+                orderId={order.id} 
+                currentStatus={order.status} 
+                onAccept={onStatusUpdate} 
+                onCancel={() => {}} 
+            />
         </TouchableOpacity>
-    );
-};
-
-const TabBar = ({ tabs, activeTab, onTabPress }: { tabs: string[]; activeTab: string; onTabPress: (index: number) => void }) => {
-    return (
-        <View style={styles.stickyHeader}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
-                {tabs.map((tab, index) => (
-                    <TouchableOpacity
-                        key={tab}
-                        onPress={() => onTabPress(index)}
-                        style={[styles.tab, activeTab === tab && styles.activeTab]}
-                    >
-                        <Text style={activeTab === tab ? styles.activeTabText : styles.tabText}>{tab}</Text>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
-        </View>
     );
 };
 
 export default function OrderShop() {
     const [activeTab, setActiveTab] = useState<string>(tabs[0]);
     const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
-    const scrollX = useRef(new Animated.Value(0)).current;
-    const flatListRef = useRef<FlatList<string>>(null);
+    const [orders, setOrders] = useState<Orders[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
     const router = useRouter();
 
+    // Gọi API để lấy danh sách đơn hàng
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                setLoading(true);
+                const status = mapTabToStatus(activeTab);
+                const ordersData = await getOrderByShop({
+                    status,
+                    pageNumber: 1,
+                    pageSize: 10,
+                });
+
+                const processedOrders = ordersData.map((order: any) => ({
+                    ...order,
+                    orderDetails: Array.isArray(order.orderDetails) ? order.orderDetails : [],
+                }));
+
+                setOrders(processedOrders);
+            } catch (error) {
+                console.error("Lỗi khi lấy đơn hàng:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrders();
+    }, [activeTab]);
+
     const filteredOrders = useMemo(
-        () => orders.filter(order => order.status === activeTab),
-        [activeTab]
+        () => orders.filter(order => mapStatusToVietnamese(order.status) === activeTab),
+        [orders, activeTab]
     );
 
-    const onTabPress = useCallback((index: number) => {
-        flatListRef.current?.scrollToOffset({ offset: index * SCREEN_WIDTH, animated: true });
-        setActiveTab(tabs[index]);
+    const onTabPress = useCallback((tab: string) => {
+        setActiveTab(tab);
     }, []);
 
-    const handleOrderDetail = useCallback((orderId: string) => {
-        router.push(`/OrderShop/${orderId}`);
+    const handleOrderDetail = useCallback((orderNumber: string) => {
+        router.push({
+            pathname: '/OrderShop/[orderdetailShop]',
+            params: { orderdetailShop: orderNumber },
+        });
     }, [router]);
 
     const toggleExpand = useCallback((orderId: string) => {
@@ -162,14 +247,24 @@ export default function OrderShop() {
         });
     }, []);
 
-    const renderOrder = useCallback(({ item }: { item: typeof orders[0] }) => {
+    const renderOrder = useCallback(({ item }: { item: Orders }) => {
         const isExpanded = expandedOrders.has(item.id);
+
+        const handleStatusUpdate = () => {
+            setOrders(prevOrders => 
+                prevOrders.map(order => 
+                    order.id === item.id ? { ...order, status: getNextStatus(order.status as OrderStatus) || order.status } : order
+                )
+            );
+        };
+
         return (
             <OrderCard
                 order={item}
-                onPress={() => handleOrderDetail(item.id)}
+                onPress={() => handleOrderDetail(item.orderNumber)}
                 onToggleExpand={() => toggleExpand(item.id)}
                 isExpanded={isExpanded}
+                onStatusUpdate={handleStatusUpdate}
             />
         );
     }, [expandedOrders, handleOrderDetail, toggleExpand]);
@@ -185,32 +280,18 @@ export default function OrderShop() {
             <TabBar tabs={tabs} activeTab={activeTab} onTabPress={onTabPress} />
 
             {/* Content */}
-            <Animated.FlatList
-                ref={flatListRef}
-                data={tabs}
-                keyExtractor={(item) => item}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onScroll={Animated.event(
-                    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                    { useNativeDriver: false }
-                )}
-                onMomentumScrollEnd={(event) => {
-                    const index = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
-                    setActiveTab(tabs[index]);
-                }}
-                renderItem={() => (
-                    <View style={styles.page}>
-                        <FlatList
-                            data={filteredOrders}
-                            keyExtractor={(order) => order.id}
-                            renderItem={renderOrder}
-                            contentContainerStyle={styles.list}
-                        />
-                    </View>
-                )}
-            />
+            {loading ? (
+                <View style={styles.loadingContainer}>
+                    <Text>Đang tải đơn hàng...</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={filteredOrders}
+                    keyExtractor={(order) => order.id}
+                    renderItem={renderOrder}
+                    contentContainerStyle={styles.list}
+                />
+            )}
         </View>
     );
 }
@@ -223,7 +304,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#699BF4",
         padding: 30,
         paddingTop: 60,
-        
     },
     header: { fontSize: 24, fontWeight: "bold", color: "#fff" },
     stickyHeader: {
@@ -235,7 +315,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
         zIndex: 10,
-        backgroundColor:"#699BF4"
+        backgroundColor: "#699BF4",
     },
     tabsContainer: {
         flexDirection: "row",
@@ -256,12 +336,9 @@ const styles = StyleSheet.create({
     activeTabText: {
         color: "#fff",
     },
-    menuTrigger: {
-        marginLeft: 7,
-    },
-    page: { width: SCREEN_WIDTH, padding: 16 },
-    list: { paddingBottom: 16, },
+    list: { padding: 16, paddingBottom: 16 },
     orderCard: {
+        margin: 15,
         backgroundColor: "#fff",
         padding: 16,
         marginBottom: 12,
@@ -274,14 +351,15 @@ const styles = StyleSheet.create({
     buttonorder: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginBottom: 5
+        marginBottom: 5,
     },
-    orderCustomer: { fontSize: 16, fontWeight: "medium", color: "#333" },
-    orderStatus: { 
+    orderCustomer: { fontSize: 16, fontWeight: "bold", color: "#333" },
+    orderStatus: {
         fontSize: 14,
         color: "#ed7c44",
         marginVertical: 4,
-        fontWeight: "700", },
+        fontWeight: "700",
+    },
     orderServices: { marginTop: 8, marginBottom: 5 },
     orderTotal: {
         fontSize: 16,
@@ -292,37 +370,6 @@ const styles = StyleSheet.create({
     orderPrice: {
         color: '#ed7c44',
     },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: "#D3D3D3",
-        opacity: 0.7,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    modalContainer: {
-        backgroundColor: "#fff",
-        padding: 16,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-    },
-    modalOption: {
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
-        backgroundColor: "#fff",
-    },
-    modalOptionText: {
-        fontSize: 16,
-        color: "#555",
-    },
-    activeModalOption: {
-        backgroundColor: "#ed7c44",
-    },
-    activeModalOptionText: {
-        color: "#fff",
-        fontWeight: "bold",
-    },
     orderServiceRow: {
         flexDirection: "row",
         alignItems: "center",
@@ -332,41 +379,39 @@ const styles = StyleSheet.create({
         marginRight: 8,
         fontSize: 14,
         color: "#555",
-        fontWeight: "600"
+        fontWeight: "600",
     },
     serviceName: {
         fontSize: 14,
-        fontWeight: "bold",
+        fontWeight: "medium",
     },
     buttonContainer: {
         flexDirection: 'row',
         justifyContent: "flex-end",
         gap: 20,
-        marginTop: 20
+        marginTop: 20,
     },
     acceptButton: {
         backgroundColor: '#ed7c44',
         padding: 10,
         borderRadius: 5,
         borderColor: "#ed7c44",
-        borderWidth: 2, // Độ dày của viền
+        borderWidth: 2,
     },
     cancelButton: {
         backgroundColor: '#fff',
         padding: 10,
         borderRadius: 5,
         borderColor: "#ed7c44",
-        borderWidth: 2, // Độ dày của viền
+        borderWidth: 2,
     },
     buttonText: {
         color: 'white',
         fontWeight: 'bold',
-        
     },
-    buttonTextCancel:{
+    buttonTextCancel: {
         color: '#ed7c44',
         fontWeight: 'bold',
-        
     },
     expandButton: {
         alignSelf: 'center',
@@ -377,5 +422,10 @@ const styles = StyleSheet.create({
         color: '#696969',
         fontSize: 15,
         fontWeight: '400',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
     },
 });
