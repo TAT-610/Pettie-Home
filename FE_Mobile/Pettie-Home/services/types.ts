@@ -162,7 +162,7 @@ export interface Category {
     code: string;
 }
 export interface Cart{
-    shopId:string;
+    id:string;
     ShopServiceId:string;
     productId:string;
     quantity:number;

@@ -19,7 +19,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { getUserAccount } from "@/services/user/auth";
 import { Profile } from "@/services/types";
-import { getCart } from "@/services/user/cart";
+import { getCart, deleteCart } from "@/services/user/cart";
 import { createOrder } from "@/services/user/order";
 
 const OrderCustomer = () => {
@@ -33,6 +33,8 @@ const OrderCustomer = () => {
   const [isPhoneModalVisible, setPhoneModalVisible] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [newPhoneNumber, setNewPhoneNumber] = useState(phoneNumber);
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedCartId, setSelectedCartId] = useState<string | null>(null);
   const defaultAddress =
     "Tòa Bs16, 88 Phước Thiện, Khu phố 29, Quận 9, Hồ Chí Minh";
   const [userInfo, setUserInfo] = useState<Profile | null>(null);
@@ -71,9 +73,28 @@ const OrderCustomer = () => {
   if (!userInfo) {
     return <Text>Loading user information...</Text>;
   }
+  const handleDelete = async (itemId: string) => {
+    try {
+      await deleteCart(itemId);
+      setOrderSummary((prev) => prev.filter((item) => item.id !== itemId));
+      setDeleteModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    }
+  };
+
+  const openDeleteModal = (cartId: string) => {
+    setSelectedCartId(cartId);
+    setDeleteModalVisible(true);
+  };
+
+  const closeDeleteModal = () => {
+    setSelectedCartId(null);
+    setDeleteModalVisible(false);
+  };
 
   const handleChooseAddress = () => {
-    router.push("/Order/Address");
+    router.push(`/Order/Address?shopId=${shopId}`);
   };
 
   const handlePlaceOrder = async () => {
@@ -86,7 +107,9 @@ const OrderCustomer = () => {
           : address || defaultAddress,
         buyerEmail: userInfo.email,
         note,
-        paymentMethod: paymentMethod === "VN Pay" ? "BankTransfer" : "Cash",
+        paymentMethod:
+          paymentMethod === "BankTransfer" ? "BankTransfer" : "Cash",
+
         appointmentDate: new Date().toISOString(),
         shopId: shopId as string,
       };
@@ -114,7 +137,7 @@ const OrderCustomer = () => {
   };
 
   const getAvailableTimes = () => {
-    return Array.from({ length: 10 }, (_, index) => `${8 + index}:00`);
+    return Array.from({ length: 12 }, (_, index) => `${8 + index}:00`);
   };
 
   // Hàm định dạng ngày theo dd/MM
@@ -150,7 +173,7 @@ const OrderCustomer = () => {
           name="arrowleft"
           size={28}
           color="white"
-          onPress={() => router.push("/ViewShop/2")}
+          onPress={() => router.push(`/ViewShop/${shopId}`)}
           style={styles.backButton}
         />
         <Text style={styles.textpay}>Thanh toán</Text>
@@ -254,6 +277,27 @@ const OrderCustomer = () => {
         </View>
       </Modal>
 
+      <Modal visible={isDeleteModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Xác nhận xóa</Text>
+            <Text>Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => handleDelete(selectedCartId as string)}
+            >
+              <Text style={styles.closeButtonText}>Xóa</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={closeDeleteModal}
+            >
+              <Text style={styles.closeButtonText}>Hủy</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView style={styles.scrollView}>
         {/* Địa chỉ nhận hàng */}
         <View
@@ -330,36 +374,41 @@ const OrderCustomer = () => {
               item.shopService && item.shopService.id !== undefined;
             const service = isService ? item.shopService : item.product;
             return (
-              <View style={{ flexDirection: "row" }} key={index}>
-                <View style={styles.orderSummaryItem}>
-                  <Image
-                    source={{
-                      uri: service.image
-                        ? `https://pettiehome.online/web/${service.image}`
-                        : `https://pettiehome.online/web/${service.imageFileName}`,
-                    }}
-                    style={styles.orderImage}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text
-                      style={styles.name}
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                    >
-                      {service.name}
-                    </Text>
+              <TouchableOpacity
+                key={index}
+                onPress={() => openDeleteModal(item.id)}
+              >
+                <View style={{ flexDirection: "row" }}>
+                  <View style={styles.orderSummaryItem}>
+                    <Image
+                      source={{
+                        uri: service.image
+                          ? `https://pettiehome.online/web/${service.image}`
+                          : `https://pettiehome.online/web/${service.imageFileName}`,
+                      }}
+                      style={styles.orderImage}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={styles.name}
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                      >
+                        {service.name}
+                      </Text>
 
-                    <View style={styles.contentcard}>
-                      <View>
-                        <Text style={styles.price}>{service.price} đ</Text>
+                      <View style={styles.contentcard}>
+                        <View>
+                          <Text style={styles.price}>{service.price} đ</Text>
+                        </View>
                       </View>
                     </View>
-                  </View>
-                  <View style={{ width: 15, paddingTop: 12 }}>
-                    <Text>x{item.quantity}</Text>
+                    <View style={{ width: 15, paddingTop: 12 }}>
+                      <Text>x{item.quantity}</Text>
+                    </View>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           })}
           <View style={styles.totalcontent}>
@@ -400,14 +449,16 @@ const OrderCustomer = () => {
             Phương thức thanh toán:
           </Text>
           <TouchableOpacity
-            onPress={() => setPaymentMethod("VN Pay")}
+            onPress={() => setPaymentMethod("BankTransfer")}
             style={[
               styles.paymentButton,
-              paymentMethod === "VN Pay" && styles.selectedPaymentButton,
+              paymentMethod === "BankTransfer" && styles.selectedPaymentButton,
             ]}
           >
             <FontAwesome
-              name={paymentMethod === "VN Pay" ? "dot-circle-o" : "circle-o"}
+              name={
+                paymentMethod === "BankTransfer" ? "dot-circle-o" : "circle-o"
+              }
               size={20}
               color="#ed7c44"
             />
@@ -415,14 +466,14 @@ const OrderCustomer = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => setPaymentMethod("Tiền mặt")}
+            onPress={() => setPaymentMethod("Cash")}
             style={[
               styles.paymentButton,
-              paymentMethod === "Tiền mặt" && styles.selectedPaymentButton,
+              paymentMethod === "Cash" && styles.selectedPaymentButton,
             ]}
           >
             <FontAwesome
-              name={paymentMethod === "Tiền mặt" ? "dot-circle-o" : "circle-o"}
+              name={paymentMethod === "Cash" ? "dot-circle-o" : "circle-o"}
               size={20}
               color="#ed7c44"
             />

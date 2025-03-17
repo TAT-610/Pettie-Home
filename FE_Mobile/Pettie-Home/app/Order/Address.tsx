@@ -7,7 +7,7 @@ import {
   Alert,
   TouchableOpacity,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import RNPickerSelect from "react-native-picker-select";
 import React, { useState, useEffect } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -15,6 +15,7 @@ import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 const Address = () => {
   const router = useRouter();
+  const { shopId } = useLocalSearchParams();
 
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -99,7 +100,7 @@ const Address = () => {
 
     router.push({
       pathname: "/Order/OrderCustomer",
-      params: { address: fullAddress },
+      params: { shopId, address: fullAddress },
     });
   };
 
@@ -114,7 +115,7 @@ const Address = () => {
           name="arrowleft"
           size={28}
           color="white"
-          onPress={() => router.push("/Order/OrderCustomer")}
+          onPress={() => router.push(`/Order/OrderCustomer?shopId=${shopId}`)}
           style={styles.backButton}
         />
         <Text style={styles.textpay}>Cập nhật địa chỉ</Text>
