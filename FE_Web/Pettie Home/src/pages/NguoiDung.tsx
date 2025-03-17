@@ -16,7 +16,6 @@ type User = {
   roles: string[]; // Mảng chứa các vai trò
 };
 
-
 const NguoiDung = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -25,21 +24,30 @@ const NguoiDung = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const users = await getAllUser(1, 10); // Gọi API lấy danh sách người dùng
-        setUsers(users); // Lưu dữ liệu vào state
-        console.log("Dữ liệu API trả về:", users);
-
-        if (!Array.isArray(users)) {
-          console.error("Dữ liệu API không đúng định dạng:", users);
+        const allUsers = await getAllUser(1, 10); // Gọi API với 2 tham số
+        if (!Array.isArray(allUsers)) {
+          console.error("Dữ liệu API không phải mảng:", allUsers);
+          setUsers([]); // Đặt mảng rỗng nếu dữ liệu không đúng định dạng
+          return;
         }
+
+        // Lọc chỉ giữ lại những người dùng có role "user" và không có "shop" hoặc "admin"
+        const userRoleUsers = allUsers.filter(
+          (user) =>
+            user.roles.includes("USER") &&
+            !user.roles.includes("SHOP") &&
+            !user.roles.includes("ADMIN")
+        );
+        console.log("Dữ liệu người dùng có role user:", userRoleUsers);
+        setUsers(userRoleUsers); // Cập nhật state với dữ liệu đã lọc
       } catch (error) {
         console.error("Lỗi khi lấy danh sách người dùng:", error);
+        setUsers([]); // Đặt mảng rỗng nếu có lỗi
       }
     };
 
     fetchUsers();
   }, []);
-
 
   const toggleUserStatus = (user: User) => {
     if (!user) return;
@@ -52,7 +60,7 @@ const NguoiDung = () => {
     setUsers((prevData) =>
       prevData.map((user) =>
         user.id === selectedUser.id
-          ? { ...user, locked: !user.isLockedOut }
+          ? { ...user, isLockedOut: !user.isLockedOut }
           : user
       )
     );
@@ -96,7 +104,7 @@ const NguoiDung = () => {
           <thead className="bg-[#699BF4] text-white uppercase text-xs">
             <tr>
               <th className="px-4 py-3">ID</th>
-              <th className="px-4 py-3">email</th>
+              <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Tên tài khoản</th>
               <th className="px-4 py-3">Số điện thoại</th>
               <th className="px-4 py-3">Vai trò</th>
@@ -104,30 +112,43 @@ const NguoiDung = () => {
             </tr>
           </thead>
           <tbody>
-            {users
-              .filter(user => !user.roles.includes("shop") && !user.roles.includes("admin")) // Lọc bỏ user có role shop/admin
-              .map((user) => (
+            {users.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-3 text-center">
+                  Không có người dùng nào để hiển thị.
+                </td>
+              </tr>
+            ) : (
+              users.map((user) => (
                 <tr key={user.id} className="bg-white border-b">
                   <td className="px-4 py-3">{user.id}</td>
                   <td className="px-4 py-3">{user.email}</td>
                   <td className="px-4 py-3">{user.fullName}</td>
                   <td className="px-4 py-3">{user.phoneNumber ?? "_"}</td>
-                  <td className="px-4 py-3">{user.roles.length > 0 ? user.roles.join(", ") : "Chưa có vai trò"}</td>
+                  <td className="px-4 py-3">
+                    {user.roles.length > 0 ? user.roles.join(", ") : "Chưa có vai trò"}
+                  </td>
                   <td className="px-4 py-3">
                     <button
-                      className={`px-3 py-1 rounded-md font-sans ${user.isLockedOut ? "border-red-500 border-2 text-red-600" : "border-green-500 border-2 text-green-600"
-                        }`}
-                      title={user.isLockedOut ? "Tài khoản này đang bị khóa" : "Tài khoản này đang hoạt động"}
+                      className={`px-3 py-1 rounded-md font-sans ${
+                        user.isLockedOut
+                          ? "border-red-500 border-2 text-red-600"
+                          : "border-green-500 border-2 text-green-600"
+                      }`}
+                      title={
+                        user.isLockedOut
+                          ? "Tài khoản này đang bị khóa"
+                          : "Tài khoản này đang hoạt động"
+                      }
                       onClick={() => toggleUserStatus(user)}
                     >
                       {user.isLockedOut ? "Không hoạt động" : "Đang hoạt động"}
                     </button>
                   </td>
                 </tr>
-              ))}
+              ))
+            )}
           </tbody>
-
-
         </table>
       </div>
 

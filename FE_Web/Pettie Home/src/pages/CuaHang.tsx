@@ -1,80 +1,42 @@
 import { useState, useEffect } from "react";
 import { FaSearch, FaBell } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { getAllShops } from "../services/shops/api";
 
-const initialStores = [
-  {
-    id: 1,
-    shopName: "Tiệm Nhà Bụp",
-    phone: "0901234567",
-    address: "53a Đặng Văn Bi, Trường Thọ, Thủ Đức, Hồ Chí Minh 71300",
-    revenue: 3340000,
-    status: true,
-  },
-  {
-    id: 2,
-    shopName: "Spa tại nhà Juddy",
-    phone: "0912345678",
-    address: "02 Hòa Bình, Bình Thọ, Thủ Đức, Hồ Chí Minh",
-    revenue: 930000,
-    status: false,
-  },
-  {
-    id: 3,
-    shopName: "Pet Shop Thủ Đức",
-    phone: "0923456789",
-    address: "27a Đ. Số 5, Linh Xuân, Thủ Đức, Hồ Chí Minh",
-    revenue: 2055000,
-    status: true,
-  },
-  {
-    id: 4,
-    shopName: "Tắm rữa thú cưng Sephera",
-    phone: "0934567890",
-    address: "447E Lê Văn Việt, p, Quận 9, Hồ Chí Minh 700000",
-    revenue: 1388000,
-    status: true,
-  },
-  {
-    id: 5,
-    shopName: "Thế giới thú cưng Quin quin",
-    phone: "0945678901",
-    address: "62B Hòa Bình, Phường 5, Quận 11, Hồ Chí Minh 700000",
-    revenue: 2440000,
-    status: false,
-  },
-  {
-    id: 6,
-    shopName: "Pet Mart Quận 9",
-    phone: "0956789012",
-    address: "5 Đ. Số 8, Linh Chiểu, Thủ Đức, Hồ Chí Minh 71300",
-    revenue: 1388000,
-    status: true,
-  },
-  {
-    id: 7,
-    shopName: "Pet mart nhà Tharo",
-    phone: "0967890123",
-    address: "62B Hòa Bình, Phường 5, Quận 11, Hồ Chí Minh 700000",
-    revenue: 300000,
-    status: false,
-  },
-];
+// Định nghĩa interface Shop khớp với API
+interface Shop {
+  id: string;
+  name: string; // Thay shopName thành name để khớp với API
+  phone: string;
+  address: string;
+  averageRating: number; // Thay revenue thành averageRating hoặc trường tương ứng
+  status: string;
+}
 
 const CuaHang = () => {
+  const [shops, setShops] = useState<Shop[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [stores, setStores] = useState(initialStores);
   const navigate = useNavigate();
 
+  // Gọi API để lấy danh sách cửa hàng đã được xét duyệt
   useEffect(() => {
-    const approvedStores = JSON.parse(
-      localStorage.getItem("approvedStores") || "[]"
-    );
-    setStores((prevStores) => [...initialStores, ...approvedStores]);
+    const fetchStores = async () => {
+      try {
+        const dataData: Shop[] = await getAllShops();
+        // Chỉ giữ lại các cửa hàng có trạng thái "Approved"
+        const approvedShops = dataData.filter(shop => shop.status === "Approved");
+        setShops(approvedShops);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách cửa hàng:", error);
+      }
+    };
+
+    fetchStores();
   }, []);
 
-  const filteredStores = stores.filter((store) =>
-    store.shopName.toLowerCase().includes(searchTerm.toLowerCase())
+  // Lọc cửa hàng theo từ khóa tìm kiếm
+  const filteredShops = shops.filter((shop) =>
+    shop.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -113,7 +75,7 @@ const CuaHang = () => {
           <thead className="bg-[#699BF4] text-white uppercase text-xs">
             <tr>
               <th className="px-4 py-3 w-[4%]">ID</th>
-              <th className="px-2 py-3  w-[16%]">Tên cửa hàng</th>
+              <th className="px-2 py-3 w-[16%]">Tên cửa hàng</th>
               <th className="px-2 py-3 w-[10%]">Số điện thoại</th>
               <th className="px-2 py-3 w-[27%]">Địa chỉ</th>
               <th className="px-2 py-3 w-[12%]">Tổng doanh thu</th>
@@ -123,34 +85,34 @@ const CuaHang = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredStores.map((store) => (
+            {filteredShops.map((shop) => (
               <tr
-                key={store.id}
+                key={shop.id}
                 className="border-b hover:bg-gray-100 transition-colors"
               >
-                <td className="px-4 py-4">{store.id}</td>
-                <td className="px-2 py-4">{store.shopName}</td>
-                <td className="px-2 py-4">{store.phone}</td>
-                <td className="px-2 py-4">{store.address}</td>
+                <td className="px-4 py-4">{shop.id}</td>
+                <td className="px-2 py-4">{shop.name}</td>
+                <td className="px-2 py-4">{shop.phone}</td>
+                <td className="px-2 py-4">{shop.address}</td>
                 <td className="px-2 py-4">
-                  {store.revenue.toLocaleString()} VND
+                  {shop.averageRating.toLocaleString()} VND
                 </td>
                 <td className="px-2 py-4">
-                  {(store.revenue * 0.18).toLocaleString()} VND
+                  {(shop.averageRating * 0.18).toLocaleString()} VND
                 </td>
                 <td
                   className={`px-4 py-4 ${
-                    store.status ? "text-green-600" : "text-red-600"
+                    shop.status === "Approved" ? "text-green-600" : "text-red-600"
                   }`}
                 >
-                  {store.status ? "Hoạt động" : "Đóng cửa"}
+                  {shop.status === "Approved" ? "Hoạt động" : "Đóng cửa"}
                 </td>
                 <td className="px-2 py-4">
                   <button
                     onClick={() =>
-                      navigate(`/admin/cuahang/detailshop/${store.id}`)
+                      navigate(`/admin/cuahang/detailshop/${shop.id}`)
                     }
-                    className="px-1 py-1  text-blue-500 rounded-lg hover:border-2 hover:border-blue-500"
+                    className="px-1 py-1 text-blue-500 rounded-lg hover:border-2 hover:border-blue-500"
                   >
                     Xem thêm
                   </button>

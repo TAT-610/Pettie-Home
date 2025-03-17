@@ -60,9 +60,9 @@ export default function Login() {
         />
       </View>
 
-      <TouchableOpacity>
+      <View>
         <Text style={styles.forgotPassword}>Bạn quên mật khẩu?</Text>
-      </TouchableOpacity>
+      </View>
 
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.loginText}>Đăng nhập</Text>

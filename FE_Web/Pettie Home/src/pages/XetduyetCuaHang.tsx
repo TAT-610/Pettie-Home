@@ -12,10 +12,10 @@ interface Shop {
 }
 
 const XetDuyetCuaHang = () => {
-  const [shops, setShops] = useState<Shop[]>([]); // Thêm kiểu dữ liệu
+  const [shops, setShops] = useState<Shop[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedShop, setSelectedShop] = useState(null);
+  const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [selectedAction, setSelectedAction] = useState("");
 
   // Gọi API để lấy danh sách cửa hàng
@@ -23,7 +23,9 @@ const XetDuyetCuaHang = () => {
     const fetchStores = async () => {
       try {
         const dataData: Shop[] = await getAllShops();
-        setShops(dataData);
+        // Chỉ giữ lại các cửa hàng có trạng thái "Pending"
+        const pendingShops = dataData.filter(shop => shop.status === "Pending");
+        setShops(pendingShops);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách cửa hàng:", error);
       }
@@ -33,9 +35,9 @@ const XetDuyetCuaHang = () => {
   }, []);
 
   // Xử lý khi chọn hành động
-  const handleActionChange = (shopId, action) => {
+  const handleActionChange = (shopId: string, action: string) => {
     const shop = shops.find((shop) => shop.id === shopId);
-    setSelectedShop(shop);
+    setSelectedShop(shop || null);
     setSelectedAction(action);
     setModalVisible(true);
   };
@@ -46,7 +48,7 @@ const XetDuyetCuaHang = () => {
     try {
       const success = await updateShopStatus(
         selectedShop.id,
-        selectedAction === "Chấp nhận" ? "Approved" : "Rejected" // Sửa giá trị status
+        selectedAction === "Chấp nhận" ? "Approved" : "Rejected"
       );
   
       if (success) {
@@ -122,14 +124,7 @@ const XetDuyetCuaHang = () => {
                 <td className="px-3 py-3">{shop.name}</td>
                 <td className="px-3 py-3">{shop.phone}</td>
                 <td className="px-3 py-3">{shop.address}</td>
-                <td
-                  className={`px-3 py-3 ${shop.status === "Chấp nhận"
-                      ? "text-green-500"
-                      : shop.status === "Từ chối"
-                        ? "text-red-500"
-                        : "text-yellow-500"
-                    }`}
-                >
+                <td className="px-3 py-3 text-yellow-500">
                   {shop.status}
                 </td>
                 <td className="px-4 py-3">
