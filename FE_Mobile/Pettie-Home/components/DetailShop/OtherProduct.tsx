@@ -16,7 +16,7 @@ import { getProductsByShop } from "../../services/shop/apiShop";
 interface CatService {
   id: number;
   name: string;
-  image: string;
+  image: { uri: string; type: string; fileName: string } | null;
   price: number;
 }
 
@@ -35,7 +35,7 @@ const OtherProduct = ({ shopId }: { shopId: string }) => {
 
   const handleProductPress = (productId: number) => {
     // router.push(`/ViewService/${serviceId}`); // Navigate to ProductDetail page
-    router.push(`/ViewProduct/${productId}`);
+    router.push(`/ViewProduct/${productId}?shopId=${shopId}`);
   };
 
   const renderItem = ({ item }: { item: any }) => (

@@ -9,7 +9,7 @@ import {
   Modal,
   FlatList,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
@@ -17,96 +17,94 @@ import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-const orderSummary = [
-  {
-    serviceId: 1,
-    quantity: 1,
-    price: 100,
-    image:
-      "https://i.pinimg.com/736x/f7/0d/69/f70d69556578090929bc1e99da269d9f.jpg",
-  },
-  {
-    productId: 1,
-    quantity: 2,
-    price: 10,
-    image:
-      "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg",
-  },
-  {
-    productId: 2,
-    quantity: 1,
-    price: 220,
-    image:
-      "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
-  },
-];
-
-const DogService1 = {
-  id: 1,
-  name: "Tắm cơ bản cho chó < 4kg",
-  image:
-    "https://i.pinimg.com/736x/f7/0d/69/f70d69556578090929bc1e99da269d9f.jpg",
-  price: 100,
-  shopId: 2,
-  description:
-    "Dịch vụ tắm cơ bản dành cho chó dưới 4 kg bao gồm tỉa lông cơ bản, vệ sinh lỗ tai, cắt móng/ dũa móng, tắm bằng xà boong chuyên dụng, sấy lông, gỡ rối, đánh tơi và thoa lotion nước hoa cho chó.",
-};
-
-const Product = [
-  {
-    id: 1,
-    name: "Pate mèo kucinta gói 80g",
-    image:
-      "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
-    price: 10,
-    rate: 4.5, // Giả sử đây là đánh giá trung bình
-    brand: "Kucinta",
-    description:
-      "Pate Cho Mèo Kucinta Gói 80g Cao Cấp Nhập Khẩu Từ Malaysia. Quy cách đóng gói: Gói seal 80g. Thành phần: Thịt gà, Cá ngừ, Cá cơm, Cá mòi, Thanh cua. Sản phẩm cao cấp siêu thơm ngon",
-    shopId: 2,
-  },
-  {
-    id: 2,
-    name: "Cây cào móng chó mèo",
-
-    image:
-      "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
-    price: 220,
-    rate: 4.5, // Giả sử đây là đánh giá trung bình
-    brand: "Kucinta",
-    description:
-      "Pate Cho Mèo Kucinta Gói 80g Cao Cấp Nhập Khẩu Từ Malaysia. Quy cách đóng gói: Gói seal 80g. Thành phần: Thịt gà, Cá ngừ, Cá cơm, Cá mòi, Thanh cua. Sản phẩm cao cấp siêu thơm ngon",
-    shopId: 2,
-  },
-];
+import { getUserAccount } from "@/services/user/auth";
+import { Profile } from "@/services/types";
+import { getCart } from "@/services/user/cart";
+import { createOrder } from "@/services/user/order";
 
 const OrderCustomer = () => {
   const router = useRouter();
-  const { address } = useLocalSearchParams();
+  const { address, shopId } = useLocalSearchParams();
   const [note, setNote] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("VN Pay");
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [selectedDate, setSelectedDate] = useState(getFormattedDate(0));
   const [selectedTime, setSelectedTime] = useState("15:00");
   const [isModalVisible, setModalVisible] = useState(false);
   const [isPhoneModalVisible, setPhoneModalVisible] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("0886133779");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [newPhoneNumber, setNewPhoneNumber] = useState(phoneNumber);
   const defaultAddress =
     "Tòa Bs16, 88 Phước Thiện, Khu phố 29, Quận 9, Hồ Chí Minh";
+  const [userInfo, setUserInfo] = useState<Profile | null>(null);
+  const [orderSummary, setOrderSummary] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await getUserAccount();
+        const data: Profile = response.data; // Lấy dữ liệu từ thuộc tính `data`
+        setUserInfo(data);
+        setPhoneNumber(data.phoneNumber); // Gán giá trị cho phoneNumber sau khi userInfo đã được gán
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      try {
+        const cartItems = await getCart(shopId as string); // Sử dụng shopId từ useLocalSearchParams
+        if (cartItems) {
+          setOrderSummary(cartItems);
+        }
+      } catch (error) {
+        console.error("Error fetching cart items:", error);
+      }
+    };
+
+    fetchCartItems();
+  }, [shopId]);
+
+  if (!userInfo) {
+    return <Text>Loading user information...</Text>;
+  }
 
   const handleChooseAddress = () => {
     router.push("/Order/Address");
   };
 
-  const handlePlaceOrder = () => {
-    router.push(`/Order/payment`);
-    console.log("Đặt hàng thành công với phương thức: ", paymentMethod);
+  const handlePlaceOrder = async () => {
+    try {
+      const orderData = {
+        buyerName: userInfo.fullName,
+        buyerPhone: phoneNumber,
+        buyerAddress: Array.isArray(address)
+          ? address[0]
+          : address || defaultAddress,
+        buyerEmail: userInfo.email,
+        note,
+        paymentMethod: paymentMethod === "VN Pay" ? "BankTransfer" : "Cash",
+        appointmentDate: new Date().toISOString(),
+        shopId: shopId as string,
+      };
+
+      const orderResponse = await createOrder(orderData);
+      console.log("Order created successfully:", orderResponse);
+      router.push(`/Order/payment`);
+    } catch (error) {
+      console.error("Error creating order:", error);
+    }
   };
 
   // Tính tổng tiền đơn hàng
   const calculateTotal = () => {
     return orderSummary.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) =>
+        total +
+        (item.shopService?.price || item.product?.price || 0) * item.quantity,
       0
     );
   };
@@ -267,6 +265,20 @@ const OrderCustomer = () => {
         >
           <View style={styles.content}>
             <Text style={styles.sectionTitle}>
+              <FontAwesome6 name="user" size={16} color="#ed7c44" /> Thông tin
+              người dùng:
+            </Text>
+            <Text style={styles.addressText}>
+              Họ và tên: {userInfo.fullName}
+            </Text>
+            <Text style={styles.addressText}>Email: {userInfo.email}</Text>
+            <Text style={styles.addressText}>
+              Số điện thoại: {userInfo.phoneNumber}
+            </Text>
+          </View>
+
+          <View style={styles.content}>
+            <Text style={styles.sectionTitle}>
               <FontAwesome6 name="location-dot" size={16} color="#ed7c44" /> Địa
               chỉ của bạn:
             </Text>
@@ -314,15 +326,18 @@ const OrderCustomer = () => {
           </Text>
 
           {orderSummary.map((item, index) => {
-            const isService = item.serviceId !== undefined;
-            const service = isService
-              ? DogService1
-              : Product.find((p) => p.id === item.productId);
+            const isService =
+              item.shopService && item.shopService.id !== undefined;
+            const service = isService ? item.shopService : item.product;
             return (
               <View style={{ flexDirection: "row" }} key={index}>
                 <View style={styles.orderSummaryItem}>
                   <Image
-                    source={{ uri: item.image }}
+                    source={{
+                      uri: service.image
+                        ? `https://pettiehome.online/web/${service.image}`
+                        : `https://pettiehome.online/web/${service.imageFileName}`,
+                    }}
                     style={styles.orderImage}
                   />
                   <View style={{ flex: 1 }}>
@@ -331,32 +346,33 @@ const OrderCustomer = () => {
                       numberOfLines={2}
                       ellipsizeMode="tail"
                     >
-                      {service?.name}
+                      {service.name}
                     </Text>
+
                     <View style={styles.contentcard}>
                       <View>
-                        <Text style={styles.price}>{item.price}.000 đ</Text>
+                        <Text style={styles.price}>{service.price} đ</Text>
                       </View>
                     </View>
                   </View>
-                </View>
-                <View style={{ width: 15, paddingTop: 12 }}>
-                  <Text>x{item.quantity}</Text>
+                  <View style={{ width: 15, paddingTop: 12 }}>
+                    <Text>x{item.quantity}</Text>
+                  </View>
                 </View>
               </View>
             );
           })}
           <View style={styles.totalcontent}>
             <Text style={styles.totalText}>Tổng đơn hàng:</Text>
-            <Text style={styles.totalprice2}>{calculateTotal()}.000đ</Text>
+            <Text style={styles.totalprice2}>{calculateTotal()}đ</Text>
           </View>
           <View style={styles.totalcontent2}>
             <Text style={styles.totalText}>Phí vận chuyển:</Text>
             <Text style={styles.totalprice2}>25.000đ</Text>
           </View>
           <View style={styles.totalcontent2}>
-            <Text style={styles.totalText2}>Phí vận chuyển:</Text>
-            <Text style={styles.totalprice3}>{calculateTotal() + 25}.000đ</Text>
+            <Text style={styles.totalText2}>Phí thanh toán:</Text>
+            <Text style={styles.totalprice3}>{calculateTotal() + 25000}đ</Text>
           </View>
         </View>
         <View
@@ -570,7 +586,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 14,
-    fontWeight: "400",
+    fontWeight: "500",
     marginBottom: 5,
   },
   price: {
@@ -656,6 +672,10 @@ const styles = StyleSheet.create({
     padding: 10,
     marginTop: 10,
     width: "100%",
+  },
+  description: {
+    fontSize: 12,
+    color: "#666",
   },
 });
 

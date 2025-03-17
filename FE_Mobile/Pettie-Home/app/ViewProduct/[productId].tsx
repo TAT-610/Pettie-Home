@@ -15,20 +15,10 @@ import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import axios from "axios";
+import { addToCart } from "../../services/user/cart";
 
 const BASE_URL = "http://14.225.198.232:8080/api/v1";
 
-// Thêm interface này sau phần imports
-interface Product {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  description: string;
-  rate: number;
-  brand: string;
-  shopId: number;
-}
 interface Feedback {
   id: number;
   name: String;
@@ -86,19 +76,6 @@ const averageRate =
   feedbacks.reduce((sum, feedback) => sum + feedback.rate, 0) /
   feedbacks.length;
 
-const Product: Product = {
-  id: 1,
-  name: "Pate mèo kucinta gói 80g",
-  image:
-    "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
-  price: 10,
-  rate: averageRate, // Sử dụng rate trung bình
-  brand: "Kucinta",
-  description:
-    "Pate Cho Mèo Kucinta Gói 80g Cao Cấp Nhập Khẩu Từ Malaysia. Quy cách đóng gói: Gói seal 80g.Thành phần: Thịt gà, Cá ngừ, Cá cơm, Cá mòi, Thanh cua. Sản phẩm cao cấp siêu thơm ngon",
-  shopId: 2, // Thêm shopId
-};
-
 // Thêm mảng màu ở đầu file
 const avatarColors = [
   "#FF6B6B", // đỏ nhạt
@@ -117,13 +94,13 @@ const getAvatarColor = (id: number) => {
 };
 
 const ProductDetail = () => {
-  const { productId } = useLocalSearchParams();
+  const { productId, shopId, serviceId } = useLocalSearchParams();
   const router = useRouter();
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [navBarColor, setNavBarColor] = useState("rgba(0, 0, 0, 0)");
-  const [totalPrice, setTotalPrice] = useState(Product.price);
   const [product, setProduct] = useState<any | null>(null);
+  const [totalPrice, setTotalPrice] = useState(product?.price);
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -136,8 +113,10 @@ const ProductDetail = () => {
   };
 
   useEffect(() => {
-    setTotalPrice(quantity * Product.price);
-  }, [quantity]);
+    if (product) {
+      setTotalPrice(quantity * product.price);
+    }
+  }, [quantity, product]);
 
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -173,9 +152,7 @@ const ProductDetail = () => {
                 {product?.name || "Tên sản phẩm không có sẵn"}
               </Text>
               <View style={styles.priceRateContainer}>
-                <Text style={styles.price}>
-                  {product?.price?.toLocaleString() || "0"}.000 VNĐ
-                </Text>
+                <Text style={styles.price}>{product?.price}đ</Text>
               </View>
             </View>
             <View style={{ backgroundColor: "#e9f1ff", height: 10 }}></View>
@@ -189,15 +166,13 @@ const ProductDetail = () => {
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>
                     Thương hiệu:{" "}
-                    <Text style={styles.detailContent}>
-                      {product?.brand || Product.brand}
-                    </Text>
+                    <Text style={styles.detailContent}>{product?.brand}</Text>
                   </Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>Mô tả:</Text>
                   <Text style={styles.detailContent}>
-                    {product?.description || Product.description}
+                    {product?.description}
                   </Text>
                 </View>
               </View>
@@ -208,7 +183,7 @@ const ProductDetail = () => {
                 <Text style={styles.ratingTitle}>Đánh giá của sản phẩm</Text>
                 <View style={styles.ratingValue}>
                   <Text style={styles.ratingNumber}>
-                    {product?.rate?.toLocaleString() || Product.rate}/5
+                    {product?.rate?.toLocaleString()}/5
                   </Text>
                   <FontAwesome
                     name="star"
@@ -303,7 +278,7 @@ const ProductDetail = () => {
           onPress={() => setShowQuantityModal(true)}
         >
           <Text style={styles.addToCartText}>
-            {`Thêm vào giỏ • ${totalPrice}.000 VNĐ`}
+            {`Thêm vào giỏ • ${totalPrice}đ`}
           </Text>
         </TouchableOpacity>
       </View>
@@ -330,9 +305,7 @@ const ProductDetail = () => {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.totalPrice}>
-              Tổng tiền: {totalPrice}.000 VNĐ
-            </Text>
+            <Text style={styles.totalPrice}>Tổng tiền: {totalPrice} VNĐ</Text>
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
@@ -346,8 +319,14 @@ const ProductDetail = () => {
                 style={styles.confirmButton}
                 onPress={() => {
                   console.log(`Thêm ${quantity} sản phẩm vào giỏ`);
+                  addToCart(
+                    shopId as string,
+                    null,
+                    productId as string,
+                    quantity
+                  );
                   setShowQuantityModal(false);
-                  router.push(`/ViewShop/${product?.shopId || Product.shopId}`);
+                  router.push(`/ViewShop/${shopId}`);
                 }}
               >
                 <Text style={styles.confirmButtonText}>Xác nhận</Text>

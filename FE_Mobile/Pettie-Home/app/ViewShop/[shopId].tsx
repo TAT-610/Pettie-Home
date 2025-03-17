@@ -25,6 +25,91 @@ import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 import AllService from "../../components/DetailShop/AllService";
 import { getShopDetails } from "../../services/shop/apiShop";
 import { Shop } from "../../services/types";
+import { getCart } from "../../services/user/cart";
+
+const CartSummary = ({
+  shopId,
+  onOrderPress,
+}: {
+  shopId: string;
+  onOrderPress: () => void;
+}) => {
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [totalQuantity, setTotalQuantity] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      const data = await getCart(shopId);
+      if (data) {
+        setCartItems(data);
+        calculateSummary(data);
+      }
+    };
+
+    fetchCartItems();
+  }, [shopId]);
+
+  const calculateSummary = (items: any[]) => {
+    let quantity = 0;
+    let price = 0;
+
+    items.forEach((item) => {
+      quantity += item.quantity;
+      price +=
+        item.quantity *
+        (item.product?.price || item.shopService?.price * 1000 || 0);
+    });
+
+    setTotalQuantity(quantity);
+    setTotalPrice(price);
+  };
+
+  return (
+    <View style={styles.card}>
+      <View style={{ marginTop: 5 }}>
+        <Text
+          style={{
+            textAlign: "center",
+            color: "#ed7c44",
+          }}
+        >
+          Tổng thanh toán ({cartItems.length})
+        </Text>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "600",
+            color: "#ed7c44",
+            textAlign: "right",
+          }}
+        >
+          {totalPrice} VNĐ
+        </Text>
+      </View>
+      <View
+        style={{
+          backgroundColor: "#ed7c44",
+          paddingVertical: 15,
+          paddingHorizontal: 25,
+          marginLeft: 15,
+        }}
+      >
+        <TouchableOpacity onPress={onOrderPress}>
+          <Text
+            style={{
+              fontSize: 15,
+              fontWeight: "500",
+              color: "white",
+            }}
+          >
+            Đặt dịch vụ
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
 
 export default function ShopDetail() {
   const router = useRouter();
@@ -46,7 +131,7 @@ export default function ShopDetail() {
   }, [shopId]);
 
   const handleOrderPress = () => {
-    router.push(`/Order/OrderCustomer`); // Navigate to ProductDetail page
+    router.push(`/Order/OrderCustomer?shopId=${shopId}`);
   };
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -135,49 +220,10 @@ export default function ShopDetail() {
           style={styles.backButton}
         />
       </View>
-      <View style={styles.card}>
-        <View style={{ marginTop: 5 }}>
-          <Text
-            style={{
-              textAlign: "center",
-              color: "#ed7c44",
-            }}
-          >
-            Tổng thanh toán(3)
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "600",
-              color: "#ed7c44",
-
-              textAlign: "right",
-            }}
-          >
-            340.000đ
-          </Text>
-        </View>
-        <View
-          style={{
-            backgroundColor: "#ed7c44",
-            paddingVertical: 15,
-            paddingHorizontal: 25,
-            marginLeft: 15,
-          }}
-        >
-          <TouchableOpacity onPress={handleOrderPress}>
-            <Text
-              style={{
-                fontSize: 15,
-                fontWeight: "500",
-                color: "white",
-              }}
-            >
-              Đặt dịch vụ
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      <CartSummary
+        shopId={Array.isArray(shopId) ? shopId[0] : shopId}
+        onOrderPress={handleOrderPress}
+      />
     </View>
   );
 }
@@ -299,5 +345,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginRight: 5,
+  },
+  summaryContainer: {
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    margin: 10,
+  },
+  summaryText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
 });
