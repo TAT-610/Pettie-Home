@@ -178,10 +178,10 @@ export default function OrderDetails() {
 
                   return (
                     <View style={styles.itemRow}>
-                      <Image
+                      {/* <Image
                         source={{ uri: imageUrl }}
                         style={styles.image}
-                      />
+                      /> */}
                       <View style={styles.itemInfo}>
                         <Text style={styles.itemText}>
                           {isService
