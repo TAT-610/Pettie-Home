@@ -1,18 +1,7 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Image,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  Linking,
-} from "react-native";
+import {Alert,Image,ScrollView,StatusBar,StyleSheet,Text,TextInput,TouchableOpacity,View,} from "react-native";
 import logo from "../../assets/images/login.png";
 import { resendOtp, signUpShop, signUpUser } from "@/services/user/auth";
 import { ResendOtpType } from "@/services/types";
@@ -45,23 +34,59 @@ export default function Register() {
 
   const handleSignUpUser = async () => {
     try {
+      // Validate các trường bắt buộc
       if (!email || !password || !confirmPassword || !fullName || !phoneNumber) {
         Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin.");
         return;
       }
-
+  
+      // Validate mật khẩu
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(password)) {
+        Alert.alert(
+          "Lỗi",
+          "Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
+        );
+        return;
+      }
+  
+      // Validate xác nhận mật khẩu
       if (password !== confirmPassword) {
         Alert.alert("Lỗi", "Mật khẩu xác nhận không khớp.");
         return;
       }
-
+  
+      // Validate email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        Alert.alert("Lỗi", "Email không hợp lệ.");
+        return;
+      }
+  
+      // Validate số điện thoại
+      const phoneRegex = /^\d{10,}$/;
+      if (!phoneRegex.test(phoneNumber)) {
+        Alert.alert("Lỗi", "Số điện thoại không hợp lệ.");
+        return;
+      }
+  
+      // Validate điều khoản
       if (!acceptTerms) {
         Alert.alert("Lỗi", "Vui lòng chấp nhận điều khoản và điều kiện để tiếp tục.");
         return;
       }
-
+  
+      // Validate thêm thông tin nếu là cửa hàng
+      if (role === "shop") {
+        if (!shopName || !address || !bankName || !bankAccountNumber || !bankAccountName) {
+          Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin cửa hàng.");
+          return;
+        }
+      }
+  
+      // Tạo dữ liệu yêu cầu
       let requestData;
-
+  
       if (role === "user") {
         requestData = {
           fullName,
@@ -70,7 +95,7 @@ export default function Register() {
           password,
         };
         const response = await signUpUser(requestData);
-
+  
         if ("error" in response && response.error === "EmailNotVerified") {
           console.log("Gửi lại OTP do email chưa xác thực...");
           await resendOtp({ email, type: ResendOtpType.ConfirmEmail });
@@ -79,11 +104,6 @@ export default function Register() {
           return;
         }
       } else {
-        if (!shopName || !address || !bankName || !bankAccountNumber || !bankAccountName) {
-          Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin cửa hàng.");
-          return;
-        }
-
         requestData = {
           email,
           password,
@@ -94,9 +114,9 @@ export default function Register() {
           bankName,
           bankAccountName,
         };
-
+  
         const response = await signUpShop(requestData);
-
+  
         if ("error" in response && response.error === "EmailNotVerified") {
           console.log("Gửi lại OTP cho Shop...");
           await resendOtp({ email, type: ResendOtpType.ConfirmEmail });
@@ -105,7 +125,7 @@ export default function Register() {
           return;
         }
       }
-
+  
       Alert.alert("Tiếp theo", "Tiếp tục xác thực OTP");
       router.push(`/Auths/confirm?email=${encodeURIComponent(email)}`);
     } catch (error: any) {

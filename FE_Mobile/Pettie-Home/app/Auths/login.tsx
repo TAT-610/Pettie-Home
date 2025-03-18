@@ -15,7 +15,6 @@ export default function Login() {
       const user = await loginUser(username, password);
       
       // Lấy thông tin user từ response
-      // const userData = user.UserData.data;
       const { fullName, roles, id } = user.userData.data;
       const userRole = roles.length > 0 ? roles[0] : "USER"; // Mặc định USER nếu không có role
   
@@ -30,7 +29,12 @@ export default function Login() {
         router.push("/home");
       }
     } catch (error: any) {
-      Alert.alert("Lỗi", error.message || "Đăng nhập thất bại");
+      // Kiểm tra nếu lỗi là 400 và có thông điệp cụ thể
+      if (error.response && error.response.status === 400) {
+        Alert.alert("Lỗi", "Tên đăng nhập hoặc mật khẩu không đúng");
+      } else {
+        Alert.alert("Lỗi", error.message || "Đăng nhập thất bại");
+      }
     }
   };
   
