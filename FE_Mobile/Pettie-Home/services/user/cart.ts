@@ -66,3 +66,23 @@ export const getCart = async (shopId: string) => {
     return null;
   }
 };
+export const deleteCart = async (cartId: string): Promise<void> => {
+  try {
+    const access_token = await AsyncStorage.getItem("access_token");
+    if (!access_token) {
+      throw new Error("Access token is not found");
+    }
+
+    const response = await axios.delete(`${BASE_URL}/cart/${cartId}`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+
+    console.log("Delete order response:", response.data); // Kiểm tra phản hồi từ API
+    return;
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    throw error;
+  }
+};
