@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect } from "react";
-import { Alert, Dimensions, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Dimensions, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal } from "react-native";
 import { useRouter } from "expo-router";
 import { cancelOrder, getOrderByShop, updateOrderStatus } from "@/services/shop/apiOrder";
 import { Orders } from "@/services/types";
@@ -9,7 +9,13 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const tabs = ["Chờ xác nhận", "Chờ ngày hẹn", "Đang diễn ra", "Đã hoàn thành", "Đã hủy"];
 type OrderStatus = "Pending" | "AwaitingSchedule" | "InProgress" | "Completed" | "Canceled";
 
-// Hàm ánh xạ activeTab sang status
+const cancelReasons = [
+    "Không có nhu cầu nữa",
+    "Đơn hàng trùng lặp",
+    "Thay đổi thông tin đơn hàng",
+    "Lý do khác"
+];
+
 const mapTabToStatus = (tab: string) => {
     switch (tab) {
         case "Chờ xác nhận":
@@ -27,7 +33,6 @@ const mapTabToStatus = (tab: string) => {
     }
 };
 
-// Hàm chuyển đổi trạng thái từ tiếng Anh sang tiếng Việt
 const mapStatusToVietnamese = (status: string) => {
     switch (status) {
         case "Pending":
@@ -83,6 +88,51 @@ const TabBar = ({ tabs, activeTab, onTabPress }: {
         </View>
     );
 };
+
+const CancelReasonPopup = ({ visible, onClose, onConfirm, reasons }: { 
+    visible: boolean; 
+    onClose: () => void; 
+    onConfirm: (reason: string) => void; 
+    reasons: string[]; 
+}) => {
+    const [selectedReason, setSelectedReason] = useState<string | null>(null);
+
+    return (
+        <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
+            <View style={styles.overlay}>
+                <View style={styles.popupContent}>
+                    <Text style={styles.popupTitle}>Chọn lý do hủy đơn</Text>
+                    {reasons.map((reason) => (
+                        <TouchableOpacity
+                            key={reason}  // ✅ Đảm bảo mỗi lý do có một key duy nhất
+                            style={[
+                                styles.reasonItem, 
+                                selectedReason === reason && styles.selectedReason
+                            ]}
+                            onPress={() => setSelectedReason(reason)}
+                        >
+                            <Text style={styles.reasonText}>{reason}</Text>
+                            {selectedReason === reason && <Text style={styles.checkIcon}>✔️</Text>}
+                        </TouchableOpacity>
+                    ))}
+                    <View style={styles.popupButtons}>
+                        <TouchableOpacity style={styles.popupButtonCancel} onPress={onClose}>
+                            <Text style={styles.popupButtonText}>Hủy</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={[styles.popupButtonConfirm, !selectedReason && styles.disabledButton]} 
+                            onPress={() => selectedReason && onConfirm(selectedReason)}
+                            disabled={!selectedReason}
+                        >
+                            <Text style={styles.popupButtonText}>Xác nhận</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        </Modal>
+    );
+};
+
 
 const OrderActions = ({ 
     orderId, 
@@ -140,14 +190,18 @@ const OrderCard = ({
     isExpanded: boolean;
     onStatusUpdate: () => void; 
 }) => {
+    const [showCancelPopup, setShowCancelPopup] = useState(false);
+
     const orderDetails = Array.isArray(order.orderDetails) ? order.orderDetails : [];
     const visibleOrderDetails = isExpanded ? orderDetails : orderDetails.slice(0, 2);
     const shouldShowToggle = orderDetails.length > 2;
 
-    const handleCancelOrder = async () => {
+    const handleCancelOrder = async (cancelReason: string) => {
+        console.log("Canceling order with ID:", order.id);
         try {
-            const cancelReason = "Lý do hủy đơn hàng"; // Bạn có thể thay thế bằng lý do thực tế
+            console.log("Cancel reason:", cancelReason);
             const canceledOrder = await cancelOrder(order.id, "v1", cancelReason);
+            console.log("Order canceled successfully:", canceledOrder);
             onStatusUpdate(); // Cập nhật trạng thái đơn hàng sau khi hủy
         } catch (error) {
             console.error("Error canceling order:", error);
@@ -188,7 +242,16 @@ const OrderCard = ({
                 orderId={order.id} 
                 currentStatus={order.status} 
                 onAccept={onStatusUpdate} 
-                onCancel={handleCancelOrder} 
+                onCancel={() => setShowCancelPopup(true)} 
+            />
+            <CancelReasonPopup 
+                visible={showCancelPopup} 
+                onClose={() => setShowCancelPopup(false)} 
+                onConfirm={(reason) => {
+                    handleCancelOrder(reason);
+                    setShowCancelPopup(false);
+                }} 
+                reasons={cancelReasons} 
             />
         </TouchableOpacity>
     );
@@ -201,7 +264,6 @@ export default function OrderShop() {
     const [loading, setLoading] = useState<boolean>(true);
     const router = useRouter();
 
-    // Gọi API để lấy danh sách đơn hàng
     useEffect(() => {
         const fetchOrders = async () => {
             try {
@@ -437,5 +499,77 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+    },
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    popupContent: {
+        width: '80%',
+        backgroundColor: 'white',
+        borderRadius: 12,
+        padding: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 6,
+    },
+    popupTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 15,
+    },
+    reasonItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 12,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        marginBottom: 8,
+    },
+    selectedReason: {
+        backgroundColor: '#f0f0f0',
+        borderColor: '#007bff',
+    },
+    reasonText: {
+        fontSize: 16,
+    },
+    checkIcon: {
+        fontSize: 18,
+        color: '#007bff',
+    },
+    popupButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 15,
+    },
+    popupButtonCancel: {
+        backgroundColor: '#ccc',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        flex: 1,
+        marginRight: 10,
+    },
+    popupButtonConfirm: {
+        backgroundColor: '#ed7c44',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+        flex: 1,
+    },
+    popupButtonText: {
+        textAlign: 'center',
+        fontWeight: 'bold',
+        color: 'white',
+    },
+    disabledButton: {
+        backgroundColor: '#ccc',
     },
 });

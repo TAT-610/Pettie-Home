@@ -262,7 +262,7 @@ export const editProfileShop = async (request: UpdateShopProfile, formData: Form
 
 
 // upload hình ảnh multipart/form-data
-export const uploadAvatar = async (imageUri: string) => {
+export const uploadAvatar = async (pictureUrl: string) => {
   try {
     const access_token = await AsyncStorage.getItem("access_token");
     if (!access_token) {
@@ -272,7 +272,7 @@ export const uploadAvatar = async (imageUri: string) => {
     // Tạo FormData để gửi file ảnh
     const formData = new FormData();
     formData.append("avatar", {
-      uri: imageUri,
+      uri: pictureUrl,
       name: "avatar.jpg", // Đặt tên file
       type: "image/jpeg", // Kiểu file
     });

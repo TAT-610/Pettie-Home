@@ -1,16 +1,13 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { Feather, FontAwesome, FontAwesome5, FontAwesome6, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Profile } from '@/services/types';
 import { getUserAccount } from '@/services/user/auth';
 
-const ProfileScreen = () => { 
+const ProfileScreen = () => {
     const router = useRouter();
-    // const [id, setId] = useState<string | null>(null);
-    // const {userData} = useLocalSearchParams();
-     
     const [profile, setProfile] = useState<Profile | null>(null);
 
     useFocusEffect(
@@ -24,16 +21,15 @@ const ProfileScreen = () => {
                     console.error("Error to fetch Data User", error)
                 }
             }
-        fetchData();
+            fetchData();
 
         }, [])
     )
 
-
-
     if (!profile) {
         return <Text>Đang tải...</Text>;
     }
+
 
     const handleLogout = async () => {
         try {
@@ -66,12 +62,19 @@ const ProfileScreen = () => {
         <ScrollView style={styles.container}>
             <View style={styles.header}>
                 <View style={styles.headerContent}>
-                    <Image source={{ uri: profile.image }} style={styles.avatar} />
+                    <Image
+                        source={{
+                            uri: profile.pictureUrl
+                                ? `https://pettiehome.online/web/${profile.pictureUrl}`
+                                : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaZPYOSQUJW4zOM9FTxASvMzRDAUaVmJCGFQ&s'
+                        }}
+                        style={styles.avatar}
+                    />
                     <Text style={styles.shopName}>{profile.fullName}</Text>
                 </View>
-                <TouchableOpacity style={styles.notificationIcon}>
+                <View style={styles.notificationIcon}>
                     <FontAwesome name="bell" size={20} color="#fff" />
-                </TouchableOpacity>
+                </View>
             </View>
 
             <View style={styles.section}>
@@ -86,26 +89,26 @@ const ProfileScreen = () => {
                 </View>
             </View>
             <View style={styles.cardmenu}>
-                <TouchableOpacity style={styles.menuItem}>
+                <View style={styles.menuItem}>
                     <View style={styles.menuItemLeft}>
                         <FontAwesome name="question-circle-o" size={20} color="#ed7c44" />
                         <Text style={styles.menuText}>Hỗ trợ</Text>
                     </View>
-                </TouchableOpacity>
+                </View>
 
-                <TouchableOpacity style={styles.menuItem} >
+                <View style={styles.menuItem} >
                     <View style={styles.menuItemLeft}>
                         <FontAwesome name="cogs" size={20} color="#ed7c44" />
                         <Text style={styles.menuText}>Cài đặt</Text>
                     </View>
-                </TouchableOpacity>
+                </View>
 
-                <TouchableOpacity style={styles.menuItem} >
+                <View style={styles.menuItem} >
                     <View style={styles.menuItemLeft}>
                         <FontAwesome name="file-text" size={20} color="#ed7c44" />
                         <Text style={styles.menuText}>Điều khoản & Chính sách</Text>
                     </View>
-                </TouchableOpacity>
+                </View>
 
                 <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
                     <View style={styles.menuItemLeft}>

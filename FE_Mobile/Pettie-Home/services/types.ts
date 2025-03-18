@@ -4,7 +4,8 @@ export interface Profile {
     email: string;
     emailConfirmed: boolean;
     phoneNumber: string; // Thêm kiểu dữ liệu cho phoneNumber
-    image?: string; // Nếu có ảnh đại diện, có thể thêm vào (tuỳ chọn)
+    pictureUrl?: { uri: string; type: string; pictureFileName?: string } | null;
+    pictureFileName: string;
     rating?: number; // Nếu có đánh giá, có thể thêm vào (tuỳ chọn)
 }
 
@@ -103,6 +104,8 @@ export interface VerifyEmailOTPRequest {
 export interface UpdateUserProfile {
     fullName: string;
     phoneNumber: string
+    pictureUrl?: { uri: string; type: string; pictureFileName?: string } | null;
+    pictureFileName: string;
 }
 
 export interface UpdateShopProfile {

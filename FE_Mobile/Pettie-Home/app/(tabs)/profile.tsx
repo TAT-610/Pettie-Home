@@ -6,10 +6,11 @@ export default function profile() {
   return (
     <FlatList
       data={[]}
+      style={{ backgroundColor: "#e9f1ff" }}
       renderItem={null}
       ListFooterComponent={() => (
         <>
-          <View style={{ backgroundColor: "#e9f1ff" }}>
+          <View >
             <Profile />
           </View>
         </>
