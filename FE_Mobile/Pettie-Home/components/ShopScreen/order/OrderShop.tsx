@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState, useEffect } from "react";
 import { Alert, Dimensions, FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRouter } from "expo-router";
-import { getOrderByShop, updateOrderStatus } from "@/services/shop/apiOrder";
+import { cancelOrder, getOrderByShop, updateOrderStatus } from "@/services/shop/apiOrder";
 import { Orders } from "@/services/types";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -144,6 +144,16 @@ const OrderCard = ({
     const visibleOrderDetails = isExpanded ? orderDetails : orderDetails.slice(0, 2);
     const shouldShowToggle = orderDetails.length > 2;
 
+    const handleCancelOrder = async () => {
+        try {
+            const cancelReason = "Lý do hủy đơn hàng"; // Bạn có thể thay thế bằng lý do thực tế
+            const canceledOrder = await cancelOrder(order.id, "v1", cancelReason);
+            onStatusUpdate(); // Cập nhật trạng thái đơn hàng sau khi hủy
+        } catch (error) {
+            console.error("Error canceling order:", error);
+        }
+    };
+
     return (
         <TouchableOpacity style={styles.orderCard} onPress={onPress}>
             <View style={styles.buttonorder}>
@@ -178,7 +188,7 @@ const OrderCard = ({
                 orderId={order.id} 
                 currentStatus={order.status} 
                 onAccept={onStatusUpdate} 
-                onCancel={() => {}} 
+                onCancel={handleCancelOrder} 
             />
         </TouchableOpacity>
     );

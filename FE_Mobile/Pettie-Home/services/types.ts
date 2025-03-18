@@ -45,6 +45,7 @@ export interface Service {
     price: string;
     image: { uri: string; type: string; fileName?: string } | null;  // Cập nhật kiểu image
     imageUrl: { uri: string; type: string; fileName?: string } | null;
+    imageFileName: { uri: string; type: string; fileName?: string } | null;
     status?: string; // Tùy chọn
     description?: string; // Tùy chọn
     categoryId?: string;
@@ -64,6 +65,7 @@ interface OrderDetail {
     product: Products;
     quantity: number;
     price: number;
+
 }
 type OrderStatus = "Pending" | "AwaitingSchedule" | "InProgress" | "Completed" | "Canceled";
 

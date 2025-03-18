@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  Dimensions,
-  Image,
-  Alert,
-} from "react-native";
+import {View,Text, FlatList, StyleSheet, TouchableOpacity, Modal, Dimensions, Image,Alert,} from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import { getOrderDetailByCode, updateOrderStatus } from "@/services/shop/apiOrder";

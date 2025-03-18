@@ -103,3 +103,43 @@ export const updateOrderStatus = async (
         throw error;
     }
 };
+
+// Hàm cập nhật trạng thái hủy đơn hàng
+export const cancelOrder = async (
+    id: string,
+    version: string,
+    cancelReason: string
+  ): Promise<Orders> => {
+    try {
+      const access_token = await AsyncStorage.getItem("access_token");
+      if (!access_token) {
+        throw new Error("Access token is not found");
+      }
+  
+      const requestBody = {
+        status: "Canceled", // Đặt trạng thái là "Canceled"
+        cancelReason: cancelReason, // Lý do hủy, bắt buộc khi status là "Canceled"
+      };
+  
+      const response = await axios.patch(`${BASE_URL_2}/orders/${id}`,
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
+      console.log("cancel order data:", response.data);
+  
+      if (response.data.success) {
+        return response.data.data; // Trả về thông tin đơn hàng sau khi hủy
+      } else {
+        throw new Error(response.data.message || "Failed to cancel order");
+      }
+    } catch (error) {
+      console.error("Error canceling order:", error);
+      throw error;
+    }
+  };
