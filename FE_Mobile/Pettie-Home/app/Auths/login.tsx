@@ -13,8 +13,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { loginUser } from "@/services/user/auth";
-const LoginImage = require('../../assets/images/login.png');
-
+import login from "../assets/images/login.png";
 
 const { width, height } = Dimensions.get("window");
 
@@ -55,7 +54,7 @@ export default function Login() {
       <StatusBar hidden={true} />
 
       {/* Logo chiếm toàn bộ chiều rộng và phần trên của màn hình */}
-      <Image source={LoginImage} style={styles.logo} />
+      <Image source={login} style={styles.logo} />
 
       <Text style={styles.title}>Đăng nhập</Text>
 
