@@ -64,6 +64,7 @@ const ServicesShop = () => {
                 category: service.category.name,
                 imageUrl: service.imageUrl || service.imageFileName,
                 image: service.imageUrl || service.imageFileName,
+                imageFileName: service.imageUrl || service.imageFileName,
               }));
             setServices(formattedServices);
             console.log("data service:", formattedServices);

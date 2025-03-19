@@ -17,7 +17,7 @@ import { resendOtp, signUpShop, signUpUser } from "@/services/user/auth";
 import { ResendOtpType } from "@/services/types";
 import * as WebBrowser from "expo-web-browser";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import logo from "../../assets/images/login.png";
+const LoginImage = require('../../assets/images/login.png');
 
 const { width, height } = Dimensions.get("window");
 
@@ -148,7 +148,7 @@ export default function Register() {
       <StatusBar hidden={true} />
 
       {/* Logo chiếm toàn bộ chiều rộng và phần trên của màn hình */}
-      <Image source={logo} style={styles.logo} />
+      <Image source={LoginImage} style={styles.logo} />
 
       <Text style={styles.title}>Đăng ký</Text>
 

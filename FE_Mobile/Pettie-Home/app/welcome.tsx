@@ -1,7 +1,8 @@
 import { Text, View, StyleSheet, Image, StatusBar, TouchableOpacity,} from "react-native";
 import { ScrollView } from "react-native";
-import logo from "../assets/images/logo12.png";
-import pet from "../assets/images/welcome.jpg";
+const LoginImage = require('../../assets/images/logo12.png');
+const petImage = require('../../assets/images/welcome.jpg');
+
 import { useRouter } from "expo-router";
 
 export default function Welcome() {
@@ -12,9 +13,9 @@ export default function Welcome() {
 
       <View style={styles.centerContent}>
         <View style={styles.centerContent1}>
-          <Image source={pet} style={styles.pet} />
+          <Image source={petImage} style={styles.pet} />
         </View>
-        <Image source={logo} style={styles.logo} />
+        <Image source={LoginImage} style={styles.logo} />
 
         <Text style={styles.text}>
           Nơi cung cấp các dịch vụ cho thú cưng tại nhà
