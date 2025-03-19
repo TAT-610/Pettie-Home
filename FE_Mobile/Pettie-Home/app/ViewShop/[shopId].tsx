@@ -8,6 +8,7 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useLocalSearchParams } from "expo-router";
@@ -88,18 +89,21 @@ const CartSummary = ({
       </View>
       <View
         style={{
-          backgroundColor: "#ed7c44",
+          backgroundColor: totalPrice > 0 ? "#ed7c44" : "#ccc",
           paddingVertical: 15,
           paddingHorizontal: 25,
           marginLeft: 15,
         }}
       >
-        <TouchableOpacity onPress={onOrderPress}>
+        <TouchableOpacity
+          onPress={totalPrice > 0 ? onOrderPress : undefined}
+          disabled={totalPrice === 0}
+        >
           <Text
             style={{
               fontSize: 15,
               fontWeight: "500",
-              color: "white",
+              color: totalPrice > 0 ? "white" : "#666",
             }}
           >
             Xem giỏ hàng
@@ -115,6 +119,7 @@ export default function ShopDetail() {
   const { shopId, distance } = useLocalSearchParams();
   const [navBarColor, setNavBarColor] = useState("rgba(0, 0, 0, 0)");
   const [shop, setShop] = useState<Shop | null>(null);
+  const [isDropdownVisible, setDropdownVisible] = useState(false);
 
   useEffect(() => {
     const fetchShopDetails = async () => {
@@ -132,9 +137,19 @@ export default function ShopDetail() {
   const handleOrderPress = () => {
     router.push(`/Order/OrderCustomer?shopId=${shopId}`);
   };
+
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
     setNavBarColor(scrollY > 200 ? "white" : "rgba(0, 0, 0, 0)");
+  };
+
+  const toggleDropdown = () => {
+    setDropdownVisible(!isDropdownVisible);
+  };
+
+  const handleHomePress = () => {
+    router.push("/(tabs)/home");
+    setDropdownVisible(false); // Đóng dropdown sau khi nhấn
   };
 
   const initialLayout = { width: Dimensions.get("window").width };
@@ -222,18 +237,27 @@ export default function ShopDetail() {
           onPress={() => router.push("/(tabs)/home")}
           style={styles.backButton}
         />
-
         <Feather
           name="more-vertical"
           size={27}
           color="white"
           style={styles.backButton}
+          onPress={toggleDropdown}
         />
       </View>
       <CartSummary
         shopId={Array.isArray(shopId) ? shopId[0] : shopId}
         onOrderPress={handleOrderPress}
       />
+
+      {/* Dropdown chứa nút về trang chủ */}
+      {isDropdownVisible && (
+        <View style={styles.dropdown}>
+          <TouchableOpacity onPress={handleHomePress}>
+            <Text style={styles.dropdownText}>Về trang chủ</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -371,5 +395,51 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    width: "80%",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 10,
+    color: "#ed7c44",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  confirmButton: {
+    color: "#ed7c44",
+    fontWeight: "bold",
+  },
+  cancelButton: {
+    color: "#666",
+    fontWeight: "bold",
+  },
+  dropdown: {
+    position: "absolute",
+    top: 80, // Vị trí dưới navigation
+    right: 10,
+    backgroundColor: "white",
+    borderRadius: 5,
+    elevation: 5,
+    padding: 10,
+    zIndex: 10,
+  },
+  dropdownText: {
+    color: "#ed7c44",
+    fontWeight: "bold",
   },
 });

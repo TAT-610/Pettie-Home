@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 
@@ -229,7 +236,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
-    marginLeft: 10
+    marginLeft: 10,
   },
   statusOrder: {
     fontSize: 15,
