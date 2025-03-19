@@ -38,6 +38,13 @@ const ServiceOfDog = ({ shopId }: { shopId: string }) => {
     router.push(`/ViewService/${serviceId}?shopId=${shopId}`); // Navigate to ProductDetail page with shopId
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
   const renderItem = ({ item }: { item: any }) => (
     <View style={styles.itemContainer}>
       <TouchableOpacity onPress={() => handleProductPress(item.id)}>
@@ -56,14 +63,16 @@ const ServiceOfDog = ({ shopId }: { shopId: string }) => {
         </Text>
         <View style={styles.contentcard}>
           <View>
-            <Text style={styles.price}>{item.price}.000đ</Text>
+            <Text style={styles.price}>{formatCurrency(item.price)}</Text>
             <TouchableOpacity onPress={() => handleProductPress(item.id)}>
               <Text style={styles.detail}>Xem chi tiết</Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.iconadd}>
-            <Ionicons name="add-circle" size={34} color="#ed7c44" />
-          </Text>
+          <TouchableOpacity onPress={() => handleProductPress(item.id)}>
+            <Text style={styles.iconadd}>
+              <Ionicons name="add-circle" size={34} color="#ed7c44" />
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

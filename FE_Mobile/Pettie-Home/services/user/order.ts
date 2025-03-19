@@ -40,3 +40,58 @@ export const createOrder = async (orderData: {
     throw error;
   }
 };
+
+export const getPaymentInfo = async (orderCode: Number): Promise<any> => {
+  try {
+    const access_token = await AsyncStorage.getItem("access_token");
+    if (!access_token) {
+      throw new Error("Access token is not found");
+    }
+    const response = await axios.get(`${BASE_URL_2}/payment/payment_link/info/${orderCode}`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("Payment info response:", response.data); // Kiểm tra phản hồi từ API
+
+    if (response.data.success) {
+      return response.data.data; // Đảm bảo trả về thông tin thanh toán
+    } else {
+      throw new Error(response.data.message || "Failed to get payment info");
+    }
+  } catch (error) {
+    console.error("Error fetching payment info:", error);
+    throw error;
+  }
+};
+
+export const getOrdersByStatus = async (status: string, pageNumber: number = 1, pageSize: number = 10) => {
+  try {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) {
+      throw new Error("Access token is not found");
+    }
+
+    const response = await axios.get(`${BASE_URL_2}/orders/user`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        status,
+        pageNumber,
+        pageSize,
+      },
+    });
+
+    if (response.data.success) {
+      return response.data.data; // Trả về dữ liệu đơn hàng
+    } else {
+      throw new Error("Không thể lấy thông tin đơn hàng.");
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy đơn hàng:", error);
+    throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+  }
+};

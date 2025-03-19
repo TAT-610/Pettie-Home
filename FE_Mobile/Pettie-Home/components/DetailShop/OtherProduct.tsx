@@ -13,13 +13,6 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useRouter } from "expo-router";
 import { getProductsByShop } from "../../services/shop/apiShop";
 
-interface CatService {
-  id: number;
-  name: string;
-  image: { uri: string; type: string; fileName: string } | null;
-  price: number;
-}
-
 const OtherProduct = ({ shopId }: { shopId: string }) => {
   const router = useRouter();
   const [products, setProducts] = useState<any[]>([]);
@@ -36,6 +29,14 @@ const OtherProduct = ({ shopId }: { shopId: string }) => {
   const handleProductPress = (productId: number) => {
     // router.push(`/ViewService/${serviceId}`); // Navigate to ProductDetail page
     router.push(`/ViewProduct/${productId}?shopId=${shopId}`);
+  };
+
+  // Hàm định dạng giá tiền
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
   };
 
   const renderItem = ({ item }: { item: any }) => (
@@ -56,7 +57,7 @@ const OtherProduct = ({ shopId }: { shopId: string }) => {
         </Text>
         <View style={styles.contentcard}>
           <View>
-            <Text style={styles.price}>{item.price} VND</Text>
+            <Text style={styles.price}>{formatCurrency(item.price)}</Text>
             <Text style={styles.detail}>Xem chi tiết</Text>
           </View>
           <Text style={styles.iconadd}>

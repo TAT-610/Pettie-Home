@@ -57,8 +57,7 @@ const CartSummary = ({
     items.forEach((item) => {
       quantity += item.quantity;
       price +=
-        item.quantity *
-        (item.product?.price || item.shopService?.price * 1000 || 0);
+        item.quantity * (item.product?.price || item.shopService?.price || 0);
     });
 
     setTotalQuantity(quantity);
@@ -103,7 +102,7 @@ const CartSummary = ({
               color: "white",
             }}
           >
-            Đặt dịch vụ
+            Xem giỏ hàng
           </Text>
         </TouchableOpacity>
       </View>
@@ -140,9 +139,12 @@ export default function ShopDetail() {
 
   const initialLayout = { width: Dimensions.get("window").width };
 
-  const data = [
-    { id: "1", component: <AllService shopId={shopId as string} /> },
-  ];
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
 
   if (!shop) {
     return <Text>Loading...</Text>;
@@ -151,7 +153,9 @@ export default function ShopDetail() {
   return (
     <View style={styles.container}>
       <FlatList
-        data={data}
+        data={[
+          { id: "1", component: <AllService shopId={shopId as string} /> },
+        ]}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => item.component}
         onScroll={handleScroll}
@@ -188,6 +192,12 @@ export default function ShopDetail() {
               <Text style={styles.texttitle}>
                 Thời gian hoạt động:{" "}
                 <Text style={styles.text}>8h00 ~ 18h00</Text>
+              </Text>
+              <Text style={styles.texttitle}>
+                Giá trung bình:{" "}
+                <Text style={styles.text}>
+                  {formatCurrency(shop.averageRating)}
+                </Text>
               </Text>
               <View style={styles.contentshop}>
                 <Text style={styles.shopDetails}>

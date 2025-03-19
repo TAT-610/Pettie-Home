@@ -19,7 +19,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { getUserAccount } from "@/services/user/auth";
 import { Profile } from "@/services/types";
-import { getCart, deleteCart } from "@/services/user/cart";
+import { getCart, deleteCart, editCart } from "@/services/user/cart";
 import { createOrder } from "@/services/user/order";
 
 const OrderCustomer = () => {
@@ -35,10 +35,29 @@ const OrderCustomer = () => {
   const [newPhoneNumber, setNewPhoneNumber] = useState(phoneNumber);
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedCartId, setSelectedCartId] = useState<string | null>(null);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [initialQuantity, setInitialQuantity] = useState(1);
+
+  const [selectedProductName, setSelectedProductName] = useState<string | null>(
+    null
+  );
+  const Shop = shopId;
   const defaultAddress =
     "Tòa Bs16, 88 Phước Thiện, Khu phố 29, Quận 9, Hồ Chí Minh";
   const [userInfo, setUserInfo] = useState<Profile | null>(null);
   const [orderSummary, setOrderSummary] = useState<any[]>([]);
+
+  // Định nghĩa hàm fetchCartItems
+  const fetchCartItems = async (shopId: string) => {
+    try {
+      const cartItems = await getCart(shopId); // Sử dụng shopId từ tham số
+      if (cartItems) {
+        setOrderSummary(cartItems);
+      }
+    } catch (error) {
+      console.error("Error fetching cart items:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -56,19 +75,15 @@ const OrderCustomer = () => {
   }, []);
 
   useEffect(() => {
-    const fetchCartItems = async () => {
-      try {
-        const cartItems = await getCart(shopId as string); // Sử dụng shopId từ useLocalSearchParams
-        if (cartItems) {
-          setOrderSummary(cartItems);
-        }
-      } catch (error) {
-        console.error("Error fetching cart items:", error);
-      }
-    };
-
-    fetchCartItems();
+    fetchCartItems(shopId as string); // Gọi hàm fetchCartItems khi shopId thay đổi
   }, [shopId]);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
 
   if (!userInfo) {
     return <Text>Loading user information...</Text>;
@@ -83,8 +98,16 @@ const OrderCustomer = () => {
     }
   };
 
-  const openDeleteModal = (cartId: string) => {
+  const openDeleteModal = (
+    cartId: string,
+    quantity: number,
+    productImage: string,
+    productName: string
+  ) => {
     setSelectedCartId(cartId);
+    setSelectedQuantity(quantity);
+    setInitialQuantity(quantity);
+    setSelectedProductName(productName);
     setDeleteModalVisible(true);
   };
 
@@ -109,14 +132,21 @@ const OrderCustomer = () => {
         note,
         paymentMethod:
           paymentMethod === "BankTransfer" ? "BankTransfer" : "Cash",
-
         appointmentDate: new Date().toISOString(),
         shopId: shopId as string,
       };
 
       const orderResponse = await createOrder(orderData);
       console.log("Order created successfully:", orderResponse);
-      router.push(`/Order/payment`);
+
+      // Kiểm tra phương thức thanh toán và điều hướng
+      if (paymentMethod === "Cash") {
+        router.push("/(tabs)/appointment"); // Chuyển đến trang hẹn
+      } else if (paymentMethod === "BankTransfer") {
+        const qrCode = orderResponse.qrCode;
+        console.log("QR Code:", qrCode); // Giả sử qrCode có trong phản hồi
+        router.push(`/Order/payment?qrCode=${qrCode}`); // Chuyển đến trang thanh toán với qrCode
+      }
     } catch (error) {
       console.error("Error creating order:", error);
     }
@@ -164,6 +194,27 @@ const OrderCustomer = () => {
   const handleUpdatePhoneNumber = () => {
     setPhoneNumber(newPhoneNumber);
     setPhoneModalVisible(false);
+  };
+
+  const handleIncreaseQuantity = () => {
+    setSelectedQuantity((prev) => prev + 1);
+  };
+
+  const handleDecreaseQuantity = () => {
+    if (selectedQuantity > 1) {
+      setSelectedQuantity((prev) => prev - 1);
+    }
+  };
+
+  const handleEditCart = async (itemId: string) => {
+    const quantityToUpdate = selectedQuantity - initialQuantity;
+    try {
+      await editCart(itemId, quantityToUpdate);
+      setDeleteModalVisible(false);
+      fetchCartItems(shopId as string); // Gọi lại hàm fetchCartItems với shopId
+    } catch (error) {
+      console.error("Error editing cart:", error);
+    }
   };
 
   return (
@@ -280,19 +331,44 @@ const OrderCustomer = () => {
       <Modal visible={isDeleteModalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Xác nhận xóa</Text>
-            <Text>Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?</Text>
+            <TouchableOpacity
+              style={styles.btnCancel}
+              onPress={closeDeleteModal}
+            >
+              <Text style={styles.closeButtonText2}>X</Text>
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Cập nhật sản phẩm</Text>
+
+            {selectedProductName && (
+              <Text
+                style={{ fontSize: 16, fontWeight: "bold", marginBottom: 10 }}
+              >
+                {selectedProductName}
+              </Text>
+            )}
+            <View style={styles.quantityContainer}>
+              <TouchableOpacity onPress={handleIncreaseQuantity}>
+                <AntDesign name="plussquare" size={30} color="#ed7c44" />
+              </TouchableOpacity>
+
+              <Text style={styles.quantityText}>{selectedQuantity}</Text>
+
+              <TouchableOpacity onPress={handleDecreaseQuantity}>
+                <AntDesign name="minussquare" size={30} color="#ed7c44" />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => handleEditCart(selectedCartId as string)}
+            >
+              <Text style={styles.closeButtonText}>Cập nhật</Text>
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => handleDelete(selectedCartId as string)}
             >
-              <Text style={styles.closeButtonText}>Xóa</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={closeDeleteModal}
-            >
-              <Text style={styles.closeButtonText}>Hủy</Text>
+              <Text style={styles.closeButtonText}>Xóa sản phẩm</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -314,10 +390,6 @@ const OrderCustomer = () => {
             </Text>
             <Text style={styles.addressText}>
               Họ và tên: {userInfo.fullName}
-            </Text>
-            <Text style={styles.addressText}>Email: {userInfo.email}</Text>
-            <Text style={styles.addressText}>
-              Số điện thoại: {userInfo.phoneNumber}
             </Text>
           </View>
 
@@ -376,7 +448,14 @@ const OrderCustomer = () => {
             return (
               <TouchableOpacity
                 key={index}
-                onPress={() => openDeleteModal(item.id)}
+                onPress={() =>
+                  openDeleteModal(
+                    item.id,
+                    item.quantity,
+                    service.image,
+                    service.name
+                  )
+                }
               >
                 <View style={{ flexDirection: "row" }}>
                   <View style={styles.orderSummaryItem}>
@@ -399,7 +478,9 @@ const OrderCustomer = () => {
 
                       <View style={styles.contentcard}>
                         <View>
-                          <Text style={styles.price}>{service.price} đ</Text>
+                          <Text style={styles.price}>
+                            {formatCurrency(service.price)}
+                          </Text>
                         </View>
                       </View>
                     </View>
@@ -413,15 +494,19 @@ const OrderCustomer = () => {
           })}
           <View style={styles.totalcontent}>
             <Text style={styles.totalText}>Tổng đơn hàng:</Text>
-            <Text style={styles.totalprice2}>{calculateTotal()}đ</Text>
+            <Text style={styles.totalprice2}>
+              {formatCurrency(calculateTotal())}
+            </Text>
           </View>
-          <View style={styles.totalcontent2}>
+          {/* <View style={styles.totalcontent2}>
             <Text style={styles.totalText}>Phí vận chuyển:</Text>
             <Text style={styles.totalprice2}>25.000đ</Text>
-          </View>
+          </View> */}
           <View style={styles.totalcontent2}>
             <Text style={styles.totalText2}>Phí thanh toán:</Text>
-            <Text style={styles.totalprice3}>{calculateTotal() + 25000}đ</Text>
+            <Text style={styles.totalprice3}>
+              {formatCurrency(calculateTotal())}
+            </Text>
           </View>
         </View>
         <View
@@ -686,6 +771,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
+    color: "#ed7c44",
   },
   optionButton: {
     padding: 10,
@@ -714,6 +800,24 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
   },
+  btnCancel: {
+    position: "absolute",
+    right: 10,
+    top: 8,
+    backgroundColor: "#ed7c44",
+    borderRadius: 100,
+  },
+  closeButtonText2: {
+    fontSize: 18,
+    fontWeight: "600",
+    height: 28,
+    width: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: "auto",
+    textAlign: "center",
+    color: "white",
+  },
   selectedOptionText: {
     color: "#fff",
   },
@@ -727,6 +831,17 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 12,
     color: "#666",
+  },
+  quantityContainer: {
+    marginVertical: 20,
+    flexDirection: "row", // Căn theo hàng ngang
+    alignItems: "center", // Canh giữa theo chiều dọc
+    justifyContent: "space-between", // Các phần tử cách đều nhau
+    width: 120, // Độ rộng cố định để tạo khoảng cách
+  },
+  quantityText: {
+    fontSize: 20,
+    fontWeight: "bold",
   },
 });
 

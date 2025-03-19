@@ -11,11 +11,10 @@ import {
 import React, { useState } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons"; // Import icon
-
-import logo from "../../assets/images/pay.jpg";
+import QRCode from "react-native-qrcode-svg";
 
 const Payment = () => {
-  const { address } = useLocalSearchParams();
+  const { address, qrCode } = useLocalSearchParams();
   const router = useRouter();
 
   // Trạng thái modal
@@ -70,7 +69,7 @@ const Payment = () => {
           <Text style={styles.value}>{orderTotal}.000đ</Text>
         </View>
 
-        <Image source={logo} style={styles.logo} />
+        <QRCode value={qrCode as string} size={200} />
 
         <TouchableOpacity style={styles.confirmButton} onPress={handlePayment}>
           <Text style={styles.buttonText}>Xác nhận đã thanh toán</Text>
