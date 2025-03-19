@@ -32,9 +32,9 @@ export default function Welcome() {
       </View>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/(tabs)/home")}
+        onPress={() => router.push("/Auths/signup")}
       >
-        <Text style={styles.textbutton}>Xem trước</Text>
+        <Text style={styles.textbutton}>Đăng kí</Text>
       </TouchableOpacity>
     </ScrollView>
   );

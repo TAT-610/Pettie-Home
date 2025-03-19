@@ -1,26 +1,39 @@
-import { Text, View, StyleSheet, Image, StatusBar, TouchableOpacity, TextInput, Alert } from "react-native";
-import { ScrollView } from "react-native";
-import logo from "../../assets/images/login.png";
+import React, { useState } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  StatusBar,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  Dimensions,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { loginUser } from "@/services/user/auth";
-import { useState } from "react";
+import logo from "../../assets/images/login.png";
+
+const { width, height } = Dimensions.get("window");
+
+// Hàm kiểm tra thiết bị
+const isTablet = width >= 600; // Máy tính bảng thường có chiều rộng từ 600px trở lên
 
 export default function Login() {
   const router = useRouter();
-  const [username, setUsername] = useState("");  
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
       const user = await loginUser(username, password);
-      
-      // Lấy thông tin user từ response
       const { fullName, roles, id } = user.userData.data;
-      const userRole = roles.length > 0 ? roles[0] : "USER"; // Mặc định USER nếu không có role
-  
+      const userRole = roles.length > 0 ? roles[0] : "USER";
+
       Alert.alert("Đăng nhập thành công", `Chào mừng ${fullName}`);
-      
-      // Điều hướng dựa theo role
+
       if (userRole === "USER") {
         router.push(`/(tabs)/home?id=${id}`);
       } else if (userRole === "SHOP") {
@@ -29,7 +42,6 @@ export default function Login() {
         router.push("/home");
       }
     } catch (error: any) {
-      // Kiểm tra nếu lỗi là 400 và có thông điệp cụ thể
       if (error.response && error.response.status === 400) {
         Alert.alert("Lỗi", "Tên đăng nhập hoặc mật khẩu không đúng");
       } else {
@@ -37,12 +49,12 @@ export default function Login() {
       }
     }
   };
-  
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <StatusBar hidden={true} />
 
+      {/* Logo chiếm toàn bộ chiều rộng và phần trên của màn hình */}
       <Image source={logo} style={styles.logo} />
 
       <Text style={styles.title}>Đăng nhập</Text>
@@ -53,7 +65,7 @@ export default function Login() {
           placeholder="Email hoặc số điện thoại"
           value={username}
           onChangeText={setUsername}
-          keyboardType="email-address"  // Cải thiện nhập email
+          keyboardType="email-address"
         />
         <TextInput
           style={styles.input}
@@ -83,25 +95,69 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: "white", flex: 1 },
-  logo: { marginLeft: 1, width: "100%", height: 400 },
-  title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
-  inputContainer: { width: "100%", marginBottom: 10, alignItems: "center" },
+  container: {
+    flexGrow: 1,
+    backgroundColor: "white",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: isTablet ? height * 0.1 : height * 0.05,
+  },
+  logo: {
+    width: "100%", // Chiếm toàn bộ chiều rộng
+    height: height * 0.8, // Chiếm 30% chiều cao màn hình
+    resizeMode: "cover", // Đảm bảo logo phủ toàn bộ khu vực
+    alignSelf: "center",
+  },
+  title: {
+    fontSize: isTablet ? width * 0.06 : width * 0.08, // Điều chỉnh font size
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: isTablet ? height * 0.03 : height * 0.02,
+  },
+  inputContainer: {
+    width: "100%",
+    marginBottom: isTablet ? height * 0.03 : height * 0.02,
+    alignItems: "center",
+  },
   input: {
-    height: 50,
+    height: isTablet ? height * 0.07 : height * 0.06,
     width: "85%",
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
     backgroundColor: "#fff",
-    marginBottom: 10,
-    fontWeight: "600",
-    fontSize: 16,
+    marginBottom: isTablet ? height * 0.02 : height * 0.015,
+    fontSize: isTablet ? width * 0.04 : width * 0.045,
   },
-  forgotPassword: { textAlign: "right", color: "#333", marginBottom: 20, marginRight: 34, fontSize: 15, fontWeight: "500" },
-  loginButton: { backgroundColor: "#ed7c44", paddingVertical: 12, borderRadius: 8, alignItems: "center", width: "85%", alignSelf: "center" },
-  loginText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  registerText: { textAlign: "center", marginTop: 20, fontSize: 14 },
-  registerLink: { fontWeight: "bold", color: "#000" },
+  forgotPassword: {
+    textAlign: "right",
+    color: "#333",
+    marginBottom: isTablet ? height * 0.03 : height * 0.02,
+    marginRight: width * 0.08,
+    fontSize: isTablet ? width * 0.035 : width * 0.04,
+    fontWeight: "500",
+  },
+  loginButton: {
+    backgroundColor: "#ed7c44",
+    paddingVertical: isTablet ? height * 0.02 : height * 0.015,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "85%",
+    alignSelf: "center",
+  },
+  loginText: {
+    color: "#fff",
+    fontSize: isTablet ? width * 0.045 : width * 0.05,
+    fontWeight: "bold",
+  },
+  registerText: {
+    textAlign: "center",
+    marginTop: isTablet ? height * 0.03 : height * 0.02,
+    fontSize: isTablet ? width * 0.035 : width * 0.04,
+  },
+  registerLink: {
+    fontWeight: "bold",
+    color: "#000",
+  },
 });
