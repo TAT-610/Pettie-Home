@@ -41,6 +41,14 @@ const ServiceDetail = () => {
     }
   };
 
+  // Hàm định dạng giá tiền
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
   // Tính tổng tiền
   const totalPrice = service.price * quantity;
 
@@ -77,7 +85,7 @@ const ServiceDetail = () => {
         </View>
         <View style={styles.infoContainer}>
           <Text style={styles.serviceName}>{service.name}</Text>
-          <Text style={styles.price}>{service.price}.000 VNĐ</Text>
+          <Text style={styles.price}>{formatCurrency(service.price)}</Text>
         </View>
         <View style={{ backgroundColor: "#e9f1ff", height: "1%" }}></View>
         <View style={styles.descriptionContainer}>
@@ -111,7 +119,7 @@ const ServiceDetail = () => {
             }}
           >
             <Text style={styles.bookingButtonText}>
-              Đặt dịch vụ - {totalPrice}.000 VNĐ
+              Đặt dịch vụ - {formatCurrency(totalPrice)}
             </Text>
           </TouchableOpacity>
         </View>

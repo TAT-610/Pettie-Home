@@ -93,7 +93,7 @@ export default function NewShop() {
               <Text style={styles.NameShop}>{item.name}</Text>
               <Text
                 style={styles.shopDescription}
-                numberOfLines={4}
+                numberOfLines={2}
                 ellipsizeMode="tail"
               >
                 Giới thiệu: {item.description}

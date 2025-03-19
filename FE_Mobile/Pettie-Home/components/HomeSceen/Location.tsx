@@ -1,70 +1,75 @@
-import { View, Text, Image, FlatList, StyleSheet } from "react-native";
-import React from "react";
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
-
+import { getShops } from "../../services/shop/apiShop"; // Đảm bảo import đúng
+import { Shop } from "../../services/types"; // Import interface
 import Octicons from "@expo/vector-icons/Octicons";
-interface Shop {
-  id: number;
-  name: string;
-  image: string;
-  rate: number;
-  distance: string;
-}
-const shopData = [
-  {
-    id: 1,
-    name: "Pet Shop Thủ Đức",
-    image:
-      "https://i.pinimg.com/736x/22/45/9a/22459a91602795a4dd42ad53baa25a9f.jpg",
-    rate: 4.5,
-    distance: "2.3 km",
-  },
-  {
-    id: 2,
-    name: "Tiệm Spa nhà Bụp",
-    image:
-      "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
-    rate: 4.0,
-    distance: "1.8 km",
-  },
-  {
-    id: 3,
-    name: "Thế giới thú cưng QuinQiun",
-    image:
-      "https://i.pinimg.com/736x/b5/e3/77/b5e377baadf2995c5ff97d9616061038.jpg",
-    rate: 4.8,
-    distance: "3.0 km",
-  },
-  {
-    id: 4,
-    name: "Juddy chuyên spa thú cưng",
-    image:
-      "https://i.pinimg.com/736x/1d/9a/22/1d9a22fab06290a3d90c08a902f5377f.jpg",
-    rate: 3.9,
-    distance: "2.0 km",
-  },
-  {
-    id: 5,
-    name: "Nhật Hùng Pet Mart",
-    image:
-      "https://i.pinimg.com/736x/1f/f4/f1/1ff4f1e627f9504d2604f47a9c475a0f.jpg",
-    rate: 4.3,
-    distance: "4.5 km",
-  },
-  {
-    id: 6,
-    name: "Tiệm mẹ Spa mẹ Bột",
-    image:
-      "https://i.pinimg.com/736x/9e/9e/0b/9e9e0b77981ba802f86393fb1c3a4dc4.jpg",
-    rate: 4.6,
-    distance: "1.5 km",
-  },
-];
+import { useRouter } from "expo-router";
 
 export default function Location() {
+  const [shopData, setShopData] = useState<Shop[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        const rawShops = await getShops();
+        const formattedShops = rawShops.map((shop: any) => ({
+          id: shop.id,
+          name: shop.name,
+          imageUrl: shop.imageUrl || shop.imageFileName || null, // Kiểm tra hình ảnh
+          totalRating: shop.averageRating ?? 0,
+          description: shop.description || "Chưa có mô tả",
+          address: shop.address || "",
+          phone: shop.phone || "",
+          email: shop.email || "",
+          balance: shop.balance || 0,
+          bankAccountNumber: shop.bankAccountNumber || "",
+          bankName: shop.bankName || "",
+          bankAccountName: shop.bankAccountName || "",
+          dateOfBirth: shop.dateOfBirth || null,
+          openingTime: shop.openingTime || "",
+          closingTime: shop.closingTime || "",
+          averageRating: shop.averageRating || 0,
+          distance: Math.floor(Math.random() * 12) + 1, // Giả lập khoảng cách
+        }));
+
+        // Sắp xếp cửa hàng theo khoảng cách gần nhất
+        formattedShops.sort((a, b) => a.distance - b.distance);
+        setShopData(formattedShops);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách cửa hàng:", error);
+      }
+    };
+
+    fetchShops();
+  }, []);
+
+  const handleProductPress = (shopId: string, distance: string) => {
+    router.push(`/ViewShop/${shopId}?distance=${distance}`);
+  };
+
   const renderItem = ({ item }: { item: Shop }) => (
     <View style={styles.shopItem}>
-      <Image source={{ uri: item.image }} style={styles.shopImage} />
+      <TouchableOpacity
+        onPress={() => handleProductPress(item.id, `${item.distance} km`)}
+      >
+        <Image
+          source={{
+            uri: item.imageUrl
+              ? `https://pettiehome.online/web/${item.imageUrl}`
+              : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
+          }}
+          style={styles.shopImage}
+        />
+      </TouchableOpacity>
       <Text style={styles.shopName} numberOfLines={2} ellipsizeMode="tail">
         {item.name}
       </Text>
@@ -72,12 +77,11 @@ export default function Location() {
       <View style={styles.contentshop}>
         <Text style={styles.shopDetails}>
           <AntDesign name="star" size={15} color="#ecc41c" />
-          <Text style={styles.shopDetails2}> {item.rate}</Text>
+          <Text style={styles.shopDetails2}> {item.totalRating}</Text>
         </Text>
-        {/* <Text>-</Text> */}
         <Text style={styles.shopDetails}>
           <Octicons name="location" size={14} color="#FE5977" />
-          <Text style={styles.shopDetails2}> {item.distance}</Text>
+          <Text style={styles.shopDetails2}> {item.distance} km</Text>
         </Text>
       </View>
     </View>
@@ -149,14 +153,12 @@ const styles = StyleSheet.create({
   },
   shopDetails2: {
     fontSize: 12,
-
     paddingLeft: 10,
     marginTop: 5,
   },
   contentheader: {
     flexDirection: "row",
     justifyContent: "space-between",
-
     paddingRight: 15,
   },
 });

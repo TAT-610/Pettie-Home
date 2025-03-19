@@ -34,7 +34,15 @@ const ServicesOfCat = ({ shopId }: { shopId: string }) => {
   }, [shopId]);
 
   const handleProductPress = (serviceId: number) => {
-    router.push(`/ViewService/${serviceId}?shopId=${shopId}`); // Navigate to ProductDetail page
+    router.push(`/ViewService/${serviceId}?shopId=${shopId}`);
+  };
+
+  // Hàm định dạng giá tiền
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
   };
 
   const renderItem = ({ item }: { item: any }) => (
@@ -55,7 +63,7 @@ const ServicesOfCat = ({ shopId }: { shopId: string }) => {
         </Text>
         <View style={styles.contentcard}>
           <View>
-            <Text style={styles.price}>{item.price}.000</Text>
+            <Text style={styles.price}>{formatCurrency(item.price)}</Text>
             <Text style={styles.detail}>Xem chi tiết</Text>
           </View>
           <Text style={styles.iconadd}>

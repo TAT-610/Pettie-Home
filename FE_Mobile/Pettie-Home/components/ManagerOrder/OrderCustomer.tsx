@@ -113,6 +113,14 @@ const initialOrders = [
 ];
 
 const tabs = [
+  "Pending", // Chờ xác nhận
+  "AwaitingSchedule", // Chờ ngày hẹn
+  "InProgress", // Đang diễn ra
+  "Completed", // Đã hoàn thành
+  "Canceled", // Đã hủy
+];
+
+const tabLabels = [
   "Chờ xác nhận",
   "Chờ ngày hẹn",
   "Đang diễn ra",
@@ -258,7 +266,7 @@ const TabBar = ({
             <Text
               style={activeTab === tab ? styles.activeTabText : styles.tabText}
             >
-              {tab}
+              {tabLabels[index]}
             </Text>
           </TouchableOpacity>
         ))}
@@ -335,7 +343,7 @@ export default function OrderCustomer() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.headerContainer}>
-        <Text style={styles.header}>Quản lí đơn hàng</Text>
+        <Text style={styles.header}>Quản lí cuộc hẹn</Text>
       </View>
 
       {/* Tabs */}

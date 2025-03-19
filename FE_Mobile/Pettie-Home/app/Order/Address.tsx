@@ -13,13 +13,21 @@ import React, { useState, useEffect } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+
+// Định nghĩa kiểu cho tỉnh, quận, phường
+interface Location {
+  label: string;
+  value: string;
+  name: string;
+}
+
 const Address = () => {
   const router = useRouter();
   const { shopId } = useLocalSearchParams();
 
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
+  const [provinces, setProvinces] = useState<Location[]>([]);
+  const [districts, setDistricts] = useState<Location[]>([]);
+  const [wards, setWards] = useState<Location[]>([]);
 
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [selectedProvinceName, setSelectedProvinceName] = useState("");

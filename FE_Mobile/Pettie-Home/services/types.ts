@@ -153,6 +153,7 @@ export interface Shop {
     totalRating: number;
     imageUrl: { uri: string; type: string; fileName?: string } | null;
     imageFileName?: string;
+    distance?: number;
 }
 
 export interface Category {

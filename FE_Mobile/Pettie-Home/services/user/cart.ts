@@ -66,6 +66,7 @@ export const getCart = async (shopId: string) => {
     return null;
   }
 };
+
 export const deleteCart = async (cartId: string): Promise<void> => {
   try {
     const access_token = await AsyncStorage.getItem("access_token");
@@ -83,6 +84,28 @@ export const deleteCart = async (cartId: string): Promise<void> => {
     return;
   } catch (error) {
     console.error("Error deleting order:", error);
+    throw error;
+  }
+};
+
+export const editCart = async (cartId: string, quantity: number): Promise<any> => {
+  try {
+    const access_token = await AsyncStorage.getItem("access_token");
+    if (!access_token) {
+      throw new Error("Access token is not found");
+    }
+
+    const response = await axios.patch(`${BASE_URL}/cart/${cartId}`, { quantity }, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("Edit cart response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error editing cart:", error);
     throw error;
   }
 };
