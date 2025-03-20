@@ -1,6 +1,6 @@
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { Alert, TextInput, TouchableOpacity, Text, View, StyleSheet } from "react-native";
+import { Alert, TextInput, TouchableOpacity, Text, View, StyleSheet, Dimensions, Platform, KeyboardAvoidingView, ScrollView } from "react-native";
 
 import { confirmEmail } from "@/services/user/auth";
 
@@ -40,22 +40,30 @@ export default function ConfirmOTP() {
       }
     }
   };
-  
+
+  const { width, height } = Dimensions.get('window');
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Xác nhận OTP</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Nhập OTP"
-        value={otp}
-        onChangeText={setOtp}
-        keyboardType="numeric"
-      />
-      <TouchableOpacity style={styles.button} onPress={handleConfirmOTP}>
-        <Text style={styles.buttonText}>Xác nhận</Text>
-      </TouchableOpacity>
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={[styles.container, { padding: width * 0.05 }]}>
+          <Text style={[styles.title, { fontSize: width * 0.06 }]}>Xác nhận OTP</Text>
+          <TextInput
+            style={[styles.input, { height: height * 0.07, width: width * 0.9 }]}
+            placeholder="Nhập OTP"
+            value={otp}
+            onChangeText={setOtp}
+            keyboardType="numeric"
+          />
+          <TouchableOpacity style={[styles.button, { paddingVertical: height * 0.02, paddingHorizontal: width * 0.1 }]} onPress={handleConfirmOTP}>
+            <Text style={styles.buttonText}>Xác nhận</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -64,17 +72,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
     backgroundColor: "#e9f1ff"
   },
   title: {
-    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 20,
   },
   input: {
-    height: 50,
-    width: "100%",
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 8,
@@ -84,8 +88,6 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: "#ed7c44",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
     borderRadius: 8,
   },
   buttonText: {

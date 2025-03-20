@@ -11,10 +11,13 @@
       "supportsTablet": true
     },
     "android": {
+      "enableProguardInReleaseBuilds": true,
+      "uploadDebugSymbols": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.lucasta.PettieHome"
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +39,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "a79c9de9-93cc-417f-91e6-aa623af6a07f"
+      }
     }
   }
 }

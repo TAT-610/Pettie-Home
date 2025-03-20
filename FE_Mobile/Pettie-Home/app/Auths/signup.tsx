@@ -295,28 +295,10 @@ export default function Register() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "white",
-    flex: 1,
-    paddingVertical: isTablet ? height * 0.05 : height * 0.02,
-  },
-  logo: {
-    width: "100%", // Chiếm toàn bộ chiều rộng
-    height: height * 0.6, // Chiếm 30% chiều cao màn hình
-    resizeMode: "cover", // Đảm bảo logo phủ toàn bộ khu vực
-    alignSelf: "center",
-  },
-  title: {
-    fontSize: isTablet ? width * 0.06 : width * 0.08,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: isTablet ? height * 0.03 : height * 0.02,
-  },
-  inputContainer: {
-    width: "100%",
-    marginBottom: isTablet ? height * 0.03 : height * 0.02,
-    alignItems: "center",
-  },
+  container: { backgroundColor: "white", flex: 1, marginBottom: 30 },
+  logo: { marginLeft: 1, width: "100%", height: 430 },
+  title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
+  inputContainer: { width: "100%", marginBottom: 10, alignItems: "center" },
   input: {
     height: isTablet ? height * 0.07 : height * 0.06,
     width: "85%",
