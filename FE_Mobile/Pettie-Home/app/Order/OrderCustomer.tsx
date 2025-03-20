@@ -577,7 +577,7 @@ const OrderCustomer = () => {
               size={20}
               color="#ed7c44"
             />
-            <Text style={{ marginLeft: 10 }}>Thanh toán VN Pay</Text>
+            <Text style={{ marginLeft: 10 }}>Thanh toán QR Pay</Text>
           </TouchableOpacity>
 
           <TouchableOpacity

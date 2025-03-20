@@ -132,3 +132,30 @@ export const getOrderDetailByCode = async (code: string): Promise<Orders> => {
   }
 };
 
+export const getOrderByCodeNumber = async (orderCode: String) => {
+  try {
+    const token = await AsyncStorage.getItem("access_token");
+    if (!token) {
+      throw new Error("Access token is not found");
+    }
+
+    const response = await axios.get(`${BASE_URL_2}/orders/${orderCode}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+
+    if (response.data.success) {
+      return response.data.data; // Trả về dữ liệu đơn hàng
+    } else {
+      throw new Error("Không thể lấy thông tin đơn hàng.");
+    }
+
+
+
+  } catch (error) {
+    console.error("Lỗi khi lấy thông tin đơn hàng:", error);
+    throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+  }
+};
