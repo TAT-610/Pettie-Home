@@ -133,6 +133,13 @@ const OrderCustomer = () => {
 
   const handlePlaceOrder = async () => {
     try {
+      // Chuyển đổi selectedDate từ dd/MM thành YYYY-MM-DD
+      const [day, month] = selectedDate.split("/");
+      const year = new Date().getFullYear(); // Sử dụng năm hiện tại
+      const formattedDate = `${year}-${month}-${day}T${selectedTime}:00`; // Định dạng thành ISO string
+
+      const appointmentDate = new Date(formattedDate).toISOString();
+
       const orderData = {
         buyerName: userInfo.fullName,
         buyerPhone: phoneNumber,
@@ -143,7 +150,7 @@ const OrderCustomer = () => {
         note,
         paymentMethod:
           paymentMethod === "BankTransfer" ? "BankTransfer" : "Cash",
-        appointmentDate: new Date().toISOString(),
+        appointmentDate,
         shopId: shopId as string,
       };
 

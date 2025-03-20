@@ -38,6 +38,8 @@ export interface Products {
     expiry: string;
     brand: string;
     description: string;
+    imageFileName: { uri: string; type: string; fileName?: string } | null;
+
 }
 
 export interface Service {

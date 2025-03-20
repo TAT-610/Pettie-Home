@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 
 const statusSteps = [
@@ -59,12 +59,12 @@ const orderDetails = {
   customerPhone: "0123456789",
   customerNote: "Vui lòng gọi điện trước khi đến để xác nhận lịch hẹn.",
 };
-
 export default function OrderDetails() {
-  const router = useRouter();
   const [order, setOrder] = useState(orderDetails);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const { address, shopId } = useLocalSearchParams();
 
+  const router = useRouter();
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -155,7 +155,6 @@ export default function OrderDetails() {
                 </Text>
               </View>
               <View style={styles.totalContainerFee}>
-                <Text style={styles.totalText}>Phí vận chuyển:</Text>
                 <Text style={styles.totalAmount}>
                   {orderDetails.shipping.toLocaleString()} đ
                 </Text>
