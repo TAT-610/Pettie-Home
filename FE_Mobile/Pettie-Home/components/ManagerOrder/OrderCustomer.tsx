@@ -205,7 +205,11 @@ export default function OrderCustomer() {
       return (
         <OrderCard
           order={item}
-          onPress={() => router.push(`/ViewOrderCustomer/${item.orderNumber}`)}
+          onPress={() =>
+            router.push(
+              `/ViewOrderCustomer/[orderdetailCus]?orderNumber=${item.orderNumber}`
+            )
+          }
         />
       );
     },

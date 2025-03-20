@@ -1,3 +1,4 @@
+
 export interface Profile {
     id: string;
     fullName: string;
@@ -90,7 +91,7 @@ export interface Orders {
     cancelReason: string | null;
     orderDetails: OrderDetail[];
 }
-
+export type OrderStatus2 = "Pending" | "AwaitingSchedule" | "InProgress" | "Completed" | "Canceled";
 
 export interface GenerateEmailOTPRequest {
     email: string, //($email && minLength: 1)

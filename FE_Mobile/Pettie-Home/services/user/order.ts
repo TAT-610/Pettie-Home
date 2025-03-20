@@ -104,26 +104,31 @@ export const getOrdersByStatus = async (params: {
     }
 };
 
-export const getOrderByCodeNumber = async (orderCode: String) => {
+export const getOrderDetailByCode = async (code: string): Promise<Orders> => {
   try {
-    const token = await AsyncStorage.getItem("access_token");
-    if (!token) {
-      throw new Error("Access token is not found");
-    }
+      const access_token = await AsyncStorage.getItem("access_token");
+      if (!access_token) {
+          throw new Error("Access token is not found");
+      }
 
-    const response = await axios.get(`${BASE_URL_2}/orders/${orderCode}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const response = await axios.get(`${BASE_URL_2}/orders/${code}`, {
+          headers: {
+              Authorization: `Bearer ${access_token}`,
+              "Content-Type": "application/json",
+          },
+      });
 
-    if (response.data.success) {
-      return response.data.data; // Trả về dữ liệu đơn hàng
-    } else {
-      throw new Error("Không thể lấy thông tin đơn hàng.");
-    }
+      console.log("Order code:", code);
+      console.log("get order detail data:", response.data);
+
+      if (response.data.success) {
+          return response.data.data; // Trả về thông tin chi tiết đơn hàng
+      } else {
+          throw new Error(response.data.message || "Failed to fetch order detail");
+      }
   } catch (error) {
-    console.error("Lỗi khi lấy thông tin đơn hàng:", error);
-    throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+      console.error("Error fetching order detail:", error);
+      throw error;
   }
 };
+
