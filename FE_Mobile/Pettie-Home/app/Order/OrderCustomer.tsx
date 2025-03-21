@@ -37,20 +37,21 @@ const OrderCustomer = () => {
   const [selectedCartId, setSelectedCartId] = useState<string | null>(null);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [initialQuantity, setInitialQuantity] = useState(1);
-
   const [selectedProductName, setSelectedProductName] = useState<string | null>(
     null
   );
+  const [userInfo, setUserInfo] = useState<Profile | null>(null);
+  const [orderSummary, setOrderSummary] = useState<any[]>([]);
+  const [isDropdownVisible, setDropdownVisible] = useState(false);
+
   const Shop = shopId;
   const defaultAddress =
     "Tòa Bs16, 88 Phước Thiện, Khu phố 29, Quận 9, Hồ Chí Minh";
-  const [userInfo, setUserInfo] = useState<Profile | null>(null);
-  const [orderSummary, setOrderSummary] = useState<any[]>([]);
 
   // Định nghĩa hàm fetchCartItems
   const fetchCartItems = async (shopId: string) => {
     try {
-      const cartItems = await getCart(shopId); // Sử dụng shopId từ tham số
+      const cartItems = await getCart(shopId);
       if (cartItems) {
         setOrderSummary(cartItems);
       }
@@ -63,9 +64,9 @@ const OrderCustomer = () => {
     const fetchUserInfo = async () => {
       try {
         const response = await getUserAccount();
-        const data: Profile = response.data; // Lấy dữ liệu từ thuộc tính `data`
+        const data: Profile = response.data;
         setUserInfo(data);
-        setPhoneNumber(data.phoneNumber); // Gán giá trị cho phoneNumber sau khi userInfo đã được gán
+        setPhoneNumber(data.phoneNumber);
       } catch (error) {
         console.error("Error fetching user info:", error);
       }
@@ -75,7 +76,7 @@ const OrderCustomer = () => {
   }, []);
 
   useEffect(() => {
-    fetchCartItems(shopId as string); // Gọi hàm fetchCartItems khi shopId thay đổi
+    fetchCartItems(shopId as string);
   }, [shopId]);
 
   const formatCurrency = (amount: number) => {
@@ -88,6 +89,16 @@ const OrderCustomer = () => {
   if (!userInfo) {
     return <Text>Loading user information...</Text>;
   }
+
+  const toggleDropdown = () => {
+    setDropdownVisible(!isDropdownVisible);
+  };
+
+  const handleHomePress = () => {
+    router.push("/(tabs)/home");
+    setDropdownVisible(false);
+  };
+
   const handleDelete = async (itemId: string) => {
     try {
       await deleteCart(itemId);
@@ -122,6 +133,13 @@ const OrderCustomer = () => {
 
   const handlePlaceOrder = async () => {
     try {
+      // Chuyển đổi selectedDate từ dd/MM thành YYYY-MM-DD
+      const [day, month] = selectedDate.split("/");
+      const year = new Date().getFullYear(); // Sử dụng năm hiện tại
+      const formattedDate = `${year}-${month}-${day}T${selectedTime}:00`; // Định dạng thành ISO string
+
+      const appointmentDate = new Date(formattedDate).toISOString();
+
       const orderData = {
         buyerName: userInfo.fullName,
         buyerPhone: phoneNumber,
@@ -132,7 +150,7 @@ const OrderCustomer = () => {
         note,
         paymentMethod:
           paymentMethod === "BankTransfer" ? "BankTransfer" : "Cash",
-        appointmentDate: new Date().toISOString(),
+        appointmentDate,
         shopId: shopId as string,
       };
 
@@ -144,8 +162,10 @@ const OrderCustomer = () => {
         router.push("/(tabs)/appointment"); // Chuyển đến trang hẹn
       } else if (paymentMethod === "BankTransfer") {
         const qrCode = orderResponse.qrCode;
-        console.log("QR Code:", qrCode); // Giả sử qrCode có trong phản hồi
-        router.push(`/Order/payment?qrCode=${qrCode}`); // Chuyển đến trang thanh toán với qrCode
+        const orderCode = orderResponse.orderCode; // Lấy orderNumber từ phản hồi
+        console.log("QR Code:", qrCode);
+        console.log("Order Code:", orderCode); // Giả sử qrCode có trong phản hồi
+        router.push(`/Order/payment?qrCode=${qrCode}&orderCode=${orderCode}`); // Chuyển đến trang thanh toán với qrCode và orderNumber
       }
     } catch (error) {
       console.error("Error creating order:", error);
@@ -233,8 +253,18 @@ const OrderCustomer = () => {
           size={27}
           color="white"
           style={styles.backButton}
+          onPress={toggleDropdown}
         />
       </View>
+
+      {isDropdownVisible && (
+        <View style={styles.dropdown}>
+          <TouchableOpacity onPress={handleHomePress}>
+            <Text style={styles.dropdownText}>Về trang chủ</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Modal chọn ngày và giờ */}
       <Modal visible={isModalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
@@ -547,7 +577,7 @@ const OrderCustomer = () => {
               size={20}
               color="#ed7c44"
             />
-            <Text style={{ marginLeft: 10 }}>Thanh toán VN Pay</Text>
+            <Text style={{ marginLeft: 10 }}>Thanh toán QR Pay</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -593,7 +623,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
-
     elevation: 10,
     shadowColor: "black",
     shadowOffset: { width: 0, height: -5 },
@@ -606,6 +635,20 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     padding: 5,
     borderRadius: 100,
+  },
+  dropdown: {
+    position: "absolute",
+    top: 80,
+    right: 10,
+    backgroundColor: "white",
+    borderRadius: 5,
+    elevation: 5,
+    padding: 10,
+    zIndex: 10,
+  },
+  dropdownText: {
+    color: "#ed7c44",
+    fontWeight: "bold",
   },
   scrollView: {
     flex: 1,
@@ -622,7 +665,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 10,
   },
-
   sectionTitle2: {
     fontSize: 15,
     fontWeight: "600",
@@ -660,7 +702,6 @@ const styles = StyleSheet.create({
   },
   totalText2: {
     fontSize: 16.5,
-
     fontWeight: "500",
   },
   totalprice2: {
@@ -687,7 +728,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 8,
   },
-
   selectedPaymentButton: {
     backgroundColor: "#f0f0f0",
   },
@@ -712,12 +752,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
     backgroundColor: "#ffff",
-
     paddingBottom: 5,
   },
   content2: {
     backgroundColor: "#ffff",
-
     paddingBottom: 5,
   },
   name: {
@@ -730,7 +768,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#ed7c44",
   },
-
   contentcard: {
     paddingTop: 12,
     flex: 1,
@@ -834,10 +871,10 @@ const styles = StyleSheet.create({
   },
   quantityContainer: {
     marginVertical: 20,
-    flexDirection: "row", // Căn theo hàng ngang
-    alignItems: "center", // Canh giữa theo chiều dọc
-    justifyContent: "space-between", // Các phần tử cách đều nhau
-    width: 120, // Độ rộng cố định để tạo khoảng cách
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: 120,
   },
   quantityText: {
     fontSize: 20,

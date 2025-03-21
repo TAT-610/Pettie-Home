@@ -60,9 +60,11 @@ const OtherProduct = ({ shopId }: { shopId: string }) => {
             <Text style={styles.price}>{formatCurrency(item.price)}</Text>
             <Text style={styles.detail}>Xem chi tiết</Text>
           </View>
-          <Text style={styles.iconadd}>
-            <Ionicons name="add-circle" size={34} color="#ed7c44" />
-          </Text>
+          <TouchableOpacity onPress={() => handleProductPress(item.id)}>
+            <Text style={styles.iconadd}>
+              <Ionicons name="add-circle" size={34} color="#ed7c44" />
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
