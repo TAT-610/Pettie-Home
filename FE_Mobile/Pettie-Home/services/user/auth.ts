@@ -3,8 +3,11 @@ import { ConfirmEmailDTO, CreateAccountDTO, CreateShopDTO, GenerateEmailOTPReque
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-const BASE_URL_1 = "http://14.225.198.232:8080";
-const BASE_URL_2 = "http://14.225.198.232:8080/api/v1"
+// const BASE_URL_1 = "http://14.225.198.232:8080";
+const BASE_URL_1 = "https://pettiehome.online";
+const BASE_URL_2 = "https://pettiehome.online/api/v1"
+
+// const BASE_URL_2 = "http://14.225.198.232:8080/api/v1"
 
 // Hàm đăng ký
 import { AxiosResponse } from "axios";

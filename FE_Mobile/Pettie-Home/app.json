@@ -12,12 +12,13 @@
     },
     "android": {
       "enableProguardInReleaseBuilds": true,
+      "proguardRules": "proguard-rules.pro",
       "uploadDebugSymbols": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.lucasta.PettieHome"
+      "package": "com.lucasta.PettiesHome"
     },
     "web": {
       "bundler": "metro",

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Shop } from "../types"; 
 
-const BASE_URL = "http://14.225.198.232:8080/api/v1";
+const BASE_URL = "https://pettiehome.online/api/v1";
 
 export const getShops = async (
   search = "",

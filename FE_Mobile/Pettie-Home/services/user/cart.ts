@@ -1,7 +1,9 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE_URL = "http://14.225.198.232:8080/api/v1";
+const BASE_URL = "https://pettiehome.online/api/v1";
+// const BASE_URL_1 = "https://pettiehome.online";
+// const BASE_URL_2 = "https://pettiehome.online/api/v1"
 
 export const addToCart = async (
   shopId: string,

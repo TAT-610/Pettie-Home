@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Orders } from "@/services/types";
 
-const BASE_URL_2 = "http://14.225.198.232:8080/api/v1";
+const BASE_URL_2 = "https://pettiehome.online/api/v1"
 
 export const getOrderByShop = async (params: {
     status?: "Pending" | "AwaitingSchedule" | "InProgress" | "Completed" | "Canceled";

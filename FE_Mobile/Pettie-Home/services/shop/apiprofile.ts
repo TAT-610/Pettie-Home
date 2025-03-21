@@ -2,7 +2,7 @@ import axios from "axios";
 import { ProfileShop } from "@/services/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const BASE_URL_2 = "http://14.225.198.232:8080/api/v1";
+const BASE_URL_2 = "https://pettiehome.online/api/v1"
 
 interface ShopData {
   id: string;
