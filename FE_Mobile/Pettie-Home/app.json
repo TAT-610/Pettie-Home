@@ -15,7 +15,7 @@
       "proguardRules": "proguard-rules.pro",
       "uploadDebugSymbols": true,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/logo.jpg",
         "backgroundColor": "#ffffff"
       },
       "package": "com.lucasta.PettiesHome"

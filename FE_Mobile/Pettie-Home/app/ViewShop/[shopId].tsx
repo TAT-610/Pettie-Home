@@ -205,22 +205,17 @@ export default function ShopDetail() {
                 Giới thiệu: <Text style={styles.text}>{shop.description}</Text>
               </Text>
               <Text style={styles.texttitle}>
-                Thời gian hoạt động:{" "}
-                <Text style={styles.text}>8h00 ~ 18h00</Text>
+                Thời gian hoạt động:
+                <Text style={styles.text}> 8h00 ~ 18h00</Text>
               </Text>
-              <Text style={styles.texttitle}>
-                Giá trung bình:{" "}
-                <Text style={styles.text}>
-                  {formatCurrency(shop.averageRating)}
-                </Text>
-              </Text>
+              
               <View style={styles.contentshop}>
                 <Text style={styles.shopDetails}>
                   Đánh giá: <AntDesign name="star" size={15} color="#ecc41c" />
                   <Text style={styles.shopDetails2}> {shop.averageRating}</Text>
                 </Text>
                 <Text style={styles.shopDetails}>
-                  Khoảng cách:{" "}
+                  Khoảng cách:
                   <Octicons name="location" size={14} color="#FE5977" />
                   <Text style={styles.shopDetails2}> {distance}</Text>
                 </Text>

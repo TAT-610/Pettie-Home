@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {View,Text, FlatList, StyleSheet, TouchableOpacity, Modal, Dimensions, Image,Alert,} from "react-native";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Modal, Dimensions, Image, Alert } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { AntDesign, Entypo } from "@expo/vector-icons";
 import { getOrderDetailByCode, updateOrderStatus } from "@/services/shop/apiOrder";
@@ -30,15 +30,40 @@ const mapStatusToText = (status: string) => {
   }
 };
 
+// Hàm dịch phương thức thanh toán
+const mapPaymentMethodToText = (method: string) => {
+  switch (method) {
+    case "Cash":
+      return "Tiền mặt";
+    case "BankTransfer":
+      return "Chuyển khoản";
+    default:
+      return "Tiền mặt"; // Mặc định là tiền mặt nếu không khớp
+  }
+};
+
+// Hàm dịch trạng thái thanh toán
+const mapPaymentStatusToText = (status: string) => {
+  switch (status) {
+    case "Pending":
+      return "Chờ thanh toán";
+    case "Paid":
+      return "Đã thanh toán";
+    case "Failed":
+      return "Thanh toán thất bại";
+    default:
+      return status || "Chưa thanh toán";
+  }
+};
+
 export default function OrderDetails() {
   const router = useRouter();
   const [order, setOrder] = useState<Orders | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isExpanded, setIsExpanded] = useState(false); // Quản lý trạng thái mở rộng
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const { orderdetailShop } = useLocalSearchParams();
-  console.log("orderdetailShop in detail:", orderdetailShop);
 
   useEffect(() => {
     const fetchOrderDetail = async () => {
@@ -108,7 +133,6 @@ export default function OrderDetails() {
     );
   }
 
-  // Logic giống OrderCard
   const orderDetails = Array.isArray(order.orderDetails) ? order.orderDetails : [];
   const visibleOrderDetails = isExpanded ? orderDetails : orderDetails.slice(0, 2);
   const shouldShowToggle = orderDetails.length > 2;
@@ -174,14 +198,10 @@ export default function OrderDetails() {
                     ? `https://pettiehome.online/web/${item.shopService.imageUrl}`
                     : isProduct
                     ? `https://pettiehome.online/web/${item.product.image?.uri}`
-                    : "https://via.placeholder.com/60"; // Hình ảnh mặc định nếu không có
+                    : "https://via.placeholder.com/60";
 
                   return (
                     <View style={styles.itemRow}>
-                      {/* <Image
-                        source={{ uri: imageUrl }}
-                        style={styles.image}
-                      /> */}
                       <View style={styles.itemInfo}>
                         <Text style={styles.itemText}>
                           {isService
@@ -226,11 +246,15 @@ export default function OrderDetails() {
             <View style={styles.cardpayment}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.section}>Phương thức thanh toán</Text>
-                <Text style={styles.infoValue}>{order.paymentMethod}</Text>
+                <Text style={styles.infoValue}>
+                  {mapPaymentMethodToText(order.paymentMethod)}
+                </Text>
               </View>
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Trạng thái thanh toán:</Text>
-                <Text style={styles.value}>{order.paymentStatus || "Chưa thanh toán"}</Text>
+                <Text style={styles.value}>
+                  {mapPaymentStatusToText(order.paymentStatus)}
+                </Text>
               </View>
             </View>
 
@@ -281,6 +305,7 @@ export default function OrderDetails() {
   );
 }
 
+// Giữ nguyên phần styles như cũ
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -405,12 +430,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
     alignItems: "center",
-  },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-    marginRight: 10,
   },
   itemInfo: {
     flex: 1,

@@ -31,40 +31,40 @@ interface Feedback {
 const feedbacks: Feedback[] = [
   {
     id: 1,
-    name: "Nguyễn Văn A",
+    name: "Nguyễn Văn TúTú",
     rate: 5,
     time: "2024-03-15",
     contentFeedback: "Sản phẩm rất tốt, mèo nhà mình rất thích ăn. Sẽ mua lại!",
     image:
-      "https://down-vn.img.susercontent.com/file/vn-11134103-7ras8-m3q6kjviug88a7.webp",
+      "https://i.pinimg.com/736x/2b/64/b7/2b64b73f2e3f0a8a0f359f533d50aedf.jpg",
   },
   {
     id: 2,
-    name: "Trần Thị B",
+    name: "Trần Thị Thanh Thủy",
     rate: 4,
     time: "2024-03-14",
     contentFeedback: "Chất lượng ổn, đóng gói cẩn thận. Giá hơi cao.",
   },
   {
     id: 3,
-    name: "Lê Văn C",
+    name: "Lê Văn Đức",
     rate: 5,
     time: "2024-03-13",
     contentFeedback: "Mèo nhà mình rất thích, ăn rất ngon miệng.",
   },
   {
     id: 4,
-    name: "Phạm Thị D",
+    name: "Phạm Thị Thái Lài",
     rate: 4,
     time: "2024-03-12",
     contentFeedback:
       "Sản phẩm tốt, giao hàng nhanh. Sẽ ủng hộ shop dài dài. Mà chắc hơi mắc.",
     image:
-      "https://down-vn.img.susercontent.com/file/vn-11134103-7ras8-m3bncfvzv8h438.webp",
+      "https://i.pinimg.com/736x/67/16/b6/6716b659c39c378f2aef928866585252.jpg",
   },
   {
     id: 5,
-    name: "Hoàng Văn E",
+    name: "Hoàng Văn Sáng",
     rate: 4,
     time: "2024-03-11",
     contentFeedback: "Chất lượng sản phẩm tốt, đóng gói cẩn thận.",
@@ -183,7 +183,7 @@ const ProductDetail = () => {
                 <Text style={styles.ratingTitle}>Đánh giá của sản phẩm</Text>
                 <View style={styles.ratingValue}>
                   <Text style={styles.ratingNumber}>
-                    {product?.rate?.toLocaleString()}/5
+                   4/5
                   </Text>
                   <FontAwesome
                     name="star"

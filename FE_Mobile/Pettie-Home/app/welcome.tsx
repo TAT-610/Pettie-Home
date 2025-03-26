@@ -37,7 +37,7 @@ export default function Welcome() {
         style={styles.button}
         onPress={() => router.push("/Auths/signup")}
       >
-        <Text style={styles.textbutton}>Đăng kí</Text>
+        <Text style={styles.textbutton}>Đăng ký</Text>
       </TouchableOpacity>
     </ScrollView>
   );
