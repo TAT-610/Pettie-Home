@@ -15,10 +15,10 @@ export default function Login() {
       console.log("User", userData);
 
       // Trích xuất dữ liệu đúng cách
-      const { fullName, roles, id } = userData.data || {};
+      const { roles, id } = userData || {};
       const userRole = roles?.length > 0 ? roles[0] : "USER";
 
-      alert(`Đăng nhập thành công! Chào mừng ${fullName || "Người dùng"}`);
+      alert(`Đăng nhập thành công! Chào mừng `);
 
       // Lưu token vào localStorage
       localStorage.setItem("access_token", accessToken);
