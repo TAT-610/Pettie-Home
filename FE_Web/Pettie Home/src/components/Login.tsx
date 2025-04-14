@@ -4,40 +4,39 @@ import { loginUser } from "../services/api";
 
 export default function Login() {
   const navigate = useNavigate();
-const [username, setUsername] = useState("");
-const [password, setPassword] = useState("");
-const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-const handleLogin = async () => {
-  setLoading(true);
-  try {
-    const { accessToken, userData } = await loginUser(username, password);
-    console.log("User", userData);
+  const handleLogin = async () => {
+    setLoading(true);
+    try {
+      const { accessToken, userData } = await loginUser(username, password);
+      console.log("User", userData);
 
-    // Trích xuất dữ liệu đúng cách
-    const { fullName, roles, id } = userData.data || {};
-    const userRole = roles?.length > 0 ? roles[0] : "USER";
+      // Trích xuất dữ liệu đúng cách
+      const { fullName, roles, id } = userData.data || {};
+      const userRole = roles?.length > 0 ? roles[0] : "USER";
 
-    alert(`Đăng nhập thành công! Chào mừng ${fullName || "Người dùng"}`);
+      alert(`Đăng nhập thành công! Chào mừng ${fullName || "Người dùng"}`);
 
-    // Lưu token vào localStorage
-    localStorage.setItem("access_token", accessToken);
-    localStorage.setItem("user_id", id || "");
+      // Lưu token vào localStorage
+      localStorage.setItem("access_token", accessToken);
+      localStorage.setItem("user_id", id || "");
 
-    // Điều hướng dựa theo vai trò
-    if (userRole === "ADMIN") {
-      navigate("/admin/thongke");
-    } else {
-      alert("Bạn không có quyền truy cập vào trang quản trị.");
+      // Điều hướng dựa theo vai trò
+      if (userRole === "ADMIN") {
+        navigate("/admin/thongke");
+      } else {
+        alert("Bạn không có quyền truy cập vào trang quản trị.");
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.error_description || "Đăng nhập thất bại!");
+    } finally {
+      setLoading(false);
     }
-  } catch (error: any) {
-    alert(error.response?.data?.error_description || "Đăng nhập thất bại!");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
-  
   return (
     <div className="flex justify-between min-h-screen bg-[#699BF4] login-container">
       {/* <div className="flex flex-col items-center text-center max-w-md w-full"> */}
@@ -56,7 +55,7 @@ const handleLogin = async () => {
 
           <input
             type="text"
-            placeholder="Số điện thoại"
+            placeholder="Nhập email"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="mb-4 px-4 py-2 rounded-lg text-slate-800 w-[400px]  border-2 border-slate-300"

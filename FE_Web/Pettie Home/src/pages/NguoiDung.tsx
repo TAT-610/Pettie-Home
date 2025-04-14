@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
-import { getAllUser } from "../services/api";
+import { User as UserData } from "../components/data3";
 
 type User = {
   id: string;
   email: string;
-  emailConfirmed: boolean;
+  emailConfirmed?: boolean;
   fullName: string;
-  phoneNumber: string | null;
-  isEnabled: boolean;
-  isLockedOut: boolean;
-  lockoutEnd: Date | null;
-  pictureFileName: string | null;
-  pictureUrl: string | null;
-  roles: string[];
+  phone: string | null;
+  isEnabled?: boolean;
+  isLockedOut?: boolean;
+  lockoutEnd?: Date | null;
+  pictureFileName?: string | null;
+  pictureUrl?: string | null;
+  role: string[];
 };
 
 const NguoiDung = () => {
@@ -21,37 +21,20 @@ const NguoiDung = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-
-  const fetchUsers = async (searchQuery = "") => {
-    try {
-      const allUsers = await getAllUser(1, 10);
-      if (!Array.isArray(allUsers)) {
-        console.error("Dữ liệu API không phải mảng:", allUsers);
-        setFilteredUsers([]);
-        return;
-      }
-
-      const userRoleUsers = allUsers.filter(
-        (user) =>
-          user.roles.includes("USER") &&
-          !user.roles.includes("SHOP") &&
-          !user.roles.includes("ADMIN")
-      );
-
-      const filtered = userRoleUsers.filter(
-        (user) =>
-          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (user.phoneNumber && user.phoneNumber.includes(searchQuery))
-      );
-      setFilteredUsers(filtered);
-    } catch (error) {
-      console.error("Lỗi khi lấy danh sách người dùng:", error);
-      setFilteredUsers([]);
-    }
-  };
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
   useEffect(() => {
+    const fetchUsers = (searchQuery = "") => {
+      const filtered = UserData.filter(
+        (user) =>
+          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.fullname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (user.phone && user.phone.includes(searchQuery))
+      );
+      setFilteredUsers(filtered);
+    };
+
     fetchUsers(searchTerm);
   }, [searchTerm]);
 
@@ -76,10 +59,21 @@ const NguoiDung = () => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to the first page on search
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+
   return (
-    // JSX giữ nguyên như code trước, chỉ thay users thành filteredUsers
     <div className="bg-[#EDF2F9] min-h-screen overflow-auto relative">
       {/* Header */}
       <div className="flex justify-between py-3 px-8 bg-slate-50 items-center mb-6 shadow-sm">
@@ -98,7 +92,6 @@ const NguoiDung = () => {
             />
           </div>
         </div>
-        {/* ... phần còn lại của header giữ nguyên ... */}
       </div>
 
       {/* Table */}
@@ -115,23 +108,21 @@ const NguoiDung = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.length === 0 ? (
+            {paginatedUsers.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-3 text-center">
                   Không tìm thấy người dùng phù hợp.
                 </td>
               </tr>
             ) : (
-              filteredUsers.map((user) => (
+              paginatedUsers.map((user) => (
                 <tr key={user.id} className="bg-white border-b">
-                  <td className="px-4 py-3">{user.id}</td>
-                  <td className="px-4 py-3">{user.email}</td>
-                  <td className="px-4 py-3">{user.fullName}</td>
-                  <td className="px-4 py-3">{user.phoneNumber ?? "_"}</td>
-                  <td className="px-4 py-3">
-                    {user.roles.length > 0 ? user.roles.join(", ") : "Chưa có vai trò"}
-                  </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-2.5">{user.id}</td>
+                  <td className="px-4 py-2.5">{user.email}</td>
+                  <td className="px-4 py-2.5">{user.fullname}</td>
+                  <td className="px-4 py-2.5">{user.phone ?? "_"}</td>
+                  <td className="px-4 py-2.5">{user.role}</td>
+                  <td className="px-4 py-2.5">
                     <button
                       className={`px-3 py-1 rounded-md font-sans ${
                         user.isLockedOut
@@ -155,11 +146,30 @@ const NguoiDung = () => {
         </table>
       </div>
 
+      {/* Pagination */}
+      <div className="flex justify-center items-center mt-4">
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index}
+            className={`px-3 py-1 mx-1 rounded-md ${
+              currentPage === index + 1
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200 text-gray-700"
+            }`}
+            onClick={() => handlePageChange(index + 1)}
+          >
+            {index + 1}
+          </button>
+        ))}
+      </div>
+
       {/* Modal giữ nguyên */}
       {showModal && selectedUser && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-lg font-bold mb-4">Xác nhận thay đổi trạng thái</h2>
+            <h2 className="text-lg font-bold mb-4">
+              Xác nhận thay đổi trạng thái
+            </h2>
             <p>
               Bạn có chắc chắn muốn thay đổi trạng thái của{" "}
               <strong>{selectedUser.email}</strong>?

@@ -1,61 +1,37 @@
 import { useState } from "react";
 import { FaSearch, FaBell } from "react-icons/fa";
+import { withdrawalRequests } from "../components/data2";
+import { orders } from "../components/data";
+import { FaCircle } from "react-icons/fa";
+
+interface Order {
+  orderId: string;
+  shopName: string;
+  buyerName: string;
+  totalAmount: number;
+  income: number;
+  orderDate: string;
+  status: string;
+}
 
 export default function GiaoDich() {
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
-  const [filter, setFilter] = useState("all");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState("orders"); // Active tab: "orders", "waiting", "paid"
+  const [currentPageOrders, setCurrentPageOrders] = useState(1);
+  const [currentPageWithdrawals, setCurrentPageWithdrawals] = useState(1);
 
-  const [giaoDichData, setGiaoDichData] = useState([
-    {
-      id: 1,
-      shopName: "Tiệm nhà Bụp",
-      amount: "450.000 VND",
-      bankName: "Vietcombank",
-      accountNumber: "123456789",
-      status: 1,
-      paymentTime: null,
-    },
-    {
-      id: 2,
-      shopName: "Pet Shop Thủ Đức",
-      amount: "325.000 VND",
-      bankName: "Techcombank",
-      accountNumber: "987654321",
-      status: 3,
-      paymentTime: "2/17/2025, 8:38:36 AM",
-    },
-    {
-      id: 3,
-      shopName: "Thế giới thú cưng Quin Quin",
-      amount: "365.000 VND",
-      bankName: "BIDV",
-      accountNumber: "567890123",
-      status: 2,
-      paymentTime: null,
-    },
-    {
-      id: 4,
-      shopName: "Pet mart quận 9",
-      amount: "2,750,000 VND",
-      bankName: "Agribank",
-      accountNumber: "654321987",
-      status: 1,
-      paymentTime: null,
-    },
-  ]);
+  const rowsPerPage = 10;
 
-  const statusMap = {
+  const [giaoDichData, setGiaoDichData] = useState(withdrawalRequests);
+
+  const statusMap: Record<number, { label: string; color: string }> = {
     1: { label: "Chờ thanh toán", color: "bg-orange-200 text-orange-700" },
-    2: {
-      label: "Hệ thống chờ thanh toán",
-      color: "bg-yellow-200 text-yellow-700",
-    },
     3: { label: "Đã thanh toán", color: "bg-green-200 text-green-700" },
   };
 
   // Mở modal xác nhận
-  const openModal = (id) => {
+  const openModal = (id: number) => {
     setSelectedId(id);
     setModalOpen(true);
   };
@@ -80,14 +56,55 @@ export default function GiaoDich() {
     closeModal();
   };
 
-  // Lọc giao dịch theo trạng thái
-  const filteredData = giaoDichData.filter((item) => {
-    if (filter === "all") return item.status === 1 || item.status === 3;
-    if (filter === "waiting") return item.status === 1;
-    if (filter === "paid") return item.status === 3;
-    if (filter === "systemWaiting") return item.status === 2;
+  // Helper function to format date to dd/mm/yyyy
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString.split("/").reverse().join("/"));
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Sort orders by orderDate in descending order
+  const sortedOrders = [...orders].sort(
+    (a, b) =>
+      new Date(b.orderDate.split("/").reverse().join("/")).getTime() -
+      new Date(a.orderDate.split("/").reverse().join("/")).getTime()
+  );
+
+  // Pagination logic for orders
+  const totalPagesOrders = Math.ceil(sortedOrders.length / rowsPerPage);
+  const paginatedOrders = sortedOrders.slice(
+    (currentPageOrders - 1) * rowsPerPage,
+    currentPageOrders * rowsPerPage
+  );
+
+  const handlePageChangeOrders = (page: number) => {
+    if (page >= 1 && page <= totalPagesOrders) {
+      setCurrentPageOrders(page);
+    }
+  };
+
+  // Pagination logic for withdrawal requests
+  const filteredWithdrawals = giaoDichData.filter((item: any) => {
+    if (activeTab === "waiting") return item.status === 1;
+    if (activeTab === "paid") return item.status === 3;
     return true;
   });
+
+  const totalPagesWithdrawals = Math.ceil(
+    filteredWithdrawals.length / rowsPerPage
+  );
+  const paginatedWithdrawals = filteredWithdrawals.slice(
+    (currentPageWithdrawals - 1) * rowsPerPage,
+    currentPageWithdrawals * rowsPerPage
+  );
+
+  const handlePageChangeWithdrawals = (page: number) => {
+    if (page >= 1 && page <= totalPagesWithdrawals) {
+      setCurrentPageWithdrawals(page);
+    }
+  };
 
   return (
     <div className="bg-[#EDF2F9] h-full overflow-hidden">
@@ -109,86 +126,245 @@ export default function GiaoDich() {
             <FaBell className="text-[#ed7c44] text-2xl" />
           </div>
           <img
-            src="https://scontent.fsgn5-9.fna.fbcdn.net/v/t39.30808-6/298262371_1454849461693251_7497615639064788636_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHIS2EWfaEKXzDZN0jYlSa5rE-BrKfZH_-sT4Gsp9kf_0yR1gdYdCUsbKDvfISZx7Tmz5fKhyZYpTW7EYSTyhUM&_nc_ohc=gkM1v5r9zwAQ7kNvgF7IFFZ&_nc_oc=AdhQ52ZlYkqQpAIU_Tuhkd-vR6O-4vRPGmG-91UolUAt_ciQNsVq4_w3MDlJdGzDYUY&_nc_zt=23&_nc_ht=scontent.fsgn5-9.fna&_nc_gid=AYBzQOllhf6SdT5VHlsmU2f&oh=00_AYBeVgH3T15kdkQDRJ_t98tnANx2bjxV3GBG64S37aUVPA&oe=67B836BE"
+            src="https://scontent.fsgn21-1.fna.fbcdn.net/v/t39.30808-6/298262371_1454849461693251_7497615639064788636_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHIS2EWfaEKXzDZN0jYlSa5rE-BrKfZH_-sT4Gsp9kf_0yR1gdYdCUsbKDvfISZx7Tmz5fKhyZYpTW7EYSTyhUM&_nc_ohc=oKNrHcCyEEwQ7kNvwEYANdJ&_nc_oc=AdmQgdpbKKkqwhnmBVfrem5GYsTrTkeX_aaVMMCRf11BGoUENmcUavw1XP3jqm9W2yj0391_nEomItzS0m0qswyP&_nc_zt=23&_nc_ht=scontent.fsgn21-1.fna&_nc_gid=Ub_Y7GE4-TFhUTmIKFaG8Q&oh=00_AfFR4OtBAp141CE8PN_hpAvVxQON-rPEqECLX4CI8eTsxA&oe=67F9E97E"
             alt="User Avatar"
             className="w-11 h-11 rounded-full"
           />
         </div>
       </div>
 
-      {/* Nút lọc trạng thái */}
-      <div className="flex space-x-4 px-10 mb-4">
+      {/* Tabs */}
+      <div className="flex space-x-4 px-8 mb-3">
         <button
-          onClick={() => setFilter("all")}
-          className="px-4 py-2 rounded bg-blue-500 text-white"
+          onClick={() => {
+            setActiveTab("orders");
+            setCurrentPageOrders(1);
+          }}
+          className={`px-4 py-1.5 rounded ${
+            activeTab === "orders" ? "bg-blue-500 text-white" : "bg-gray-200"
+          }`}
         >
-          Tất cả
+          Quản lí đơn hàng
         </button>
         <button
-          onClick={() => setFilter("waiting")}
-          className="px-4 py-2 rounded bg-orange-500 text-white"
+          onClick={() => {
+            setActiveTab("waiting");
+            setCurrentPageWithdrawals(1);
+          }}
+          className={`px-4 py-1.5 rounded ${
+            activeTab === "waiting"
+              ? "bg-orange-500 text-white"
+              : "border-orange-500 border-2 text-orange-500"
+          }`}
         >
           Yêu cầu thanh toán
         </button>
         <button
-          onClick={() => setFilter("paid")}
-          className="px-4 py-2 rounded bg-green-500 text-white"
+          onClick={() => {
+            setActiveTab("paid");
+            setCurrentPageWithdrawals(1);
+          }}
+          className={`px-4 py-1.5 rounded ${
+            activeTab === "paid"
+              ? "bg-green-500 text-white"
+              : "border-green-500 border-2 text-green-500"
+          }`}
         >
           Đã thanh toán
         </button>
-        <button
-          onClick={() => setFilter("systemWaiting")}
-          className="px-4 py-2 rounded bg-yellow-500 text-white"
-        >
-          Hệ thống chờ thanh toán
-        </button>
       </div>
 
-      {/* Bảng giao dịch */}
-      <div className="overflow-x-auto bg-white shadow-md rounded-lg mx-10">
-        <table className="w-full text-sm text-left text-gray-500">
-          <thead className="bg-[#699BF4] text-white uppercase text-xs">
-            <tr>
-              <th className="px-4 py-3">ID</th>
-              <th className="px-3 py-3">Tên cửa hàng</th>
-              <th className="px-3 py-3">Số tiền rút</th>
-              <th className="px-3 py-3">Ngân hàng</th>
-              <th className="px-3 py-3">Số tài khoản</th>
-              <th className="px-3 py-3">Trạng thái</th>
-              <th className="px-3 py-3">Thời gian thanh toán</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.map((shop) => (
-              <tr key={shop.id} className="border-b hover:bg-gray-100">
-                <td className="px-4 py-4">{shop.id}</td>
-                <td className="px-3 py-4">{shop.shopName}</td>
-                <td className="px-3 py-4">{shop.amount}</td>
-                <td className="px-3 py-4">{shop.bankName}</td>
-                <td className="px-3 py-4">{shop.accountNumber}</td>
-                <td className="px-3 py-4">
-                  <button
-                    onClick={() =>
-                      shop.status === 1 ? openModal(shop.id) : null
-                    }
-                    className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      statusMap[shop.status].color
-                    } ${
-                      shop.status === 3 ? "cursor-default" : "hover:opacity-80"
-                    }`}
-                    disabled={shop.status === 3}
-                  >
-                    {statusMap[shop.status].label}
-                  </button>
-                </td>
-                <td className="px-3 py-4">
-                  {shop.paymentTime ? shop.paymentTime : "__"}
-                </td>
+      {/* Orders Table */}
+      {activeTab === "orders" && (
+        <div className="overflow-x-auto bg-white shadow-md rounded-lg mx-10">
+          <table className="w-full text-sm text-left text-gray-500">
+            <thead className="bg-[#699BF4] text-white uppercase text-xs">
+              <tr>
+                <th className="px-3 py-3">Mã đơn hàng</th>
+                <th className="px-3 py-3">Tên cửa hàng</th>
+                <th className="px-3 py-3">Khách hàng</th>
+                <th className="px-3 py-3">Tổng đơn</th>
+                <th className="px-3 py-3">Thu nhập</th>
+                <th className="px-3 py-3">Ngày đặt</th>
+                <th className="px-3 py-3 text-center">Trạng thái</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {paginatedOrders.map((order: Order) => (
+                <tr key={order.orderId} className="border-b hover:bg-gray-100">
+                  <td className="px-4 py-3.5 font-sans text-gray-800">
+                    #{order.orderId}
+                  </td>
+                  <td className="px-3 py-3.5 font-sans text-gray-800">
+                    {order.shopName}
+                  </td>
+                  <td className="px-3 py-3.5 font-sans text-gray-800">
+                    {order.buyerName}
+                  </td>
+                  <td className="px-3 py-3.5 font-sans text-gray-800">
+                    {order.totalAmount}.000 VND
+                  </td>
+                  <td className="px-3 py-3.5 font-sans text-gray-800">
+                    {order.income}.000 VND
+                  </td>
+                  <td className="px-3 py-3.5 font-sans text-gray-800">
+                    {formatDate(order.orderDate)}
+                  </td>
+                  <td className="px-3 py-2.5 font-sans">
+                    <div className="py-1 text-xs flex justify-center items-center gap-2 font-bold rounded-full h-fit text-center bg-green-200 text-green-700">
+                      <FaCircle /> {order.status}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {/* Pagination for orders */}
+      <div className="flex justify-center items-center mt-4">
+        <button
+          onClick={() => handlePageChangeOrders(currentPageOrders - 1)}
+          className={`px-3 py-1 mx-1  border-[#699BF4] border-2 rounded-md ${
+            currentPageOrders === 1
+              ? "text-[#699BF4] cursor-not-allowed"
+              : "text-[#699BF4]"
+          }`}
+          disabled={currentPageOrders === 1}
+        >
+          {"<"}
+        </button>
+        {Array.from({ length: totalPagesOrders }, (_, index) => (
+          <button
+            key={index}
+            onClick={() => handlePageChangeOrders(index + 1)}
+            className={`px-3 py-1 mx-1  border-[#699BF4] border-2 rounded-md ${
+              currentPageOrders === index + 1
+                ? "bg-blue-500 text-white"
+                : "text-[#699BF4]"
+            }`}
+          >
+            {index + 1}
+          </button>
+        ))}
+        <button
+          onClick={() => handlePageChangeOrders(currentPageOrders + 1)}
+          className={`px-3 py-1 mx-1  border-[#699BF4] border-2 rounded-md ${
+            currentPageOrders === totalPagesOrders
+              ? "text-[#699BF4] cursor-not-allowed"
+              : "text-[#699BF4]"
+          }`}
+          disabled={currentPageOrders === totalPagesOrders}
+        >
+          {">"}
+        </button>
       </div>
+      {/* Withdrawals Table */}
+      {activeTab !== "orders" && (
+        <div className="overflow-x-auto bg-white shadow-md rounded-lg mx-10">
+          <table className="w-full text-sm text-left text-gray-500">
+            <thead className="bg-[#699BF4] text-white uppercase text-xs">
+              <tr>
+                <th className="px-4 py-3">ID</th>
+                <th className="px-3 py-3">Tên cửa hàng</th>
+                <th className="px-3 py-3">Số tiền rút</th>
+                <th className="px-3 py-3">Ngân hàng</th>
+                <th className="px-3 py-3">Số tài khoản</th>
+                <th className="px-3 py-3">Trạng thái</th>
+                <th className="px-3 py-3">Thời gian thanh toán</th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedWithdrawals.map(
+                (withdrawal: {
+                  id: number;
+                  shopName: string;
+                  amount: number;
+                  bankName: string;
+                  accountNumber: string;
+                  status: number;
+                  paymentTime?: string;
+                }) => (
+                  <tr
+                    key={withdrawal.id}
+                    className="border-b hover:bg-gray-100"
+                  >
+                    <td className="px-4 py-4">{withdrawal.id}</td>
+                    <td className="px-3 py-4">{withdrawal.shopName}</td>
+                    <td className="px-3 py-4">{withdrawal.amount}</td>
+                    <td className="px-3 py-4">{withdrawal.bankName}</td>
+                    <td className="px-3 py-4">{withdrawal.accountNumber}</td>
+                    <td className="px-3 py-4">
+                      <button
+                        onClick={() =>
+                          withdrawal.status === 1
+                            ? openModal(withdrawal.id)
+                            : null
+                        }
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          statusMap[withdrawal.status].color
+                        } ${
+                          withdrawal.status === 3
+                            ? "cursor-default"
+                            : "hover:opacity-80"
+                        }`}
+                        disabled={withdrawal.status === 3}
+                      >
+                        {statusMap[withdrawal.status].label}
+                      </button>
+                    </td>
+                    <td className="px-3 py-4">
+                      {withdrawal.paymentTime ? withdrawal.paymentTime : "__"}
+                    </td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
+          {/* Pagination for withdrawals */}
+          <div className="flex justify-center items-center mt-4">
+            <button
+              onClick={() =>
+                handlePageChangeWithdrawals(currentPageWithdrawals - 1)
+              }
+              className={`px-3 py-1 mx-1 rounded ${
+                currentPageWithdrawals === 1
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-gray-200"
+              }`}
+              disabled={currentPageWithdrawals === 1}
+            >
+              Previous
+            </button>
+            {Array.from({ length: totalPagesWithdrawals }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => handlePageChangeWithdrawals(index + 1)}
+                className={`px-3 py-1 mx-1 rounded ${
+                  currentPageWithdrawals === index + 1
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-200 text-gray-700"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+            <button
+              onClick={() =>
+                handlePageChangeWithdrawals(currentPageWithdrawals + 1)
+              }
+              className={`px-3 py-1 mx-1 rounded ${
+                currentPageWithdrawals === totalPagesWithdrawals
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-gray-200"
+              }`}
+              disabled={currentPageWithdrawals === totalPagesWithdrawals}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Modal xác nhận */}
       {modalOpen && selectedId !== null && (

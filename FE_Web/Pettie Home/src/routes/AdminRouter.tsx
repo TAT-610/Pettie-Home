@@ -20,7 +20,7 @@ export default function AdminRouter() {
           <Route path="cuahang" element={<CuaHang />} />
           <Route path="xetduyetCuahang" element={<XetduyetCuaHang />} />
           <Route path="giaodich" element={<GiaoDich />} />
-          <Route path={`cuahang/detailshop/:id`} element={<DetailShop />} />
+          <Route path="cuahang/detailshop" element={<DetailShop />} />
           <Route path="danhmuc" element={<Danhmuc />} />
         </Routes>
       </div>
