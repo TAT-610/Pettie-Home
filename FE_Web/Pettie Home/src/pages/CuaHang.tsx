@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { getAllShops } from "../services/shops/api";
 const prices = [3410000, 2020000, 1740000, 0, 0];
 
-// Định nghĩa interface Shop khớp với API
 interface Shop {
   id: string;
   name: string;

@@ -3,24 +3,11 @@ import axios from "axios";
 const BASE_URL_1 = "http://14.225.198.232:8080";
 const BASE_URL_2 = "http://14.225.198.232:8080/api/v1";
 
-interface UserData {
-  id: string;
-  username: string;
-  email: string;
-  roles: string[];
-  // Add other fields as per the API response
-}
-
-export const loginUser = async (username: string, password: string): Promise<{ accessToken: string; userData: UserData }> => {
+export const loginUser = async (username: string, password: string): Promise<any> => {
   console.log("Login with username:", username, "Password:", password);
 
   try {
-    interface LoginResponse {
-      access_token: string;
-      // Add other fields if needed
-    }
-
-    const response = await axios.post<LoginResponse>(
+    const response = await axios.post(
       `${BASE_URL_1}/connect/token`,
       new URLSearchParams({
         username,
@@ -52,8 +39,9 @@ export const loginUser = async (username: string, password: string): Promise<{ a
   }
 };
 
+
 // Hàm lấy thông tin người dùng
-export const getUserAccount = async (): Promise<UserData> => {
+export const getUserAccount = async () => {
   try {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
@@ -61,7 +49,7 @@ export const getUserAccount = async (): Promise<UserData> => {
       throw new Error("Access token không hợp lệ");
     }
 
-    const response = await axios.get<UserData>(`${BASE_URL_2}/account/users/me`, {
+    const response = await axios.get(`${BASE_URL_2}/account/users/me`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
@@ -69,15 +57,16 @@ export const getUserAccount = async (): Promise<UserData> => {
     });
 
     console.log("User Data:", response.data);
-    return response.data; // Ensure response.data matches UserData
+    return response.data;
   } catch (error) {
     console.error("Lỗi lấy thông tin user:", error);
     throw error;
   }
 };
 
+
 // Hàm lấy danh sách tất cả người dùng
-export const getAllUser = async (page = 1, pageSize = 10): Promise<UserData[]> => {
+export const getAllUser = async (page = 1, pageSize = 10): Promise<any[]> => {
   const accessToken = localStorage.getItem("access_token");
   if (!accessToken) {
     console.error("Lỗi: Chưa có access_token");
@@ -85,13 +74,7 @@ export const getAllUser = async (page = 1, pageSize = 10): Promise<UserData[]> =
   }
 
   try {
-    interface GetAllUserResponse {
-      data: {
-        items: UserData[];
-      };
-    }
-
-    const response = await axios.get<GetAllUserResponse>(
+    const response = await axios.get(
       `${BASE_URL_2}/account/users?pageNumber=${Math.max(1, page)}&pageSize=${Math.max(1, pageSize)}`,
       {
         headers: {

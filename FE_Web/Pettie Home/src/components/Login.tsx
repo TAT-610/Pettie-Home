@@ -15,10 +15,10 @@ export default function Login() {
       console.log("User", userData);
 
       // Trích xuất dữ liệu đúng cách
-      const { roles, id } = userData || {};
+      const { fullName, roles, id } = userData.data || {};
       const userRole = roles?.length > 0 ? roles[0] : "USER";
 
-      alert(`Đăng nhập thành công! Chào mừng `);
+      alert(`Đăng nhập thành công! Chào mừng ${fullName || "Người dùng"}`);
 
       // Lưu token vào localStorage
       localStorage.setItem("access_token", accessToken);
@@ -70,9 +70,8 @@ export default function Login() {
           <button
             className="px-5 py-3 bg-[#ed7c44] text-white text-base font-semibold rounded-full hover:bg-[#ff8c57] transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
             onClick={handleLogin}
-            disabled={loading}
           >
-            {loading ? "Đang xử lý..." : "Đăng nhập"}
+            Đăng nhập
           </button>
         </div>
       </div>

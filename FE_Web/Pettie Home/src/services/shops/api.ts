@@ -25,8 +25,14 @@ export const getAllShops = async (params: GetShopsParams = {}): Promise<Shop[]> 
   const accessToken = localStorage.getItem("access_token");
   if (!accessToken) throw new Error("Chưa có access_token");
 
+  interface GetShopsResponse {
+    data: {
+      items: Shop[];
+    };
+  }
+
   try {
-    const response = await axios.get(`${BASE_URL}/shops/admin`, {
+    const response = await axios.get<GetShopsResponse>(`${BASE_URL}/shops/admin`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       params: {
         pageNumber: 1,

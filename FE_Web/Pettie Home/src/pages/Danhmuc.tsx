@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { FaSearch, FaPlus, FaEdit, FaTrash } from "react-icons/fa";
-import { addCategory, getAllCategories, updateCategory, deleteCategory } from "../services/category/apiCategory";
+import {
+  addCategory,
+  getAllCategories,
+  updateCategory,
+  deleteCategory,
+} from "../services/category/apiCategory";
 
 type Category = {
   id: string;
@@ -13,7 +18,11 @@ const Categories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [newCategory, setNewCategory] = useState({ name: "", description: "", isActive: true });
+  const [newCategory, setNewCategory] = useState({
+    name: "",
+    description: "",
+    isActive: true,
+  });
 
   useEffect(() => {
     fetchCategories();
@@ -22,7 +31,14 @@ const Categories = () => {
   const fetchCategories = async () => {
     try {
       const data = await getAllCategories();
-      setCategories(data);
+      setCategories(
+        data.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          isActive: item.isActive ?? true, // Default to true if isActive is missing
+        }))
+      );
     } catch (error) {
       console.error("Lỗi khi lấy danh sách danh mục:", error);
     }
@@ -45,7 +61,10 @@ const Categories = () => {
       setEditingCategory(null);
       fetchCategories();
     } catch (error: any) {
-      console.error("Lỗi khi thêm hoặc chỉnh sửa danh mục:", error.response?.data || error.message);
+      console.error(
+        "Lỗi khi thêm hoặc chỉnh sửa danh mục:",
+        error.response?.data || error.message
+      );
       alert("Đã xảy ra lỗi. Vui lòng thử lại!");
     }
   };
@@ -65,13 +84,22 @@ const Categories = () => {
     <div className="bg-[#EDF2F9] min-h-screen overflow-auto relative">
       <div className="flex justify-between py-3 px-8 bg-slate-50 items-center mb-6 shadow-sm">
         <div className="relative w-1/2 flex items-center space-x-2">
-          <span className="font-bold text-xl text-gray-600 mr-10">Quản lý danh mục</span>
+          <span className="font-bold text-xl text-gray-600 mr-10">
+            Quản lý danh mục
+          </span>
           <div className="relative flex-1">
             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input type="text" placeholder="Tìm kiếm danh mục..." className="pl-10 py-3 text-sm rounded-full w-full border border-gray-300 focus:ring-2 focus:ring-blue-400" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm danh mục..."
+              className="pl-10 py-3 text-sm rounded-full w-full border border-gray-300 focus:ring-2 focus:ring-blue-400"
+            />
           </div>
         </div>
-        <button className="px-4 py-2 bg-[#ed7c44] text-white rounded-md flex items-center space-x-2" onClick={() => setShowModal(true)}>
+        <button
+          className="px-4 py-2 bg-[#ed7c44] text-white rounded-md flex items-center space-x-2"
+          onClick={() => setShowModal(true)}
+        >
           <FaPlus /> <span>Thêm danh mục</span>
         </button>
       </div>
@@ -90,16 +118,28 @@ const Categories = () => {
               <tr key={category.id} className="bg-white border-b">
                 <td className="px-4 py-3">{category.id}</td>
                 <td className="px-4 py-3">{category.name}</td>
-                <td className="px-4 py-3">{category.description || "Không có mô tả"}</td>
+                <td className="px-4 py-3">
+                  {category.description || "Không có mô tả"}
+                </td>
                 <td className="px-4 py-3 flex justify-center space-x-3">
-                  <button className="text-blue-500" onClick={() => {
-                    setEditingCategory(category);
-                    setNewCategory({ name: category.name, description: category.description, isActive: category.isActive });
-                    setShowModal(true);
-                  }}>
+                  <button
+                    className="text-blue-500"
+                    onClick={() => {
+                      setEditingCategory(category);
+                      setNewCategory({
+                        name: category.name,
+                        description: category.description,
+                        isActive: category.isActive,
+                      });
+                      setShowModal(true);
+                    }}
+                  >
                     <FaEdit />
                   </button>
-                  <button className="text-red-500" onClick={() => handleDeleteCategory(category.id)}>
+                  <button
+                    className="text-red-500"
+                    onClick={() => handleDeleteCategory(category.id)}
+                  >
                     <FaTrash />
                   </button>
                 </td>
@@ -111,12 +151,42 @@ const Categories = () => {
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-lg font-bold mb-4">{editingCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}</h2>
-            <input type="text" placeholder="Tên danh mục" value={newCategory.name} onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })} className="w-full px-3 py-2 border rounded-md mb-3" />
-            <textarea placeholder="Mô tả" value={newCategory.description} onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })} className="w-full px-3 py-2 border rounded-md mb-3" />
+            <h2 className="text-lg font-bold mb-4">
+              {editingCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}
+            </h2>
+            <input
+              type="text"
+              placeholder="Tên danh mục"
+              value={newCategory.name}
+              onChange={(e) =>
+                setNewCategory({ ...newCategory, name: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md mb-3"
+            />
+            <textarea
+              placeholder="Mô tả"
+              value={newCategory.description}
+              onChange={(e) =>
+                setNewCategory({ ...newCategory, description: e.target.value })
+              }
+              className="w-full px-3 py-2 border rounded-md mb-3"
+            />
             <div className="flex justify-end">
-              <button className="px-4 py-2 bg-gray-400 text-white rounded-md mr-2" onClick={() => { setShowModal(false); setEditingCategory(null); }}>Hủy</button>
-              <button className="px-4 py-2 bg-blue-500 text-white rounded-md" onClick={handleAddOrEditCategory}>{editingCategory ? "Lưu" : "Thêm"}</button>
+              <button
+                className="px-4 py-2 bg-gray-400 text-white rounded-md mr-2"
+                onClick={() => {
+                  setShowModal(false);
+                  setEditingCategory(null);
+                }}
+              >
+                Hủy
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                onClick={handleAddOrEditCategory}
+              >
+                {editingCategory ? "Lưu" : "Thêm"}
+              </button>
             </div>
           </div>
         </div>
