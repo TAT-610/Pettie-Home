@@ -1,34 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
 import { useRouter } from "expo-router";
-
-interface DogService {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  description: string;
-  shopId: number;
-}
-
-const DogService1: DogService = {
-  id: 1,
-  name: "Tắm cơ bản cho chó < 4kg",
-  image:
-    "https://i.pinimg.com/736x/f7/0d/69/f70d69556578090929bc1e99da269d9f.jpg",
-  price: 100,
-  shopId: 2,
-  description:
-    "Dịch vụ tắm cơ bản dành cho chó dưới 4 kg bao gồm tỉa lông cơ bản, vệ sinh lỗ tai, cắt móng/ dũa móng, tắm bằng xà boong chuyên dụng, sấy lông, gỡ rối, đánh tơi và thoa lotion nước hoa cho chó.",
-};
+import { getServiceById } from "../../services/shop/apiService";
+import { addToCart } from "../../services/user/cart";
 
 const ServiceDetail = () => {
   const { serviceId } = useLocalSearchParams();
+  const { shopId } = useLocalSearchParams();
   const router = useRouter();
+  const [service, setService] = useState<any | null>(null);
   const [quantity, setQuantity] = useState(1);
+
+  useEffect(() => {
+    const fetchServiceDetails = async () => {
+      try {
+        const serviceData = await getServiceById(serviceId as string);
+        setService(serviceData);
+      } catch (error) {
+        console.error("Lỗi khi lấy chi tiết dịch vụ:", error);
+      }
+    };
+
+    fetchServiceDetails();
+  }, [serviceId]);
+
+  if (!service) {
+    return <Text>Loading...</Text>;
+  }
 
   const increaseQuantity = () => {
     setQuantity((prev) => prev + 1);
@@ -40,8 +41,16 @@ const ServiceDetail = () => {
     }
   };
 
+  // Hàm định dạng giá tiền
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
   // Tính tổng tiền
-  const totalPrice = DogService1.price * quantity;
+  const totalPrice = service.price * quantity;
 
   return (
     <View style={styles.container}>
@@ -65,19 +74,23 @@ const ServiceDetail = () => {
       <View>
         <View style={{ height: "40%" }}>
           <Image
-            source={{ uri: DogService1.image }}
+            source={{
+              uri: service.image
+                ? `https://pettiehome.online/web/${service.image}`
+                : `https://pettiehome.online/web/${service.imageFileName}`,
+            }}
             resizeMode="cover"
             style={styles.serviceerviceImage}
           />
         </View>
         <View style={styles.infoContainer}>
-          <Text style={styles.serviceName}>{DogService1.name}</Text>
-          <Text style={styles.price}>{DogService1.price}.000 VNĐ</Text>
+          <Text style={styles.serviceName}>{service.name}</Text>
+          <Text style={styles.price}>{formatCurrency(service.price)}</Text>
         </View>
         <View style={{ backgroundColor: "#e9f1ff", height: "1%" }}></View>
         <View style={styles.descriptionContainer}>
           <Text style={styles.descriptionTitle}>Mô tả dịch vụ:</Text>
-          <Text style={styles.description}>{DogService1.description}</Text>
+          <Text style={styles.description}>{service.description}</Text>
         </View>
         <View style={styles.quantityContainer}>
           <TouchableOpacity
@@ -100,12 +113,13 @@ const ServiceDetail = () => {
           <TouchableOpacity
             style={styles.bookingButton}
             onPress={() => {
-              console.log("Đặt dịch vụ với số lượng:", quantity);
-              router.push(`/ViewShop/${DogService1.shopId}`);
+              console.log(`Thêm ${quantity} dịch vụ vào giỏ`);
+              addToCart(shopId as string, serviceId as string, null, quantity);
+              router.push(`/ViewShop/${shopId}`);
             }}
           >
             <Text style={styles.bookingButtonText}>
-              Đặt dịch vụ - {totalPrice}.000 VNĐ
+              Đặt dịch vụ - {formatCurrency(totalPrice)}
             </Text>
           </TouchableOpacity>
         </View>

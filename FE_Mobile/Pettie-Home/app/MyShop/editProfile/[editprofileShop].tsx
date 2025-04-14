@@ -1,136 +1,132 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert, Modal } from 'react-native';
-import { router, useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter, router } from 'expo-router';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { getProfileById, updateProfile } from '../../../services/api';
+import * as ImagePicker from 'expo-image-picker';
+import { editProfileShop } from '@/services/user/auth';
 
 const EditProfileShop = () => {
-  // State lưu thông tin hồ sơ
-  const [profile, setProfile] = useState({
-    id: "",
-    fullname: "",
-    phone: "",
-    description: "",
-    email: "",
-    address: "",
-    openingTime: "",
-    closingTime: "",
-    image: "",
-    birthDate: ""
-  });
-  const { id } = useLocalSearchParams();
-  console.log("ID", id);
-  
-  const profileId = Array.isArray(id) ? id[0] : id;
+  const { profile } = useLocalSearchParams();
+  // Đảm bảo `profile` là string trước khi parse
+  const parsedProfile = typeof profile === "string" ? JSON.parse(decodeURIComponent(profile)) : null;
+  console.log("Profile in EditProfile:", parsedProfile);
+
+  // State để lưu thông tin profile
+  const [profileData, setProfileData] = useState(parsedProfile || {});
+  // Or explicitly type it inline
+  const [selectedImage, setSelectedImage] = useState<{ uri: string; fileName: string; type: string } | null>(null);
   const [isSuccessModalVisible, setSuccessModalVisible] = useState(false);
+  const [isUploading, setUploading] = useState(false);
 
-  // Lấy dữ liệu hồ sơ khi component được mount
-  useEffect(() => {
+  // Hàm chọn ảnh từ thư viện
+  const handlePickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
 
-    const fetchData = async () => {
-      console.log("Start get Profile");
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      // Get file name from uri
+      const fileName = uri.split('/').pop() || 'profile.jpg';
+      // Infer the type of the image
+      const type = 'image/' + (fileName.split('.').pop() === 'png' ? 'png' : 'jpeg');
 
-      try {
-        
-        const data = await getProfileById(profileId);
-        console.log("End get Profile");
-
-
-        // Kiểm tra nếu dữ liệu trả về bị thiếu, gán giá trị mặc định
-        setProfile({
-          id: data?.id || "",
-          fullname: data?.fullname || "",
-          phone: data?.phone || "",
-          description: data?.description || "",
-          email: data?.email || "",
-          address: data?.address || "",
-          openingTime: data?.openingTime || "",
-          closingTime: data?.closingTime || "",
-          image: data?.image || "",
-          birthDate: data?.birthDate || "",
-        });
-
-      } catch (error) {
-        console.error("Lỗi khi lấy hồ sơ:", error);
-        Alert.alert("Lỗi", "Không thể tải dữ liệu hồ sơ.");
-      }
-    };
-
-    if (profileId) {
-      fetchData();
-    }
-  }, [profileId]); // Chạy lại khi profileId thay đổi
-
-  // Xử lý thay đổi giá trị trong form
-  const handleChange = <T extends keyof typeof profile>(field: T) => (value: typeof profile[T]) => {
-    setProfile((prev) => ({ ...prev, [field]: value }));
-  };
-  
-  
-
-  // Xử lý lưu dữ liệu khi người dùng nhấn "Lưu"
-  const handleSave = async () => {
-    if (!profile.id) {
-      Alert.alert("Lỗi", "Không tìm thấy ID của hồ sơ.");
-      return;
-    }
-
-    try {
-      await updateProfile(profile.id, {
-        fullname: profile.fullname,
-        phone: profile.phone,
-        description: profile.description,
-        email: profile.email,
-        address: profile.address,
-        openingTime: profile.openingTime,
-        closingTime: profile.closingTime,
-        image: profile.image // Fix lỗi thiếu `image`
+      // Set selected image data
+      setSelectedImage({
+        uri: uri,
+        fileName: fileName,
+        type: type
       });
 
-      setSuccessModalVisible(true);
-      setTimeout(() => {
-        setSuccessModalVisible(false);
-        router.back();
-      }, 2000); // Ẩn sau 2 giây
+      // Update the preview
+      setProfileData((prev: any) => ({
+        ...prev,
+        pictureUrl: uri
+      }));
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setUploading(true);
+
+      const formData = new FormData();
+      formData.append("name", profileData.name);
+      formData.append("phone", profileData.phone);
+      formData.append("description", profileData.description);
+      formData.append("address", profileData.address);
+      formData.append("openingTime", profileData.openingTime);
+      formData.append("closingTime", profileData.closingTime);
+      formData.append("bankAccountNumber", profileData.bankAccountNumber);
+      formData.append("bankName", profileData.bankName);
+      formData.append("bankAccountName", profileData.bankAccountName);
+
+      // Nếu có ảnh mới, thêm vào FormData
+      if (selectedImage) {
+        formData.append("image", {
+          uri: selectedImage.uri,
+          name: selectedImage.fileName,
+          type: selectedImage.type,
+        });
+      }
+
+      const response = await editProfileShop(profileData, formData);
+
+      if (response?.data) {
+        setProfileData(response.data);
+        setSuccessModalVisible(true);
+      }
     } catch (error) {
-      console.error("Lỗi khi cập nhật hồ sơ:", error);
       Alert.alert("Lỗi", "Cập nhật hồ sơ thất bại.");
+      console.error("Lỗi cập nhật hồ sơ:", error);
+    } finally {
+      setUploading(false);
     }
   };
 
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <AntDesign name="arrowleft" size={24} color="black" />
+          <AntDesign name="left" size={24} color="#333" />
           <Text style={styles.title}>Chỉnh sửa hồ sơ</Text>
         </TouchableOpacity>
-        <Image
-          source={{ uri: profile?.image || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7_PuGiOv6gDS4J7YTJkyDKGoGL2SzJAEY4A&s' }}
-          style={styles.avatar}
-          onError={() => setProfile(prev => ({ ...prev, image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7_PuGiOv6gDS4J7YTJkyDKGoGL2SzJAEY4A&s' }))}
-        />
+
+        {/* Avatar */}
+        <TouchableOpacity onPress={handlePickImage} disabled={isUploading}>
+          <Image
+            source={{
+              uri: selectedImage
+                ? selectedImage.uri
+                : profileData.imageUrl
+                  ? `https://pettiehome.online/web/${profileData.imageUrl}`
+                  : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaZPYOSQUJW4zOM9FTxASvMzRDAUaVmJCGFQ&s',
+            }}
+            style={styles.avatar}
+          />
+          {isUploading && <Text style={styles.uploadingText}>Đang tải...</Text>}
+        </TouchableOpacity>
       </View>
 
-      {/* Form */}
       <View style={styles.form}>
         <View style={styles.row}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Giờ mở cửa</Text>
             <TextInput
               style={styles.input}
-              value={profile.openingTime}
-              onChangeText={(text) => setProfile({ ...profile, openingTime: text })}
+              value={profileData?.openingTime || ''}
+              onChangeText={(text) => setProfileData({ ...profileData, openingTime: text })}
             />
           </View>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Giờ đóng cửa</Text>
             <TextInput
               style={styles.input}
-              value={profile.closingTime}
-              onChangeText={(text) => setProfile({ ...profile, closingTime: text })}
+              value={profileData?.closingTime || ''}
+              onChangeText={(text) => setProfileData({ ...profileData, closingTime: text })}
             />
           </View>
         </View>
@@ -142,18 +138,18 @@ const EditProfileShop = () => {
             multiline
             numberOfLines={4}
             maxLength={180}
-            value={profile.description}
-            onChangeText={(text) => setProfile({ ...profile, description: text })}
+            value={profileData?.description || ''}
+            onChangeText={(text) => setProfileData({ ...profileData, description: text })}
           />
-          <Text style={styles.textCounter}>{profile.description.length}/180</Text>
+          <Text style={styles.textCounter}>{profileData?.description?.length || 0}/180</Text>
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Tên Shop</Text>
           <TextInput
             style={styles.input}
-            value={profile.fullname}
-            onChangeText={(text) => setProfile({ ...profile, fullname: text })}
+            value={profileData?.name || ''}
+            onChangeText={(text) => setProfileData({ ...profileData, name: text })}
           />
         </View>
 
@@ -161,8 +157,9 @@ const EditProfileShop = () => {
           <Text style={styles.label}>Số điện thoại</Text>
           <TextInput
             style={styles.input}
-            value={profile.phone}
-            onChangeText={(text) => setProfile({ ...profile, phone: text })}
+            keyboardType="phone-pad"
+            value={profileData.phone}
+            onChangeText={(text) => setProfileData({ ...profileData, phone: text })}
           />
         </View>
 
@@ -170,77 +167,81 @@ const EditProfileShop = () => {
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
-            keyboardType="email-address"
-            value={profile.email}
-            onChangeText={(text) => setProfile({ ...profile, email: text })}
+            value={profileData.email}
+            editable={false} // Không cho chỉnh sửa email
           />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Ngày sinh</Text>
-          <TextInput style={styles.input} editable={false} value={profile.birthDate} />
         </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Địa chỉ</Text>
           <TextInput
             style={styles.input}
-            value={profile.address}
-            onChangeText={(text) => setProfile({ ...profile, address: text })}
+            value={profileData?.address || ''}
+            onChangeText={(text) => setProfileData({ ...profileData, address: text })}
           />
         </View>
 
-        {/* Lưu */}
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Lưu</Text>
+        <TouchableOpacity
+          style={[styles.saveButton, isUploading && styles.disabledButton]}
+          onPress={handleSaveProfile}
+          disabled={isUploading}
+        >
+          <Text style={styles.saveButtonText}>{isUploading ? 'Đang lưu...' : 'Lưu'}</Text>
         </TouchableOpacity>
       </View>
 
       {/* Popup thành công */}
-      <Modal transparent visible={isSuccessModalVisible} animationType="fade">
-        <View style={styles.modalContainer}>
+      <Modal
+        transparent
+        visible={isSuccessModalVisible}
+        animationType="fade"
+        onRequestClose={() => setSuccessModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalContainer}
+          activeOpacity={1}
+          onPress={() => setSuccessModalVisible(false)}
+        >
           <View style={styles.modalContent}>
             <AntDesign name="checkcircle" size={50} color="#4CAF50" />
             <Text style={styles.modalText}>Cập nhật thành công!</Text>
           </View>
-        </View>
+        </TouchableOpacity>
       </Modal>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#e9f1ff' },
   header: {
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
     height: 250,
-    backgroundColor: '#ed7c44',
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
     overflow: 'hidden'
   },
+  uploadingText: { color: "#fff", },
   backButton: {
     position: 'absolute',
     top: 40,
     left: 20,
-    zIndex: 10,
     flexDirection: 'row'
   },
   avatar: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover'
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    borderWidth: 2,
+    borderColor: "#fff",
+    marginTop: "17%",
   },
   title: { fontSize: 18, fontWeight: 'bold', marginLeft: 20 },
+  avatarContainer: { position: 'relative', marginTop: 20 },
+  imagePreview: { width: 100, height: 100, alignSelf: "center", marginBottom: 10 },
+  cameraIcon: { position: 'absolute', bottom: 5, right: 5, backgroundColor: '#00000080', padding: 5, borderRadius: 15 },
   form: { padding: 20 },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginLeft: 40,
-    marginRight: 40
-  },
+  row: { flexDirection: 'row', justifyContent: 'space-between', marginRight: 40, marginLeft: 40 },
   inputContainer: { marginBottom: 15 },
   label: { fontSize: 14, color: '#555', marginBottom: 5 },
   input: {
@@ -252,30 +253,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9'
   },
   textarea: { height: 80, textAlignVertical: 'top' },
-  textCounter: { textAlign: 'right', fontSize: 12, color: '#888', marginTop: 5 },
-  saveButton: {
-    backgroundColor: '#ed7c44',
-    padding: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 30
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)'
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center'
-  },
-  modalText: { fontSize: 18, fontWeight: 'bold', color: '#4CAF50', marginTop: 10 },
-  
-  saveButtonText: { fontSize: 16, fontWeight: 'bold', color: '#fff' }
+  textCounter: { textAlign: 'right', fontSize: 12, color: '#888' },
+  saveButton: { backgroundColor: '#ed7c44', padding: 15, borderRadius: 10, alignItems: 'center', marginTop: 20 },
+  disabledButton: { backgroundColor: '#cccccc', },
+  saveButtonText: { fontSize: 16, fontWeight: 'bold', color: '#fff', },
+  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+  modalContent: { backgroundColor: '#fff', padding: 20, borderRadius: 10, alignItems: 'center' },
+  modalText: { fontSize: 18, fontWeight: 'bold', color: '#4CAF50' }
 });
 
 export default EditProfileShop;

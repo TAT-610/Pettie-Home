@@ -1,101 +1,84 @@
 import { useState, useEffect } from "react";
 import { FaSearch, FaBell } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { getAllShops, updateShopStatus } from "../services/shops/api";
 
-const initialStores = [
-  {
-    id: 10,
-    name: "Phan Thục Quyên",
-    shopName: "Clarke Pitt",
-    phone: "0901234567",
-    address: "45b Vân Côi, Phường 7, Tân Bình, Hồ Chí Minh",
-    status: "Chờ xác nhận",
-    price: 50,
-  },
-  {
-    id: 11,
-    name: "Trương Nữ Thùy Ngân",
-    shopName: "Haven Pet Shop",
-    phone: "0912345678",
-    address: " 651 Lạc Long Quân, Phường 10, Tân Bình, Hồ Chí Minh 700000",
-    status: "Từ chối",
-    price: 75,
-  },
-  {
-    id: 12,
-    name: "Trần Công Tạo",
-    shopName: "Pet Spa ParadosParados",
-    phone: "0923456789",
-    address: "62B Hòa Bình, Phường 5, Quận 11, Hồ Chí Minh",
-    status: "Chờ xác nhận",
-    price: 120,
-  },
-  {
-    id: 13,
-    name: "Ngô Nguyễn Cầm Thanh",
-    shopName: "CuePie",
-    phone: "0934567890",
-    address: " 151 Lý Thường Kiệt, Phường 7, Quận 11, Hồ Chí Minh",
-    status: "Từ chối",
-    price: 95,
-  },
-];
+interface Shop {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  averageRating: number;
+  status: string;
+}
 
 const XetDuyetCuaHang = () => {
-  const [storeData, setStoreData] = useState(() => {
-    const approvedStores = JSON.parse(
-      localStorage.getItem("approvedStores") || "[]"
-    );
-    return initialStores.filter(
-      (store) => !approvedStores.some((approved) => approved.id === store.id)
-    );
-  });
+  const [shops, setShops] = useState<Shop[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedStore, setSelectedStore] = useState(null);
+  const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [selectedAction, setSelectedAction] = useState("");
-  const navigate = useNavigate();
 
-  const handleActionChange = (storeId, action) => {
-    const store = storeData.find((store) => store.id === storeId);
-    setSelectedStore(store);
+  // Gọi API để lấy danh sách cửa hàng
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const dataData: Shop[] = await getAllShops();
+        // Chỉ giữ lại các cửa hàng có trạng thái "Pending"
+        const pendingShops = dataData.filter((shop) => shop.status === "Pending");
+        setShops(pendingShops);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách cửa hàng:", error);
+        setShops([]);
+      }
+    };
+
+    fetchStores();
+  }, []);
+
+  // Xử lý khi chọn hành động
+  const handleActionChange = (shopId: string, action: string) => {
+    const shop = shops.find((shop) => shop.id === shopId);
+    setSelectedShop(shop || null);
     setSelectedAction(action);
     setModalVisible(true);
   };
 
-  const confirmAction = () => {
-    const updatedStores = storeData.filter((store) => {
-      if (store.id === selectedStore.id) {
-        if (selectedAction === "approve") {
-          const approvedStores = JSON.parse(
-            localStorage.getItem("approvedStores") || "[]"
-          );
-          approvedStores.push({
-            ...store,
-            revenue: 0,
-            status: true,
-          });
-          localStorage.setItem(
-            "approvedStores",
-            JSON.stringify(approvedStores)
-          );
-          return false; // Loại bỏ cửa hàng đã chấp nhận khỏi danh sách
-        } else {
-          store.status = "Từ chối";
-        }
+  // Gửi API cập nhật trạng thái cửa hàng
+  const confirmAction = async () => {
+    if (!selectedShop) return;
+    try {
+      const newStatus = selectedAction === "Chấp nhận" ? "Approved" : "Rejected";
+      const success = await updateShopStatus(selectedShop.id, newStatus);
+
+      if (success) {
+        setShops((prevShops) =>
+          prevShops.filter((shop) => shop.id !== selectedShop.id)
+        );
+        setModalVisible(false);
+        setSelectedShop(null);
+        setSelectedAction("");
+      } else {
+        console.error("Lỗi khi cập nhật trạng thái.");
       }
-      return true;
-    });
-    setStoreData(updatedStores);
-    setModalVisible(false);
+    } catch (error) {
+      console.error("Lỗi kết nối API:", error);
+    }
   };
 
-  const filteredStores = storeData.filter((store) =>
-    store.shopName.toLowerCase().includes(searchTerm.toLowerCase())
+  // Hàm xử lý tìm kiếm
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Lọc cửa hàng theo từ khóa tìm kiếm
+  const filteredStores = shops.filter((shop) =>
+    shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    shop.phone.includes(searchTerm) ||
+    shop.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="bg-[#EDF2F9] h-full overflow-hidden">
+    <div className="bg-[#EDF2F9] min-h-screen overflow-auto relative">
       {/* Header */}
       <div className="flex justify-between py-3 px-8 bg-slate-50 items-center mb-6 shadow-sm">
         <div className="relative w-1/2 flex items-center space-x-2">
@@ -106,17 +89,17 @@ const XetDuyetCuaHang = () => {
             <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder="Tìm kiếm..."
+              placeholder="Tìm kiếm theo tên, số điện thoại hoặc địa chỉ..."
               className="px-10 py-3 text-sm rounded-full w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearch}
             />
           </div>
         </div>
 
         <div className="flex items-center space-x-4">
           <div className="w-11 h-11 rounded-full bg-slate-200 flex items-center justify-center">
-            <FaBell className="text-[#ed7c44] text-2xl " />
+            <FaBell className="text-[#ed7c44] text-2xl" />
           </div>
           <img
             src="https://scontent.fsgn5-9.fna.fbcdn.net/v/t39.30808-6/298262371_1454849461693251_7497615639064788636_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHIS2EWfaEKXzDZN0jYlSa5rE-BrKfZH_-sT4Gsp9kf_0yR1gdYdCUsbKDvfISZx7Tmz5fKhyZYpTW7EYSTyhUM&_nc_ohc=gkM1v5r9zwAQ7kNvgF7IFFZ&_nc_oc=AdhQ52ZlYkqQpAIU_Tuhkd-vR6O-4vRPGmG-91UolUAt_ciQNsVq4_w3MDlJdGzDYUY&_nc_zt=23&_nc_ht=scontent.fsgn5-9.fna&_nc_gid=AYBzQOllhf6SdT5VHlsmU2f&oh=00_AYBeVgH3T15kdkQDRJ_t98tnANx2bjxV3GBG64S37aUVPA&oe=67B836BE"
@@ -133,62 +116,56 @@ const XetDuyetCuaHang = () => {
             <tr>
               <th className="px-3 py-3">ID</th>
               <th className="px-3 py-3">Tên chủ cửa hàng</th>
-              <th className="px-3 py-3">Tên cửa hàng</th>
               <th className="px-3 py-3">Số điện thoại</th>
               <th className="px-3 py-3">Địa chỉ</th>
               <th className="px-3 py-3">Trạng thái</th>
-              <th className="px-33 py-3">Hành động</th>
+              <th className="px-3 py-3">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {filteredStores.map((store) => (
-              <tr
-                key={store.id}
-                className="border-b hover:bg-gray-100 transition-colors"
-              >
-                <td className="px-3 py-3">{store.id}</td>
-                <td className="px-3 py-3">{store.name}</td>
-                <td className="px-3 py-3">{store.shopName}</td>
-                <td className="px-3 py-3">{store.phone}</td>
-                <td className="px-3 py-3">{store.address}</td>
-                <td
-                  className={`px-3 py-3 ${
-                    store.status === "Chấp nhận"
-                      ? "text-green-500"
-                      : store.status === "Từ chối"
-                      ? "text-red-500"
-                      : "text-yellow-500"
-                  }`}
-                >
-                  {store.status}
-                </td>
-                <td className="px-4 py-3">
-                  <select
-                    className="border border-gray-300 rounded-lg px-2 py-1"
-                    onChange={(e) =>
-                      handleActionChange(store.id, e.target.value)
-                    }
-                  >
-                    <option value="">Chọn hành động</option>
-                    <option value="approve">Chấp nhận</option>
-                    <option value="reject">Từ chối</option>
-                  </select>
+            {filteredStores.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-3 py-3 text-center">
+                  Không tìm thấy cửa hàng phù hợp.
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredStores.map((shop) => (
+                <tr
+                  key={shop.id}
+                  className="border-b hover:bg-gray-100 transition-colors"
+                >
+                  <td className="px-3 py-3">{shop.id}</td>
+                  <td className="px-3 py-3">{shop.name}</td>
+                  <td className="px-3 py-3">{shop.phone}</td>
+                  <td className="px-3 py-3">{shop.address}</td>
+                  <td className="px-3 py-3 text-yellow-500">{shop.status}</td>
+                  <td className="px-3 py-3">
+                    <select
+                      className="border border-gray-300 rounded-lg px-2 py-1"
+                      onChange={(e) => handleActionChange(shop.id, e.target.value)}
+                    >
+                      <option value="">Chọn hành động</option>
+                      <option value="Chấp nhận">Chấp nhận</option>
+                      <option value="Từ chối">Từ chối</option>
+                    </select>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
 
       {/* Modal */}
-      {modalVisible && (
+      {modalVisible && selectedShop && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-5 rounded-lg shadow-lg">
             <h2 className="text-lg font-bold mb-4">Xác nhận hành động</h2>
             <p>
               Bạn có chắc chắn muốn{" "}
-              {selectedAction === "approve" ? "chấp nhận" : "từ chối"} cửa hàng{" "}
-              <strong>{selectedStore?.shopName}</strong>?
+              {selectedAction === "Chấp nhận" ? "chấp nhận" : "từ chối"} cửa hàng{" "}
+              <strong>{selectedShop.name}</strong>?
             </p>
             <div className="flex justify-end mt-4">
               <button
@@ -208,6 +185,7 @@ const XetDuyetCuaHang = () => {
         </div>
       )}
 
+      {/* Pagination */}
       <div className="flex justify-center items-center mt-5">
         <div className="flex items-center space-x-2">
           <button className="px-3 py-1 border rounded-md text-gray-600 hover:bg-gray-200">

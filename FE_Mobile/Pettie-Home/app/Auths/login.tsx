@@ -1,54 +1,71 @@
-import { Text, View, StyleSheet, Image, StatusBar, TouchableOpacity, TextInput, Alert } from "react-native";
-import { ScrollView } from "react-native";
-import logo from "../../assets/images/login.png";
+import React, { useState } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  Image,
+  StatusBar,
+  TouchableOpacity,
+  TextInput,
+  Alert,
+  Dimensions,
+  ScrollView,
+} from "react-native";
 import { useRouter } from "expo-router";
-import { loginUser } from "@/services/api";
-import { useState } from "react";
+import { loginUser } from "@/services/user/auth";
+// import login from "../assets/images/login.png";
+const LoginImage = require('../../assets/images/login.png')
+
+const { width, height } = Dimensions.get("window");
+
+// Hàm kiểm tra thiết bị
+const isTablet = width >= 600; // Máy tính bảng thường có chiều rộng từ 600px trở lên
 
 export default function Login() {
   const router = useRouter();
-  const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      const user = await loginUser(phone, password);
+      const user = await loginUser(username, password);
+      const { fullName, roles, id } = user.userData.data;
+      const userRole = roles.length > 0 ? roles[0] : "USER";
 
-      if (!user || !user.role || !user.id) {
-        throw new Error("Không thể xác định vai trò người dùng.");
-      }
+      Alert.alert("Đăng nhập thành công", `Chào mừng ${fullName}`);
 
-      Alert.alert("Đăng nhập thành công", `Chào mừng ${user.phone}`);
-
-      // Điều hướng dựa theo role
-      if (user.role === "user") {
-        router.push(`/(tabs)/home?id=${user.id}`);
-      } else if (user.role === "shop") {
-        router.push(`/(tabsShop)/homeShop?id=${user.id}`);
-        console.log(`Truyen ID User AfterLogin",${user.id}` );
-        
+      if (userRole === "USER") {
+        router.push(`/(tabs)/home?id=${id}`);
+      } else if (userRole === "SHOP") {
+        router.push(`/(tabsShop)/homeShop?id=${id}`);
       } else {
         router.push("/home");
       }
     } catch (error: any) {
-      Alert.alert("Lỗi", error.message || "Đăng nhập thất bại");
+      if (error.response && error.response.status === 400) {
+        Alert.alert("Lỗi", "Tên đăng nhập hoặc mật khẩu không đúng");
+      } else {
+        Alert.alert("Lỗi", error.message || "Đăng nhập thất bại");
+      }
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <StatusBar hidden={true} />
 
-      <Image source={logo} style={styles.logo} />
+      {/* Logo chiếm toàn bộ chiều rộng và phần trên của màn hình */}
+      <Image source={LoginImage} style={styles.logo} />
 
       <Text style={styles.title}>Đăng nhập</Text>
 
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Số điện thoại"
-          value={phone}
-          onChangeText={setPhone}
+          placeholder="Email hoặc số điện thoại"
+          value={username}
+          onChangeText={setUsername}
+          keyboardType="email-address"
         />
         <TextInput
           style={styles.input}
@@ -59,9 +76,9 @@ export default function Login() {
         />
       </View>
 
-      <TouchableOpacity>
+      <View>
         <Text style={styles.forgotPassword}>Bạn quên mật khẩu?</Text>
-      </TouchableOpacity>
+      </View>
 
       <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
         <Text style={styles.loginText}>Đăng nhập</Text>
@@ -79,24 +96,48 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   container: { backgroundColor: "white", flex: 1 },
-  logo: { marginLeft: 1, width: "100%", height: 400 },
+  logo: { marginLeft: 1, width: "100%", height: 430 },
   title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
   inputContainer: { width: "100%", marginBottom: 10, alignItems: "center" },
   input: {
-    height: 50,
+    height: isTablet ? height * 0.07 : height * 0.06,
     width: "85%",
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
     backgroundColor: "#fff",
-    marginBottom: 10,
-    fontWeight: "600",
-    fontSize: 16,
+    marginBottom: isTablet ? height * 0.02 : height * 0.015,
+    fontSize: isTablet ? width * 0.04 : width * 0.045,
   },
-  forgotPassword: { textAlign: "right", color: "#333", marginBottom: 20, marginRight: 34, fontSize: 15, fontWeight: "500" },
-  loginButton: { backgroundColor: "#ed7c44", paddingVertical: 12, borderRadius: 8, alignItems: "center", width: "85%", alignSelf: "center" },
-  loginText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  registerText: { textAlign: "center", marginTop: 20, fontSize: 14 },
-  registerLink: { fontWeight: "bold", color: "#000" },
+  forgotPassword: {
+    textAlign: "right",
+    color: "#333",
+    marginBottom: isTablet ? height * 0.03 : height * 0.02,
+    marginRight: width * 0.08,
+    fontSize: isTablet ? width * 0.035 : width * 0.04,
+    fontWeight: "500",
+  },
+  loginButton: {
+    backgroundColor: "#ed7c44",
+    paddingVertical: isTablet ? height * 0.02 : height * 0.015,
+    borderRadius: 8,
+    alignItems: "center",
+    width: "85%",
+    alignSelf: "center",
+  },
+  loginText: {
+    color: "#fff",
+    fontSize: isTablet ? width * 0.045 : width * 0.05,
+    fontWeight: "bold",
+  },
+  registerText: {
+    textAlign: "center",
+    marginTop: isTablet ? height * 0.03 : height * 0.02,
+    fontSize: isTablet ? width * 0.035 : width * 0.04,
+  },
+  registerLink: {
+    fontWeight: "bold",
+    color: "#000",
+  },
 });

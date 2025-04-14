@@ -1,14 +1,15 @@
-import { StyleSheet, Text, View, ScrollView } from "react-native";
 import React from "react";
+import { StyleSheet, View } from "react-native";
 import ServiceOfDog from "./ServiceOfDog";
 import ServicesOfCat from "./ServicesOfCat";
 import OtherProduct from "@/components/DetailShop/OtherProduct";
-const AllService = () => {
+
+const AllService = ({ shopId }: { shopId: string }) => {
   return (
     <View style={styles.content}>
-      <ServiceOfDog />
-      <ServicesOfCat />
-      <OtherProduct />
+      <ServiceOfDog shopId={shopId} />
+      <ServicesOfCat shopId={shopId} />
+      <OtherProduct shopId={shopId} />
     </View>
   );
 };

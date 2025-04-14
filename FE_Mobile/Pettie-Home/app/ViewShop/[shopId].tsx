@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useLocalSearchParams } from "expo-router";
@@ -23,27 +24,153 @@ import { TabView, SceneMap, TabBar } from "react-native-tab-view";
 // import ServiceOfDog from "../../components/DetailShop/ServiceOfDog";
 // import Product from "../../components/DetailShop/Product";
 import AllService from "../../components/DetailShop/AllService";
+import { getShopDetails } from "../../services/shop/apiShop";
+import { Shop } from "../../services/types";
+import { getCart } from "../../services/user/cart";
+
+const CartSummary = ({
+  shopId,
+  onOrderPress,
+}: {
+  shopId: string;
+  onOrderPress: () => void;
+}) => {
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [totalQuantity, setTotalQuantity] = useState(0);
+  const [totalPrice, setTotalPrice] = useState(0);
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      const data = await getCart(shopId);
+      if (data) {
+        setCartItems(data);
+        calculateSummary(data);
+      }
+    };
+
+    fetchCartItems();
+  }, [shopId]);
+
+  const calculateSummary = (items: any[]) => {
+    let quantity = 0;
+    let price = 0;
+
+    items.forEach((item) => {
+      quantity += item.quantity;
+      price +=
+        item.quantity * (item.product?.price || item.shopService?.price || 0);
+    });
+
+    setTotalQuantity(quantity);
+    setTotalPrice(price);
+  };
+
+  return (
+    <View style={styles.card}>
+      <View style={{ marginTop: 5 }}>
+        <Text
+          style={{
+            textAlign: "center",
+            color: "#ed7c44",
+          }}
+        >
+          Tổng thanh toán ({cartItems.length})
+        </Text>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "600",
+            color: "#ed7c44",
+            textAlign: "right",
+          }}
+        >
+          {totalPrice} VNĐ
+        </Text>
+      </View>
+      <View
+        style={{
+          backgroundColor: totalPrice > 0 ? "#ed7c44" : "#ccc",
+          paddingVertical: 15,
+          paddingHorizontal: 25,
+          marginLeft: 15,
+        }}
+      >
+        <TouchableOpacity
+          onPress={totalPrice > 0 ? onOrderPress : undefined}
+          disabled={totalPrice === 0}
+        >
+          <Text
+            style={{
+              fontSize: 15,
+              fontWeight: "500",
+              color: totalPrice > 0 ? "white" : "#666",
+            }}
+          >
+            Xem giỏ hàng
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
 
 export default function ShopDetail() {
   const router = useRouter();
-  const { shopId } = useLocalSearchParams();
+  const { shopId, distance } = useLocalSearchParams();
   const [navBarColor, setNavBarColor] = useState("rgba(0, 0, 0, 0)");
+  const [shop, setShop] = useState<Shop | null>(null);
+  const [isDropdownVisible, setDropdownVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchShopDetails = async () => {
+      try {
+        const shopData = await getShopDetails(shopId as string);
+        setShop(shopData);
+      } catch (error) {
+        console.error("Lỗi khi lấy chi tiết cửa hàng:", error);
+      }
+    };
+
+    fetchShopDetails();
+  }, [shopId]);
+
   const handleOrderPress = () => {
-    router.push(`/Order/OrderCustomer`); // Navigate to ProductDetail page
+    router.push(`/Order/OrderCustomer?shopId=${shopId}`);
   };
+
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
     setNavBarColor(scrollY > 200 ? "white" : "rgba(0, 0, 0, 0)");
   };
 
+  const toggleDropdown = () => {
+    setDropdownVisible(!isDropdownVisible);
+  };
+
+  const handleHomePress = () => {
+    router.push("/(tabs)/home");
+    setDropdownVisible(false); // Đóng dropdown sau khi nhấn
+  };
+
   const initialLayout = { width: Dimensions.get("window").width };
 
-  const data = [{ id: "1", component: <AllService /> }];
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
+  if (!shop) {
+    return <Text>Loading...</Text>;
+  }
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={data}
+        data={[
+          { id: "1", component: <AllService shopId={shopId as string} /> },
+        ]}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => item.component}
         onScroll={handleScroll}
@@ -52,7 +179,11 @@ export default function ShopDetail() {
           <>
             <Image
               source={{
-                uri: "https://i.pinimg.com/736x/7f/78/37/7f783761231551f96aadbaece6e7e1d9.jpg",
+                uri: shop.imageUrl
+                  ? `https://pettiehome.online/web/${shop.imageUrl}`
+                  : shop.imageFileName
+                  ? `https://pettiehome.online/web/${shop.imageFileName}`
+                  : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
               }}
               resizeMode="cover"
               style={styles.shopImage}
@@ -65,31 +196,28 @@ export default function ShopDetail() {
                   color="#ed7c44"
                   style={{ marginRight: 5 }}
                 />
-                <Text style={styles.shopname}>Tiệm Spa nhà Bụp </Text>
+                <Text style={styles.shopname}>{shop.name}</Text>
                 {/* <Text style={styles.texttitle}>
                   ID shop: <Text style={styles.text}>{shopId}</Text>
                 </Text> */}
               </View>
               <Text style={styles.texttitle}>
-                Giới thiệu:{" "}
-                <Text style={styles.text}>
-                  Nhà Bụp với 2 năm kinh nghiệm trong việc spa thú cưng, tụi
-                  mình luôn muốn bạn và thú cưng có trãi nghiệm tốt nhất.
-                </Text>
+                Giới thiệu: <Text style={styles.text}>{shop.description}</Text>
               </Text>
               <Text style={styles.texttitle}>
-                Thời gian hoạt động:{" "}
-                <Text style={styles.text}>8h00 ~ 18h00</Text>
+                Thời gian hoạt động:
+                <Text style={styles.text}> 8h00 ~ 18h00</Text>
               </Text>
+              
               <View style={styles.contentshop}>
                 <Text style={styles.shopDetails}>
                   Đánh giá: <AntDesign name="star" size={15} color="#ecc41c" />
-                  <Text style={styles.shopDetails2}> 4.5</Text>
+                  <Text style={styles.shopDetails2}> {shop.averageRating}</Text>
                 </Text>
                 <Text style={styles.shopDetails}>
-                  Khoảng cách:{" "}
+                  Khoảng cách:
                   <Octicons name="location" size={14} color="#FE5977" />
-                  <Text style={styles.shopDetails2}> 5km</Text>
+                  <Text style={styles.shopDetails2}> {distance}</Text>
                 </Text>
               </View>
             </View>
@@ -104,57 +232,27 @@ export default function ShopDetail() {
           onPress={() => router.push("/(tabs)/home")}
           style={styles.backButton}
         />
-
         <Feather
           name="more-vertical"
           size={27}
           color="white"
           style={styles.backButton}
+          onPress={toggleDropdown}
         />
       </View>
-      <View style={styles.card}>
-        <View style={{ marginTop: 5 }}>
-          <Text
-            style={{
-              textAlign: "center",
-              color: "#ed7c44",
-            }}
-          >
-            Tổng thanh toán(3)
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "600",
-              color: "#ed7c44",
+      <CartSummary
+        shopId={Array.isArray(shopId) ? shopId[0] : shopId}
+        onOrderPress={handleOrderPress}
+      />
 
-              textAlign: "right",
-            }}
-          >
-            340.000đ
-          </Text>
-        </View>
-        <View
-          style={{
-            backgroundColor: "#ed7c44",
-            paddingVertical: 15,
-            paddingHorizontal: 25,
-            marginLeft: 15,
-          }}
-        >
-          <TouchableOpacity onPress={handleOrderPress}>
-            <Text
-              style={{
-                fontSize: 15,
-                fontWeight: "500",
-                color: "white",
-              }}
-            >
-              Đặt dịch vụ
-            </Text>
+      {/* Dropdown chứa nút về trang chủ */}
+      {isDropdownVisible && (
+        <View style={styles.dropdown}>
+          <TouchableOpacity onPress={handleHomePress}>
+            <Text style={styles.dropdownText}>Về trang chủ</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      )}
     </View>
   );
 }
@@ -220,7 +318,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingVertical: 12,
     paddingHorizontal: 15,
-    marginBottom: 10,
   },
   shopname: {
     fontSize: 16,
@@ -232,18 +329,20 @@ const styles = StyleSheet.create({
     flexDirection: "row", // Đặt icon và tên shop trên cùng một dòng
     alignItems: "center", // Căn giữa icon và tên theo chiều dọc
     justifyContent: "center", // Căn chúng bắt đầu từ bên trái
-    marginBottom: 8, // Khoảng cách bên dưới hàng
+    marginBottom: 8,
+    marginTop: 5, // Khoảng cách bên dưới hàng
   },
   inforshop: {
     alignItems: "flex-start",
-    marginBottom: 5,
+    marginBottom: 8,
   },
   texttitle: {
     fontWeight: "800",
     color: "#666",
     fontSize: 12.5,
-    lineHeight: 16,
+    lineHeight: 17,
     textAlign: "left",
+    marginBottom: 5,
   },
   text: {
     fontWeight: "400",
@@ -254,7 +353,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingBottom: 5,
+    paddingBottom: 8,
   },
   detailItem: {
     flexDirection: "row",
@@ -275,5 +374,67 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginRight: 5,
+  },
+  summaryContainer: {
+    padding: 20,
+    backgroundColor: "white",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    margin: 10,
+  },
+  summaryText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    width: "80%",
+    padding: 20,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 10,
+    color: "#ed7c44",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  confirmButton: {
+    color: "#ed7c44",
+    fontWeight: "bold",
+  },
+  cancelButton: {
+    color: "#666",
+    fontWeight: "bold",
+  },
+  dropdown: {
+    position: "absolute",
+    top: 80, // Vị trí dưới navigation
+    right: 10,
+    backgroundColor: "white",
+    borderRadius: 5,
+    elevation: 5,
+    padding: 10,
+    zIndex: 10,
+  },
+  dropdownText: {
+    color: "#ed7c44",
+    fontWeight: "bold",
   },
 });

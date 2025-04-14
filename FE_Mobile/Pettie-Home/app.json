@@ -4,7 +4,6 @@
     "slug": "Pettie-Home",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -12,10 +11,14 @@
       "supportsTablet": true
     },
     "android": {
+      "enableProguardInReleaseBuilds": true,
+      "proguardRules": "proguard-rules.pro",
+      "uploadDebugSymbols": true,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/logo.jpg",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.lucasta.PettiesHome"
     },
     "web": {
       "bundler": "metro",
@@ -32,10 +35,19 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "a79c9de9-93cc-417f-91e6-aa623af6a07f"
+      }
     }
   }
 }

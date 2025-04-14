@@ -30,10 +30,10 @@ const WalletShop = () => {
       </View>
 
       {/* Nút rút tiền */}
-      <TouchableOpacity style={styles.withdrawButton} onPress={handleWithdrawRequest}>
+      <View style={styles.withdrawButton}>
         <FontAwesome5 name="money-check-alt" size={18} color="#fff" style={{ marginRight: 8 }} />
         <Text style={styles.withdrawButtonText}>Rút tiền</Text>
-      </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };

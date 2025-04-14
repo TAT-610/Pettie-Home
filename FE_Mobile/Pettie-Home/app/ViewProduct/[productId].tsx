@@ -14,18 +14,11 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import Entypo from "@expo/vector-icons/Entypo";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import axios from "axios";
+import { addToCart } from "../../services/user/cart";
 
-// Thêm interface này sau phần imports
-interface Product {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  description: string;
-  rate: number;
-  brand: string;
-  shopId: number;
-}
+const BASE_URL = "http://14.225.198.232:8080/api/v1";
+
 interface Feedback {
   id: number;
   name: String;
@@ -38,40 +31,40 @@ interface Feedback {
 const feedbacks: Feedback[] = [
   {
     id: 1,
-    name: "Nguyễn Văn A",
+    name: "Nguyễn Văn TúTú",
     rate: 5,
     time: "2024-03-15",
     contentFeedback: "Sản phẩm rất tốt, mèo nhà mình rất thích ăn. Sẽ mua lại!",
     image:
-      "https://down-vn.img.susercontent.com/file/vn-11134103-7ras8-m3q6kjviug88a7.webp",
+      "https://i.pinimg.com/736x/2b/64/b7/2b64b73f2e3f0a8a0f359f533d50aedf.jpg",
   },
   {
     id: 2,
-    name: "Trần Thị B",
+    name: "Trần Thị Thanh Thủy",
     rate: 4,
     time: "2024-03-14",
     contentFeedback: "Chất lượng ổn, đóng gói cẩn thận. Giá hơi cao.",
   },
   {
     id: 3,
-    name: "Lê Văn C",
+    name: "Lê Văn Đức",
     rate: 5,
     time: "2024-03-13",
     contentFeedback: "Mèo nhà mình rất thích, ăn rất ngon miệng.",
   },
   {
     id: 4,
-    name: "Phạm Thị D",
+    name: "Phạm Thị Thái Lài",
     rate: 4,
     time: "2024-03-12",
     contentFeedback:
       "Sản phẩm tốt, giao hàng nhanh. Sẽ ủng hộ shop dài dài. Mà chắc hơi mắc.",
     image:
-      "https://down-vn.img.susercontent.com/file/vn-11134103-7ras8-m3bncfvzv8h438.webp",
+      "https://i.pinimg.com/736x/67/16/b6/6716b659c39c378f2aef928866585252.jpg",
   },
   {
     id: 5,
-    name: "Hoàng Văn E",
+    name: "Hoàng Văn Sáng",
     rate: 4,
     time: "2024-03-11",
     contentFeedback: "Chất lượng sản phẩm tốt, đóng gói cẩn thận.",
@@ -82,19 +75,6 @@ const feedbacks: Feedback[] = [
 const averageRate =
   feedbacks.reduce((sum, feedback) => sum + feedback.rate, 0) /
   feedbacks.length;
-
-const Product: Product = {
-  id: 1,
-  name: "Pate mèo kucinta gói 80g",
-  image:
-    "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
-  price: 10,
-  rate: averageRate, // Sử dụng rate trung bình
-  brand: "Kucinta",
-  description:
-    "Pate Cho Mèo Kucinta Gói 80g Cao Cấp Nhập Khẩu Từ Malaysia. Quy cách đóng gói: Gói seal 80g.Thành phần: Thịt gà, Cá ngừ, Cá cơm, Cá mòi, Thanh cua. Sản phẩm cao cấp siêu thơm ngon",
-  shopId: 2, // Thêm shopId
-};
 
 // Thêm mảng màu ở đầu file
 const avatarColors = [
@@ -114,12 +94,13 @@ const getAvatarColor = (id: number) => {
 };
 
 const ProductDetail = () => {
-  const { productId } = useLocalSearchParams();
+  const { productId, shopId, serviceId } = useLocalSearchParams();
   const router = useRouter();
   const [showQuantityModal, setShowQuantityModal] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [navBarColor, setNavBarColor] = useState("rgba(0, 0, 0, 0)");
-  const [totalPrice, setTotalPrice] = useState(Product.price);
+  const [product, setProduct] = useState<any | null>(null);
+  const [totalPrice, setTotalPrice] = useState(product?.price);
 
   const handleScroll = (event: any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -132,8 +113,19 @@ const ProductDetail = () => {
   };
 
   useEffect(() => {
-    setTotalPrice(quantity * Product.price);
-  }, [quantity]);
+    if (product) {
+      setTotalPrice(quantity * product.price);
+    }
+  }, [quantity, product]);
+
+  useEffect(() => {
+    const fetchProductDetails = async () => {
+      const productData = await getProductDetails(productId as string);
+      setProduct(productData);
+    };
+
+    fetchProductDetails();
+  }, [productId]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -145,20 +137,22 @@ const ProductDetail = () => {
         <View style={{ paddingBottom: 100, backgroundColor: "white" }}>
           <View>
             <Image
-              source={{ uri: Product.image }}
+              source={{
+                uri: product?.imageUrl
+                  ? `https://pettiehome.online/web/${product.imageUrl}`
+                  : product?.imageFileName
+                  ? `https://pettiehome.online/web/${product.imageFileName}`
+                  : "default-image-url.jpg",
+              }}
               resizeMode="cover"
               style={styles.serviceerviceImage}
             />
             <View style={styles.infoContainer}>
               <Text style={styles.name} numberOfLines={2} ellipsizeMode="tail">
-                {Product.name}
+                {product?.name || "Tên sản phẩm không có sẵn"}
               </Text>
               <View style={styles.priceRateContainer}>
-                <Text style={styles.price}>{Product.price}.000 VNĐ</Text>
-                {/* <View style={styles.rateContainer}>
-                <AntDesign name="star" size={20} color="#FFD700" />
-                <Text style={styles.rate}>{Product.rate}</Text>
-              </View> */}
+                <Text style={styles.price}>{product?.price}đ</Text>
               </View>
             </View>
             <View style={{ backgroundColor: "#e9f1ff", height: 10 }}></View>
@@ -172,13 +166,13 @@ const ProductDetail = () => {
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>
                     Thương hiệu:{" "}
-                    <Text style={styles.detailContent}>{Product.brand}</Text>
+                    <Text style={styles.detailContent}>{product?.brand}</Text>
                   </Text>
                 </View>
                 <View style={styles.detailRow}>
                   <Text style={styles.detailLabel}>Mô tả:</Text>
                   <Text style={styles.detailContent}>
-                    {Product.description}
+                    {product?.description}
                   </Text>
                 </View>
               </View>
@@ -188,7 +182,9 @@ const ProductDetail = () => {
               <View style={styles.ratingHeader}>
                 <Text style={styles.ratingTitle}>Đánh giá của sản phẩm</Text>
                 <View style={styles.ratingValue}>
-                  <Text style={styles.ratingNumber}>{Product.rate}/5</Text>
+                  <Text style={styles.ratingNumber}>
+                   4/5
+                  </Text>
                   <FontAwesome
                     name="star"
                     size={18}
@@ -282,7 +278,7 @@ const ProductDetail = () => {
           onPress={() => setShowQuantityModal(true)}
         >
           <Text style={styles.addToCartText}>
-            {`Thêm vào giỏ • ${totalPrice}.000 VNĐ`}
+            {`Thêm vào giỏ • ${totalPrice}đ`}
           </Text>
         </TouchableOpacity>
       </View>
@@ -309,9 +305,7 @@ const ProductDetail = () => {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.totalPrice}>
-              Tổng tiền: {totalPrice}.000 VNĐ
-            </Text>
+            <Text style={styles.totalPrice}>Tổng tiền: {totalPrice} VNĐ</Text>
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
@@ -325,8 +319,14 @@ const ProductDetail = () => {
                 style={styles.confirmButton}
                 onPress={() => {
                   console.log(`Thêm ${quantity} sản phẩm vào giỏ`);
+                  addToCart(
+                    shopId as string,
+                    null,
+                    productId as string,
+                    quantity
+                  );
                   setShowQuantityModal(false);
-                  router.push(`/ViewShop/${Product.shopId}`);
+                  router.push(`/ViewShop/${shopId}`);
                 }}
               >
                 <Text style={styles.confirmButtonText}>Xác nhận</Text>
@@ -340,6 +340,21 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
+
+export const getProductDetails = async (productId: string): Promise<any> => {
+  try {
+    const response = await axios.get(`${BASE_URL}/products/${productId}`);
+    if (response.data.success && response.data.data) {
+      return response.data.data;
+    } else {
+      throw new Error("Dữ liệu sản phẩm không hợp lệ.");
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+    return null;
+  }
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

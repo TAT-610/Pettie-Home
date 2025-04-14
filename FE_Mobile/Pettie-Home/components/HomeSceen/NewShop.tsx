@@ -1,99 +1,124 @@
-import { View, Text, Image, StyleSheet, FlatList } from "react-native";
-import React from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
+import React, { useEffect, useState } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Octicons from "@expo/vector-icons/Octicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-interface Shop {
-  id: number;
-  name: string;
-  image: string;
-  rate: number;
-  distance: string;
-  about: string;
-}
-const shopData = [
-  {
-    id: 1,
-    name: "Pet Shop Thủ Đức",
-    image:
-      "https://i.pinimg.com/736x/22/45/9a/22459a91602795a4dd42ad53baa25a9f.jpg",
-    rate: 4.5,
-    distance: "2.3 km",
-    about:
-      "Chuyên Spa làm đẹp thú cưng, với kinh nghiệm 3 năm sẽ không khiên bạn thất vọng.",
-  },
-  {
-    id: 2,
-    name: "Tiệm Spa nhà Bụp",
-    image:
-      "https://i.pinimg.com/736x/7f/78/37/7f783761231551f96aadbaece6e7e1d9.jpg",
-    rate: 4.0,
-    distance: "1.8 km",
-    about: "Đỉnh nóc kịch trần.",
-  },
-  {
-    id: 3,
-    name: "Thế giới thú cưng QuinQiun",
-    image:
-      "https://i.pinimg.com/736x/cc/7d/36/cc7d36064755b0c4b7c0eb2d46afb738.jpg",
-    rate: 4.8,
-    distance: "3.0 km",
-    about: "Cung cấp đầy đủ các dịch vụ và sãn phẩm dành cho thú cưng",
-  },
-  {
-    id: 4,
-    name: "Juddy chuyên spa thú cưng",
-    image:
-      "https://i.pinimg.com/736x/ee/e7/16/eee71664f50e9de6b253c2b26621b385.jpg",
-    rate: 3.9,
-    distance: "2.0 km",
-    about: "Cung cấp đầy đủ các dịch vụ và sãn phẩm dành cho thú cưng",
-  },
-  {
-    id: 5,
-    name: "Nhật Hùng Pet Mart",
-    image:
-      "https://i.pinimg.com/736x/a6/69/10/a66910ead16e4aa71a420eebcab72cf8.jpg",
-    rate: 4.3,
-    distance: "4.5 km",
-    about: "Cung cấp đầy đủ các dịch vụ và sãn phẩm dành cho thú cưng",
-  },
-];
+import { getShops } from "../../services/shop/apiShop"; // Đảm bảo import đúng
+import { Shop } from "../../services/types"; // Import interface
+import { useRouter } from "expo-router";
+
 export default function NewShop() {
-  const renderItem = ({ item }: { item: Shop }) => (
-    <View style={styles.listcontentitem}>
-      <Image source={{ uri: item.image }} style={styles.shopImage} />
-      <View style={styles.contentshop}>
-        <View>
-          {/* Tên shop */}
-          <Text style={styles.NameShop}>{item.name}</Text>
-          {/* Giới thiệu shop */}
-          <Text
-            style={styles.shopDescription}
-            numberOfLines={4}
-            ellipsizeMode="tail"
-          >
-            Giới thiệu: {item.about}
-          </Text>
+  const [shopData, setShopData] = useState<Shop[]>([]);
+
+  useEffect(() => {
+    const fetchShops = async () => {
+      try {
+        const rawShops = await getShops();
+        const formattedShops = rawShops.map((shop: any) => ({
+          id: shop.id,
+          name: shop.name,
+          imageUrl: shop.imageUrl || shop.imageFileName || null, // Kiểm tra hình ảnh
+          totalRating: shop.averageRating ?? 0,
+          description: shop.description || "Chưa có mô tả",
+          address: shop.address || "",
+          phone: shop.phone || "",
+          email: shop.email || "",
+          balance: shop.balance || 0,
+          bankAccountNumber: shop.bankAccountNumber || "",
+          bankName: shop.bankName || "",
+          bankAccountName: shop.bankAccountName || "",
+          dateOfBirth: shop.dateOfBirth || null,
+          openingTime: shop.openingTime || "",
+          closingTime: shop.closingTime || "",
+          averageRating: shop.averageRating || 0,
+        }));
+        setShopData(formattedShops);
+      } catch (error) {
+        console.error("Lỗi khi lấy danh sách cửa hàng:", error);
+      }
+    };
+
+    fetchShops();
+  }, []);
+
+  const router = useRouter();
+  const handleProductPress = (shopId: string, distance: string) => {
+    router.push(`/ViewShop/${shopId}?distance=${distance}`);
+  };
+  const renderItem = ({ item }: { item: Shop }) => {
+    const randomDistance = Math.floor(Math.random() * 12) + 1;
+
+    return (
+      <TouchableOpacity
+        onPress={() => handleProductPress(item.id, `${randomDistance} km`)}
+      >
+        <View style={styles.listcontentitem}>
+          {/* <Image
+            source={{
+              uri:
+                item.imageUrl || item.imageFileName
+                  ? `https://pettiehome.online/web/${
+                      item.imageUrl || item.imageFileName
+                    }`
+                  : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
+            }}
+            style={styles.shopImage}
+          /> */}
+          <Image
+            source={{
+              uri: item.imageUrl
+                ? `https://pettiehome.online/web/${item.imageUrl}`
+                : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
+            }}
+            style={styles.shopImage}
+          />
+          {/* <Image
+            source={{
+              uri: item.imageUrl
+                ? `https://pettiehome.online/web/${item.imageUrl}`
+                : "https://i.pinimg.com/736x/37/e0/b1/37e0b1b41ee635c1af8d1440dafde41c.jpg",
+            }}
+            style={styles.shopImage}
+          /> */}
+
+          <View style={styles.contentshop}>
+            <View>
+              <Text style={styles.NameShop}>{item.name}</Text>
+              <Text
+                style={styles.shopDescription}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                Giới thiệu: {item.description}
+              </Text>
+            </View>
+            <View style={styles.detailShop}>
+              <Text style={styles.detailitem}>
+                <AntDesign name="star" size={15} color="#ecc41c" />{" "}
+                {item.totalRating ?? "__"}
+              </Text>
+
+              <Text style={styles.detailitem}>
+                <Octicons name="location" size={14} color="#FE5977" />{" "}
+                {`${randomDistance} km`}
+              </Text>
+              <Text style={styles.detailitem2}>
+                <MaterialIcons name="pets" size={15} color="#00bf63" /> New
+              </Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.detailShop}>
-          {/* Đánh giá */}
-          <Text style={styles.detailitem}>
-            <AntDesign name="star" size={15} color="#ecc41c" /> {item.rate}
-          </Text>
-          {/* Khoảng cách */}
-          <Text style={styles.detailitem}>
-            <Octicons name="location" size={14} color="#FE5977" />{" "}
-            {item.distance}
-          </Text>
-          {/* Trạng thái */}
-          <Text style={styles.detailitem2}>
-            <MaterialIcons name="pets" size={15} color="#00bf63" /> New
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.contentheader}>
@@ -115,6 +140,7 @@ export default function NewShop() {
   );
 }
 
+// Styles không thay đổi
 const styles = StyleSheet.create({
   container: {
     marginTop: 15,
@@ -148,7 +174,6 @@ const styles = StyleSheet.create({
   contentshop: {
     flex: 1,
     marginLeft: 10,
-
     alignSelf: "stretch",
   },
   NameShop: {

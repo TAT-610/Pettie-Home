@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "93030d30-6077-423c-b712-b90cbf1d6e34"
+      }
+    },
+    "android": {
+      "package": "com.lucasta.pettiehome"
+    }
+  }
+}

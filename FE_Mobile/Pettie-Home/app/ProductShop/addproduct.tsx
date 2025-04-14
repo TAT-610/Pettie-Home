@@ -1,202 +1,197 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ScrollView, FlatList } from "react-native";
 import { useRouter } from "expo-router";
-import { AntDesign, Entypo } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
+import { createProduct } from "@/services/shop/apiproduct";
+import * as ImagePicker from "expo-image-picker";
 
 export default function AddProduct() {
     const router = useRouter();
-    const [product, setProduct] = useState({
+
+    const [product, setProduct] = useState<{
+        name: string;
+        price: string;
+        stock: string;
+        image: { uri: string; type: string; fileName: string } | null;
+        expiry: string;
+        brand: string;
+        description: string;
+    }>({
         name: "",
-        retailPrice: "",
-        wholesalePrice: "",
-        quantity: "",
-        image: "",
+        price: "",
+        stock: "",
+        image: null, // Định nghĩa ban đầu là null
         expiry: "",
-        brand: ""
+        brand: "",
+        description: "",
     });
 
-    const handleAddProduct = () => {
-        if (!product.name || !product.retailPrice || !product.wholesalePrice || !product.quantity || !product.image || !product.expiry || !product.brand) {
-            Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin!");
+    const handleChange = useCallback(
+        (field: keyof typeof product, value: string | number) => {
+            setProduct((prev) => ({
+                ...prev,
+                [field]: field === "price" || field === "stock" ? parseFloat(value as string) || 0 : value,
+            }));
+        },
+        []
+    );
+
+    // Chọn ảnh từ thư viện
+    const pickImage = async () => {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permissionResult.granted) {
+            Alert.alert("Lỗi", "Bạn cần cấp quyền để chọn ảnh!");
             return;
         }
-        Alert.alert("Thành công", "Sản phẩm đã được thêm!");
-        router.back();
+
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [4, 3],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setProduct((prev) => ({
+                ...prev,
+                image: {
+                    uri: result.assets[0].uri,
+                    type: "image/jpeg",
+                    fileName: result.assets[0].fileName || "upload.jpg",
+                },
+            }));
+        }
     };
 
+    const handleAddProduct = async () => {
+        if (!product.name) {
+            Alert.alert("Lỗi", "Vui lòng nhập tên sản phẩm và chọn danh mục!");
+            return;
+        }
+    
+        try {
+            let formData = new FormData();
+            formData.append("name", product.name);
+            formData.append("price", product.price);
+            formData.append("stock", product.stock);
+            formData.append("expiry", product.expiry);
+            formData.append("brand", product.brand);
+            formData.append("description", product.description);
+    
+            // Kiểm tra nếu có hình ảnh thì thêm vào FormData
+            if (product.image) {
+                formData.append("image", {
+                    uri: product.image.uri,
+                    name: product.image.fileName,
+                    type: product.image.type,
+                } as any);
+            }
+    
+            await createProduct(product);
+            Alert.alert("Thành công", "Sản phẩm đã được thêm!");
+            router.back();
+        } catch (error) {
+            Alert.alert("Lỗi", "Không thể thêm sản phẩm, vui lòng thử lại!");
+            console.error("Lỗi khi thêm sản phẩm:", error);
+        }
+    };    
+
     return (
-        <ScrollView style={styles.container}>
-            <View style={{ paddingBottom: 60 }}>
-                <View style={styles.headerContainer}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                        <AntDesign name="left" size={24} color="#fff" />
-                    </TouchableOpacity>
-                    <Text style={styles.header}>Thêm sản phẩm</Text>
-                </View>
-
-                <View style={styles.card}>
-                    <TouchableOpacity style={styles.imageUpload}>
-                        <View style={styles.imageUploadBox}>
-                            <Entypo name="camera" size={40} color="#696969" />
-                        </View>
-                    </TouchableOpacity>
-                    {product.image ? (
-                        <Image source={{ uri: product.image }} style={styles.imagePreview} />
-                    ) : null}
-                    <TextInput
-                        style={styles.input}
-                        placeholder="URL ảnh"
-                        value={product.image}
-                        onChangeText={(text) => setProduct({ ...product, image: text })}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Tên sản phẩm"
-                        value={product.name}
-                        onChangeText={(text) => setProduct({ ...product, name: text })}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Thương hiệu sản phẩm"
-                        value={product.brand}
-                        onChangeText={(text) => setProduct({ ...product, brand: text })}
-                    />
-                    <View style={styles.priceContainer}>
-                        <TextInput
-                            style={[styles.input, styles.halfInput]}
-                            placeholder="Giá bán lẻ (VND)"
-                            keyboardType="numeric"
-                            value={product.retailPrice}
-                            onChangeText={(text) => setProduct({ ...product, retailPrice: text })}
-                        />
-                        <TextInput
-                            style={[styles.input, styles.halfInput]}
-                            placeholder="Giá bán buôn (VND)"
-                            keyboardType="numeric"
-                            value={product.wholesalePrice}
-                            onChangeText={(text) => setProduct({ ...product, wholesalePrice: text })}
-                        />
+        <FlatList
+            data={[{ key: "form" }]} // Dummy data để render form trong FlatList
+            renderItem={() => (
+                <View style={{ paddingBottom: 60 }}>
+                    <View style={styles.headerContainer}>
+                        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                            <AntDesign name="left" size={24} color="#fff" />
+                        </TouchableOpacity>
+                        <Text style={styles.header}>Thêm sản phẩm</Text>
                     </View>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Số lượng"
-                        keyboardType="numeric"
-                        value={product.quantity}
-                        onChangeText={(text) => setProduct({ ...product, quantity: text })}
-                    />
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Hạn sử dụng"
-                        value={product.expiry}
-                        onChangeText={(text) => setProduct({ ...product, expiry: text })}
-                    />
-
+                    <View style={styles.card}>
+                        <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
+                            {product.image ? (
+                                <Image source={{ uri: product.image.uri }} style={styles.imagePreview} />
+                            ) : (
+                                <Text>Chọn ảnh</Text>
+                            )}
+                        </TouchableOpacity>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Tên sản phẩm"
+                            value={product.name}
+                            onChangeText={(text) => handleChange("name", text)}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Thương hiệu sản phẩm"
+                            value={product.brand}
+                            onChangeText={(text) => handleChange("brand", text)}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Giá bán (VND)"
+                            keyboardType="numeric"
+                            value={product.price.toString()}
+                            onChangeText={(text) => handleChange("price", text)}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Số lượng"
+                            keyboardType="numeric"
+                            value={product.stock.toString()}
+                            onChangeText={(text) => handleChange("stock", text)}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Chi tiết sản phẩm"
+                            value={product.description}
+                            onChangeText={(text) => handleChange("description", text)}
+                        />
+                        <TouchableOpacity style={styles.addButton} onPress={handleAddProduct}>
+                            <Text style={styles.buttonText}>Thêm sản phẩm</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
+            )}
+            keyExtractor={(item) => item.key}
+        />
 
-                <TouchableOpacity style={styles.addButton} onPress={handleAddProduct} activeOpacity={0.8}>
-                    <Text style={styles.buttonText}>Thêm sản phẩm</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.cancelButton} onPress={() => router.back()} activeOpacity={0.8}>
-                    <Text style={styles.buttonTextCancel}>Hủy</Text>
-                </TouchableOpacity></View>
-        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#e9f1ff" },
     headerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         marginBottom: 20,
         backgroundColor: "#699BF4",
         padding: 10,
         paddingBottom: 30,
         paddingTop: 30
     },
-    backButton: {
-        marginRight: 10,
-    },
-    header: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: '#fff',
-    },
-    card: {
-        backgroundColor: "#fff",
-        padding: 20,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 5,
-        marginBottom: 20,
-        margin: 5
-    },
-    imageUpload: {
-        alignItems: "center",
-        marginBottom: 15,
-    },
-    imageUploadBox: {
-        width: 70,
-        height: 70,
-        borderWidth: 2,
-        borderColor: "#d0d0d0",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    imagePreview: {
+    backButton: { marginRight: 10 },
+    header: { fontSize: 22, fontWeight: "bold", color: "#fff" },
+    card: { backgroundColor: "#fff", padding: 20, marginBottom: 20, margin: 5 },
+    imagePreview: { width: 100, height: 100, alignSelf: "center", marginBottom: 10 },
+    input: { borderWidth: 1, borderColor: "#ddd", padding: 12, borderRadius: 8, marginBottom: 15, backgroundColor: "#fff" },
+    dropdown: { borderWidth: 1, borderColor: "#ddd", borderRadius: 8, backgroundColor: "#fff" },
+    priceContainer: { flexDirection: "row", justifyContent: "space-between" },
+    halfInput: { width: "48%" },
+    addButton: { backgroundColor: "#ed7c44", padding: 15, borderRadius: 8, alignItems: "center", margin: 5 },
+    cancelButton: { backgroundColor: "#fff", padding: 15, borderRadius: 8, alignItems: "center", margin: 5, borderColor: "#ed7c44", borderWidth: 2 },
+    buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
+    buttonTextCancel: { color: "#ed7c44", fontWeight: "bold", fontSize: 16 },
+    imagePicker: {
         width: 100,
         height: 100,
+        borderWidth: 1,
+        borderColor: "#ccc",
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 8,
+        backgroundColor: "#f0f0f0",
         alignSelf: "center",
         marginBottom: 10,
     },
-    input: {
-        borderWidth: 1,
-        borderColor: "#ddd",
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 15,
-        backgroundColor: "#fff",
-    },
-    priceContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-    },
-    halfInput: {
-        width: '48%',
-    },
-    addButton: {
-        backgroundColor: "#ed7c44",
-        padding: 15,
-        borderRadius: 8,
-        alignItems: "center",
-        shadowColor: "#699BF4",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 5,
-        margin: 5
-    },
-    cancelButton: {
-        backgroundColor: "#fff",
-        padding: 15,
-        borderRadius: 8,
-        alignItems: "center",
-        marginTop: 10,
-        margin: 5,
-        borderColor: "#ed7c44",
-        borderWidth: 2,
-    },
-    buttonText: {
-        color: "#fff",
-        fontWeight: "bold",
-        fontSize: 16,
-    },
-    buttonTextCancel: {
-        color: "#ed7c44",
-        fontWeight: "bold",
-        fontSize: 16,
-    }
 });

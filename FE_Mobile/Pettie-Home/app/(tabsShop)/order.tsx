@@ -5,11 +5,12 @@ import OrderShop from "@/components/ShopScreen/order/OrderShop";
 export default function order() {
   return (
     <FlatList
+    style={{backgroundColor: "#e9f1ff"}}
       data={[]}
       renderItem={null}
       ListFooterComponent={() => (
         <>
-          <View style={{ backgroundColor: "#f9f9f9" }}>
+          <View >
             <OrderShop />
           </View>
         </>

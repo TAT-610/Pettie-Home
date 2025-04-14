@@ -9,7 +9,7 @@ import {
   Modal,
   FlatList,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Feather from "@expo/vector-icons/Feather";
@@ -17,108 +17,181 @@ import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-const orderSummary = [
-  {
-    serviceId: 1,
-    quantity: 1,
-    price: 100,
-    image:
-      "https://i.pinimg.com/736x/f7/0d/69/f70d69556578090929bc1e99da269d9f.jpg",
-  },
-  {
-    productId: 1,
-    quantity: 2,
-    price: 10,
-    image:
-      "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg",
-  },
-  {
-    productId: 2,
-    quantity: 1,
-    price: 220,
-    image:
-      "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
-  },
-];
-
-const DogService1 = {
-  id: 1,
-  name: "Tắm cơ bản cho chó < 4kg",
-  image:
-    "https://i.pinimg.com/736x/f7/0d/69/f70d69556578090929bc1e99da269d9f.jpg",
-  price: 100,
-  shopId: 2,
-  description:
-    "Dịch vụ tắm cơ bản dành cho chó dưới 4 kg bao gồm tỉa lông cơ bản, vệ sinh lỗ tai, cắt móng/ dũa móng, tắm bằng xà boong chuyên dụng, sấy lông, gỡ rối, đánh tơi và thoa lotion nước hoa cho chó.",
-};
-
-const Product = [
-  {
-    id: 1,
-    name: "Pate mèo kucinta gói 80g",
-    image:
-      "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
-    price: 10,
-    rate: 4.5, // Giả sử đây là đánh giá trung bình
-    brand: "Kucinta",
-    description:
-      "Pate Cho Mèo Kucinta Gói 80g Cao Cấp Nhập Khẩu Từ Malaysia. Quy cách đóng gói: Gói seal 80g. Thành phần: Thịt gà, Cá ngừ, Cá cơm, Cá mòi, Thanh cua. Sản phẩm cao cấp siêu thơm ngon",
-    shopId: 2,
-  },
-  {
-    id: 2,
-    name: "Cây cào móng chó mèo",
-
-    image:
-      "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
-    price: 220,
-    rate: 4.5, // Giả sử đây là đánh giá trung bình
-    brand: "Kucinta",
-    description:
-      "Pate Cho Mèo Kucinta Gói 80g Cao Cấp Nhập Khẩu Từ Malaysia. Quy cách đóng gói: Gói seal 80g. Thành phần: Thịt gà, Cá ngừ, Cá cơm, Cá mòi, Thanh cua. Sản phẩm cao cấp siêu thơm ngon",
-    shopId: 2,
-  },
-];
+import { getUserAccount } from "@/services/user/auth";
+import { Profile } from "@/services/types";
+import { getCart, deleteCart, editCart } from "@/services/user/cart";
+import { createOrder } from "@/services/user/order";
 
 const OrderCustomer = () => {
   const router = useRouter();
-  const { address } = useLocalSearchParams();
+  const { address, shopId } = useLocalSearchParams();
   const [note, setNote] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("VN Pay");
+  const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [selectedDate, setSelectedDate] = useState(getFormattedDate(0));
   const [selectedTime, setSelectedTime] = useState("15:00");
   const [isModalVisible, setModalVisible] = useState(false);
+  const [isPhoneModalVisible, setPhoneModalVisible] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [newPhoneNumber, setNewPhoneNumber] = useState(phoneNumber);
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedCartId, setSelectedCartId] = useState<string | null>(null);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
+  const [initialQuantity, setInitialQuantity] = useState(1);
+  const [selectedProductName, setSelectedProductName] = useState<string | null>(
+    null
+  );
+  const [userInfo, setUserInfo] = useState<Profile | null>(null);
+  const [orderSummary, setOrderSummary] = useState<any[]>([]);
+  const [isDropdownVisible, setDropdownVisible] = useState(false);
+
+  const Shop = shopId;
   const defaultAddress =
     "Tòa Bs16, 88 Phước Thiện, Khu phố 29, Quận 9, Hồ Chí Minh";
 
-  const handleChooseAddress = () => {
-    router.push(`/Order/Address`);
+  // Định nghĩa hàm fetchCartItems
+  const fetchCartItems = async (shopId: string) => {
+    try {
+      const cartItems = await getCart(shopId);
+      if (cartItems) {
+        setOrderSummary(cartItems);
+      }
+    } catch (error) {
+      console.error("Error fetching cart items:", error);
+    }
   };
 
-  const handlePlaceOrder = () => {
-    router.push(`/Order/payment`);
-    console.log("Đặt hàng thành công với phương thức: ", paymentMethod);
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await getUserAccount();
+        const data: Profile = response.data;
+        setUserInfo(data);
+        setPhoneNumber(data.phoneNumber);
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    fetchCartItems(shopId as string);
+  }, [shopId]);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
+  if (!userInfo) {
+    return <Text>Loading user information...</Text>;
+  }
+
+  const toggleDropdown = () => {
+    setDropdownVisible(!isDropdownVisible);
+  };
+
+  const handleHomePress = () => {
+    router.push("/(tabs)/home");
+    setDropdownVisible(false);
+  };
+
+  const handleDelete = async (itemId: string) => {
+    try {
+      await deleteCart(itemId);
+      setOrderSummary((prev) => prev.filter((item) => item.id !== itemId));
+      setDeleteModalVisible(false);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    }
+  };
+
+  const openDeleteModal = (
+    cartId: string,
+    quantity: number,
+    productImage: string,
+    productName: string
+  ) => {
+    setSelectedCartId(cartId);
+    setSelectedQuantity(quantity);
+    setInitialQuantity(quantity);
+    setSelectedProductName(productName);
+    setDeleteModalVisible(true);
+  };
+
+  const closeDeleteModal = () => {
+    setSelectedCartId(null);
+    setDeleteModalVisible(false);
+  };
+
+  const handleChooseAddress = () => {
+    router.push(`/Order/Address?shopId=${shopId}`);
+  };
+
+  const handlePlaceOrder = async () => {
+    try {
+      // Chuyển đổi selectedDate từ dd/MM thành YYYY-MM-DD
+      const [day, month] = selectedDate.split("/");
+      const year = new Date().getFullYear(); // Sử dụng năm hiện tại
+      const formattedDate = `${year}-${month}-${day}T${selectedTime}:00`; // Định dạng thành ISO string
+
+      const appointmentDate = new Date(formattedDate).toISOString();
+
+      const orderData = {
+        buyerName: userInfo.fullName,
+        buyerPhone: phoneNumber,
+        buyerAddress: Array.isArray(address)
+          ? address[0]
+          : address || defaultAddress,
+        buyerEmail: userInfo.email,
+        note,
+        paymentMethod:
+          paymentMethod === "BankTransfer" ? "BankTransfer" : "Cash",
+        appointmentDate,
+        shopId: shopId as string,
+      };
+
+      const orderResponse = await createOrder(orderData);
+      console.log("Order created successfully:", orderResponse);
+
+      // Kiểm tra phương thức thanh toán và điều hướng
+      if (paymentMethod === "Cash") {
+        router.push("/(tabs)/appointment"); // Chuyển đến trang hẹn
+      } else if (paymentMethod === "BankTransfer") {
+        const qrCode = orderResponse.qrCode;
+        const orderCode = orderResponse.orderCode; // Lấy orderNumber từ phản hồi
+        console.log("QR Code:", qrCode);
+        console.log("Order Code:", orderCode); // Giả sử qrCode có trong phản hồi
+        router.push(`/Order/payment?qrCode=${qrCode}&orderCode=${orderCode}`); // Chuyển đến trang thanh toán với qrCode và orderNumber
+      }
+    } catch (error) {
+      console.error("Error creating order:", error);
+    }
   };
 
   // Tính tổng tiền đơn hàng
   const calculateTotal = () => {
     return orderSummary.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) =>
+        total +
+        (item.shopService?.price || item.product?.price || 0) * item.quantity,
       0
     );
   };
-  // Lấy danh sách 3 ngày liên tiếp từ hôm nay
+
   const getNextThreeDays = () => {
     return Array.from({ length: 3 }, (_, index) => getFormattedDate(index));
   };
 
-  // Lấy danh sách giờ từ 8h sáng đến 5h chiều
   const getAvailableTimes = () => {
-    return Array.from({ length: 10 }, (_, index) => `${8 + index}:00`);
+    return Array.from({ length: 12 }, (_, index) => `${8 + index}:00`);
   };
 
   // Hàm định dạng ngày theo dd/MM
-  function getFormattedDate(offset) {
+  function getFormattedDate(offset: any) {
     const date = new Date();
     date.setDate(date.getDate() + offset);
     const day = date.getDate().toString().padStart(2, "0");
@@ -127,15 +200,43 @@ const OrderCustomer = () => {
   }
 
   // Xử lý khi chọn ngày
-  const handleSelectDate = (date) => {
+  const handleSelectDate = (date: any) => {
     setSelectedDate(date);
   };
 
   // Xử lý khi chọn giờ
-  const handleSelectTime = (time) => {
+  const handleSelectTime = (time: any) => {
     setSelectedTime(time);
     setModalVisible(false);
   };
+
+  // Xử lý cập nhật số điện thoại
+  const handleUpdatePhoneNumber = () => {
+    setPhoneNumber(newPhoneNumber);
+    setPhoneModalVisible(false);
+  };
+
+  const handleIncreaseQuantity = () => {
+    setSelectedQuantity((prev) => prev + 1);
+  };
+
+  const handleDecreaseQuantity = () => {
+    if (selectedQuantity > 1) {
+      setSelectedQuantity((prev) => prev - 1);
+    }
+  };
+
+  const handleEditCart = async (itemId: string) => {
+    const quantityToUpdate = selectedQuantity - initialQuantity;
+    try {
+      await editCart(itemId, quantityToUpdate);
+      setDeleteModalVisible(false);
+      fetchCartItems(shopId as string); // Gọi lại hàm fetchCartItems với shopId
+    } catch (error) {
+      console.error("Error editing cart:", error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.navigation}>
@@ -143,7 +244,7 @@ const OrderCustomer = () => {
           name="arrowleft"
           size={28}
           color="white"
-          onPress={() => router.push("/ViewShop/2")}
+          onPress={() => router.push(`/ViewShop/${shopId}`)}
           style={styles.backButton}
         />
         <Text style={styles.textpay}>Thanh toán</Text>
@@ -152,8 +253,18 @@ const OrderCustomer = () => {
           size={27}
           color="white"
           style={styles.backButton}
+          onPress={toggleDropdown}
         />
       </View>
+
+      {isDropdownVisible && (
+        <View style={styles.dropdown}>
+          <TouchableOpacity onPress={handleHomePress}>
+            <Text style={styles.dropdownText}>Về trang chủ</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Modal chọn ngày và giờ */}
       <Modal visible={isModalVisible} animationType="slide" transparent>
         <View style={styles.modalContainer}>
@@ -187,7 +298,8 @@ const OrderCustomer = () => {
             <FlatList
               data={getAvailableTimes()}
               keyExtractor={(item) => item}
-              horizontal
+              numColumns={3}
+              key={`numColumns-${3}`}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={[
@@ -217,6 +329,81 @@ const OrderCustomer = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Modal cập nhật số điện thoại */}
+      <Modal visible={isPhoneModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Cập nhật số điện thoại</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nhập số điện thoại mới"
+              value={newPhoneNumber}
+              onChangeText={setNewPhoneNumber}
+              keyboardType="phone-pad"
+            />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleUpdatePhoneNumber}
+            >
+              <Text style={styles.closeButtonText}>Cập nhật</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setPhoneModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Hủy</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={isDeleteModalVisible} animationType="slide" transparent>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.btnCancel}
+              onPress={closeDeleteModal}
+            >
+              <Text style={styles.closeButtonText2}>X</Text>
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Cập nhật sản phẩm</Text>
+
+            {selectedProductName && (
+              <Text
+                style={{ fontSize: 16, fontWeight: "bold", marginBottom: 10 }}
+              >
+                {selectedProductName}
+              </Text>
+            )}
+            <View style={styles.quantityContainer}>
+              <TouchableOpacity onPress={handleIncreaseQuantity}>
+                <AntDesign name="plussquare" size={30} color="#ed7c44" />
+              </TouchableOpacity>
+
+              <Text style={styles.quantityText}>{selectedQuantity}</Text>
+
+              <TouchableOpacity onPress={handleDecreaseQuantity}>
+                <AntDesign name="minussquare" size={30} color="#ed7c44" />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => handleEditCart(selectedCartId as string)}
+            >
+              <Text style={styles.closeButtonText}>Cập nhật</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => handleDelete(selectedCartId as string)}
+            >
+              <Text style={styles.closeButtonText}>Xóa sản phẩm</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <ScrollView style={styles.scrollView}>
         {/* Địa chỉ nhận hàng */}
         <View
@@ -228,13 +415,20 @@ const OrderCustomer = () => {
         >
           <View style={styles.content}>
             <Text style={styles.sectionTitle}>
+              <FontAwesome6 name="user" size={16} color="#ed7c44" /> Thông tin
+              người dùng:
+            </Text>
+            <Text style={styles.addressText}>
+              Họ và tên: {userInfo.fullName}
+            </Text>
+          </View>
+
+          <View style={styles.content}>
+            <Text style={styles.sectionTitle}>
               <FontAwesome6 name="location-dot" size={16} color="#ed7c44" /> Địa
               chỉ của bạn:
             </Text>
-            <TouchableOpacity
-            // onPress={handleChooseAddress}
-            // style={styles.addressContainer}
-            >
+            <TouchableOpacity onPress={handleChooseAddress}>
               <Text style={styles.addressText}>
                 {address || defaultAddress}
               </Text>
@@ -242,22 +436,16 @@ const OrderCustomer = () => {
           </View>
 
           {/* Số điện thoại */}
-
           <View style={styles.content}>
             <Text style={styles.sectionTitle}>
               <FontAwesome5 name="phone-alt" size={16} color="#ed7c44" /> Số
               điện thoại:
             </Text>
-            <Text style={styles.addressText}>0886133779</Text>
+            <TouchableOpacity onPress={() => setPhoneModalVisible(true)}>
+              <Text style={styles.addressText}>{phoneNumber}</Text>
+            </TouchableOpacity>
           </View>
-          {/* <View style={styles.content2}>
-            <Text style={styles.sectionTitle}>
-              <FontAwesome6 name="calendar-check" size={16} color="#ed7c44" />{" "}
-              Thời gian hẹn:
-            </Text>
-            <Text style={styles.addressText}>21/02/2025 - 15:00</Text>
-          </View> */}
-          {/* Thời gian hẹn */}
+
           <View style={styles.content}>
             <Text style={styles.sectionTitle}>
               <FontAwesome6 name="calendar-check" size={16} color="#ed7c44" />{" "}
@@ -284,49 +472,71 @@ const OrderCustomer = () => {
           </Text>
 
           {orderSummary.map((item, index) => {
-            const isService = item.serviceId !== undefined;
-            const service = isService
-              ? DogService1
-              : Product.find((p) => p.id === item.productId);
+            const isService =
+              item.shopService && item.shopService.id !== undefined;
+            const service = isService ? item.shopService : item.product;
             return (
-              <View style={{ flexDirection: "row" }} key={index}>
-                <View style={styles.orderSummaryItem}>
-                  <Image
-                    source={{ uri: item.image }}
-                    style={styles.orderImage}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text
-                      style={styles.name}
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                    >
-                      {service?.name}
-                    </Text>
-                    <View style={styles.contentcard}>
-                      <View>
-                        <Text style={styles.price}>{item.price}.000 đ</Text>
+              <TouchableOpacity
+                key={index}
+                onPress={() =>
+                  openDeleteModal(
+                    item.id,
+                    item.quantity,
+                    service.image,
+                    service.name
+                  )
+                }
+              >
+                <View style={{ flexDirection: "row" }}>
+                  <View style={styles.orderSummaryItem}>
+                    <Image
+                      source={{
+                        uri: service.image
+                          ? `https://pettiehome.online/web/${service.image}`
+                          : `https://pettiehome.online/web/${service.imageFileName}`,
+                      }}
+                      style={styles.orderImage}
+                    />
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={styles.name}
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                      >
+                        {service.name}
+                      </Text>
+
+                      <View style={styles.contentcard}>
+                        <View>
+                          <Text style={styles.price}>
+                            {formatCurrency(service.price)}
+                          </Text>
+                        </View>
                       </View>
+                    </View>
+                    <View style={{ width: 15, paddingTop: 12 }}>
+                      <Text>x{item.quantity}</Text>
                     </View>
                   </View>
                 </View>
-                <View style={{ width: 15, paddingTop: 12 }}>
-                  <Text>x{item.quantity}</Text>
-                </View>
-              </View>
+              </TouchableOpacity>
             );
           })}
           <View style={styles.totalcontent}>
             <Text style={styles.totalText}>Tổng đơn hàng:</Text>
-            <Text style={styles.totalprice2}>{calculateTotal()}.000đ</Text>
+            <Text style={styles.totalprice2}>
+              {formatCurrency(calculateTotal())}
+            </Text>
           </View>
-          <View style={styles.totalcontent2}>
+          {/* <View style={styles.totalcontent2}>
             <Text style={styles.totalText}>Phí vận chuyển:</Text>
             <Text style={styles.totalprice2}>25.000đ</Text>
-          </View>
+          </View> */}
           <View style={styles.totalcontent2}>
-            <Text style={styles.totalText2}>Phí vận chuyển:</Text>
-            <Text style={styles.totalprice3}>{calculateTotal() + 25}.000đ</Text>
+            <Text style={styles.totalText2}>Phí thanh toán:</Text>
+            <Text style={styles.totalprice3}>
+              {formatCurrency(calculateTotal())}
+            </Text>
           </View>
         </View>
         <View
@@ -354,29 +564,31 @@ const OrderCustomer = () => {
             Phương thức thanh toán:
           </Text>
           <TouchableOpacity
-            onPress={() => setPaymentMethod("VN Pay")}
+            onPress={() => setPaymentMethod("BankTransfer")}
             style={[
               styles.paymentButton,
-              paymentMethod === "VN Pay" && styles.selectedPaymentButton,
+              paymentMethod === "BankTransfer" && styles.selectedPaymentButton,
             ]}
           >
             <FontAwesome
-              name={paymentMethod === "VN Pay" ? "dot-circle-o" : "circle-o"}
+              name={
+                paymentMethod === "BankTransfer" ? "dot-circle-o" : "circle-o"
+              }
               size={20}
               color="#ed7c44"
             />
-            <Text style={{ marginLeft: 10 }}>Thanh toán VN Pay</Text>
+            <Text style={{ marginLeft: 10 }}>Thanh toán QR Pay</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => setPaymentMethod("Tiền mặt")}
+            onPress={() => setPaymentMethod("Cash")}
             style={[
               styles.paymentButton,
-              paymentMethod === "Tiền mặt" && styles.selectedPaymentButton,
+              paymentMethod === "Cash" && styles.selectedPaymentButton,
             ]}
           >
             <FontAwesome
-              name={paymentMethod === "Tiền mặt" ? "dot-circle-o" : "circle-o"}
+              name={paymentMethod === "Cash" ? "dot-circle-o" : "circle-o"}
               size={20}
               color="#ed7c44"
             />
@@ -411,7 +623,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
-
     elevation: 10,
     shadowColor: "black",
     shadowOffset: { width: 0, height: -5 },
@@ -424,6 +635,20 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     padding: 5,
     borderRadius: 100,
+  },
+  dropdown: {
+    position: "absolute",
+    top: 80,
+    right: 10,
+    backgroundColor: "white",
+    borderRadius: 5,
+    elevation: 5,
+    padding: 10,
+    zIndex: 10,
+  },
+  dropdownText: {
+    color: "#ed7c44",
+    fontWeight: "bold",
   },
   scrollView: {
     flex: 1,
@@ -440,7 +665,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 10,
   },
-
   sectionTitle2: {
     fontSize: 15,
     fontWeight: "600",
@@ -478,7 +702,6 @@ const styles = StyleSheet.create({
   },
   totalText2: {
     fontSize: 16.5,
-
     fontWeight: "500",
   },
   totalprice2: {
@@ -505,7 +728,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 8,
   },
-
   selectedPaymentButton: {
     backgroundColor: "#f0f0f0",
   },
@@ -530,17 +752,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
     backgroundColor: "#ffff",
-
     paddingBottom: 5,
   },
   content2: {
     backgroundColor: "#ffff",
-
     paddingBottom: 5,
   },
   name: {
     fontSize: 14,
-    fontWeight: "400",
+    fontWeight: "500",
     marginBottom: 5,
   },
   price: {
@@ -548,7 +768,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#ed7c44",
   },
-
   contentcard: {
     paddingTop: 12,
     flex: 1,
@@ -589,6 +808,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
+    color: "#ed7c44",
   },
   optionButton: {
     padding: 10,
@@ -617,8 +837,48 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
   },
+  btnCancel: {
+    position: "absolute",
+    right: 10,
+    top: 8,
+    backgroundColor: "#ed7c44",
+    borderRadius: 100,
+  },
+  closeButtonText2: {
+    fontSize: 18,
+    fontWeight: "600",
+    height: 28,
+    width: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: "auto",
+    textAlign: "center",
+    color: "white",
+  },
   selectedOptionText: {
     color: "#fff",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#bbb",
+    padding: 10,
+    marginTop: 10,
+    width: "100%",
+  },
+  description: {
+    fontSize: 12,
+    color: "#666",
+  },
+  quantityContainer: {
+    marginVertical: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: 120,
+  },
+  quantityText: {
+    fontSize: 20,
+    fontWeight: "bold",
   },
 });
 

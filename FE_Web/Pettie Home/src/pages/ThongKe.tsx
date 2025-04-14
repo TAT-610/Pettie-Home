@@ -17,88 +17,70 @@ import { GiTrophyCup } from "react-icons/gi";
 const shop = [
   {
     id: 1,
-    name: "Tiệm nhà Bụp",
-    income: "600",
+    name: "Mesmeomeo",
+    income: "3.410",
     avatar:
-      "https://i.pinimg.com/474x/7f/78/37/7f783761231551f96aadbaece6e7e1d9.jpg",
+      "https://scontent.fsgn13-2.fna.fbcdn.net/v/t39.30808-6/331927170_1255538045380860_3619882846865462020_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeF-XV4w7c1xqeImHe229TtEvTauxWvJsfy9Nq7Fa8mx_EsPsBreIDsHcvrmVUZLZiw4U7UE0ltfVJj1stBCCFta&_nc_ohc=LewDBLnDppsQ7kNvwHyVXzs&_nc_oc=Adl3kuW9O1GQff4wOfNz5TBj_BIv7eJdT73sh1_BPRJ6gG3kTHaLCbSyEa0R2lNiKZgzb7_PNP9hmYyCsPmUzY7R&_nc_zt=23&_nc_ht=scontent.fsgn13-2.fna&_nc_gid=QtHjcERX5jIFc4lfLqrSlQ&oh=00_AfGVpDWeKBtC8Av8x5nbiU9nzS9q6k122rjDFmuiXVn1zA&oe=67F88AF4",
   },
   {
     id: 2,
-    name: "Thế giới thú cưng Quin quin",
-    income: "440",
+    name: "Pet Want",
+    income: "2.020",
     avatar:
-      "https://i.pinimg.com/736x/6c/ed/df/6ceddf366988007afff55079d9a6a6c7.jpg",
+      "https://scontent.fsgn24-2.fna.fbcdn.net/v/t39.30808-6/292478853_190638156651811_5630531594611378651_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEtis0hBfi8aRiro28c8hJQspT3OFgmDMyylPc4WCYMzJZugWLrN2KOaUXKxydKgRXNz9EaemnMVnUqvKqyhsjo&_nc_ohc=pp-BLOEYR3UQ7kNvwHZPyXQ&_nc_oc=Adn9Vbfsqmk1A4kQCXd23oBgG346tVNdt4bZfurXX6AWnbTQd8C9X7YbWu5Hl4Cxo4jWyKLPUT-ctIolaQcoWRnh&_nc_zt=23&_nc_ht=scontent.fsgn24-2.fna&_nc_gid=cwd4xIx7YPO6ulCUJKHWtA&oh=00_AfGm29Ie-ltLLXOu6z_C-rXLqxD6jXEVxuwjzrznMsGiXQ&oe=67F885E1",
   },
   {
     id: 3,
-    name: "Pet shop Thủ Đức",
-    income: "370",
+    name: "VietNam Vet Clinic",
+    income: "1.740",
     avatar:
-      "https://i.pinimg.com/736x/5e/ac/7e/5eac7e0c084cabfde8733aa1a7bdffec.jpg",
-  },
-  {
-    id: 4,
-    name: "Spa tại nhà Juddy",
-    income: "320",
-    avatar:
-      "https://i.pinimg.com/736x/ab/52/1d/ab521d5f94b0d391bf9018c4eefd297d.jpg",
-  },
-  {
-    id: 5,
-    name: "Pet Mart quận 9",
-    income: "250",
-    avatar:
-      "https://i.pinimg.com/736x/ac/df/80/acdf808d2132658c9fa834aca6837359.jpg",
-  },
-  {
-    id: 6,
-    name: "Tắm rữa thú cưng Sephera",
-    income: "250",
-    avatar:
-      "https://i.pinimg.com/736x/1d/9a/22/1d9a22fab06290a3d90c08a902f5377f.jpg",
+      "https://scontent.fsgn4-1.fna.fbcdn.net/v/t39.30808-6/305117335_381112410875432_7271808005355689381_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeECpXM9HoeaY25uN-5IWOxb-4eABbYFJ6X7h4AFtgUnpf0PG3C2z8ZhInP9drzGwFZQL87HSv2EYT4848BPVfcW&_nc_ohc=2hG-gEDrLYoQ7kNvwFzAPoA&_nc_oc=AdnQMNoj1lCv8xG-TYYoYkgC5hHEFH3QyYuMyZVsXF7kNC2uscpma9p1xBMieTDYhm4e7CAujiI63qHj-2l0YMQA&_nc_zt=23&_nc_ht=scontent.fsgn4-1.fna&_nc_gid=KObCNdZNiXSP12ZijOnqaA&oh=00_AfGCGTr-XnrrW04sCLHxeSZxpxoR_6arh0K4oJL5gn-z_g&oe=67F88CCE",
   },
 ];
 
 const ThongKe = () => {
+  // Sort shop array by id in ascending order
+  const sortedShop = [...shop].sort((a, b) => a.id - b.id);
+
   const fakeData = [
     {
       title: "Tổng doanh thu",
-      value: "3.400.000",
+      value: "717.000",
       change: "+2.8%",
       icon: GrMoney,
       color: "#FF947A",
     },
     {
       title: "Tổng đơn hàng",
-      value: "17",
-      change: "-2.1%",
+      value: "24",
+      change: "+2.1%",
       icon: FaBox,
       color: "#3CD856",
     },
     {
       title: "Số lượng người dùng",
-      value: "24",
-      change: "+3.2%",
+      value: "31",
+      change: "-1.2%",
       icon: FaUsers,
       color: "#FA5A7D",
     },
     {
       title: "Số lượng shop thú cưng",
-      value: "7",
-      change: "-1.5%",
+      value: "3",
+      change: "+1.5%",
       icon: RiHomeHeartFill,
       color: "#BF83FF",
     },
   ];
 
   const salesData = [
-    { day: "Thứ 3", income: 0, expense: 200 },
-    { day: "Thứ 4", income: 250, expense: 100 },
-    { day: "Thứ 5", income: 100, expense: 100 },
-    { day: "Thứ 6", income: 0, expense: 120 },
-    { day: "Thứ 7", income: 300, expense: 100 },
-    { day: "Chủ Nhật", income: 580, expense: 100 },
-    { day: "Thứ 2", income: 320, expense: 120 },
+    { day: "02/04", income: 780 },
+    { day: "03/04", income: 1180 },
+    { day: "04/04", income: 480 },
+    { day: "05/04", income: 1440 },
+    { day: "06/04", income: 340 },
+    { day: "07/04", income: 380 },
+    { day: "08/04", income: 0 },
   ];
 
   // Hàm formatter để thay đổi nhãn
@@ -106,8 +88,7 @@ const ThongKe = () => {
     switch (name) {
       case "income":
         return [`${value}.000 VND`, "Thu nhập"];
-      case "expense":
-        return [`${value}.000 VND`, "Chi phí"];
+
       default:
         return [value, name];
     }
@@ -136,7 +117,7 @@ const ThongKe = () => {
             <FaBell className="text-[#ed7c44] text-2xl " />
           </div>
           <img
-            src="https://scontent.fsgn5-9.fna.fbcdn.net/v/t39.30808-6/298262371_1454849461693251_7497615639064788636_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHIS2EWfaEKXzDZN0jYlSa5rE-BrKfZH_-sT4Gsp9kf_0yR1gdYdCUsbKDvfISZx7Tmz5fKhyZYpTW7EYSTyhUM&_nc_ohc=gkM1v5r9zwAQ7kNvgF7IFFZ&_nc_oc=AdhQ52ZlYkqQpAIU_Tuhkd-vR6O-4vRPGmG-91UolUAt_ciQNsVq4_w3MDlJdGzDYUY&_nc_zt=23&_nc_ht=scontent.fsgn5-9.fna&_nc_gid=AYBzQOllhf6SdT5VHlsmU2f&oh=00_AYBeVgH3T15kdkQDRJ_t98tnANx2bjxV3GBG64S37aUVPA&oe=67B836BE"
+            src="https://scontent.fsgn24-2.fna.fbcdn.net/v/t39.30808-6/298262371_1454849461693251_7497615639064788636_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHIS2EWfaEKXzDZN0jYlSa5rE-BrKfZH_-sT4Gsp9kf_0yR1gdYdCUsbKDvfISZx7Tmz5fKhyZYpTW7EYSTyhUM&_nc_ohc=oKNrHcCyEEwQ7kNvwEMJJol&_nc_oc=AdkuMvYpOplO3nazEuJM5DDCf2EnecoxPnSvk0QbaCstVkUwULDjIqCYEQEtu7YbfINV6kRepsVNxLF49UABpRCh&_nc_zt=23&_nc_ht=scontent.fsgn24-2.fna&_nc_gid=j0PNrUNXUS1LuUkvrojZ_Q&oh=00_AfE_3l2HJR97dczONEEH0AVhAImqw7VFNp4QnuriRnUqTA&oe=67F897FE"
             alt="User Avatar"
             className="w-11 h-11 rounded-full"
           />
@@ -177,7 +158,7 @@ const ThongKe = () => {
       <div className="flex p-8">
         <div className="col-span-2 w-2/3 bg-white rounded-lg py-5 pr-7 shadow-md">
           <h3 className="text-lg ml-7 font-sans font-bold mb-4">
-            Sơ đồ doanh thu trong tuần
+            Sơ đồ doanh thu
           </h3>
           {/* Line Chart */}
           <ResponsiveContainer width="100%" height={400}>
@@ -207,13 +188,6 @@ const ThongKe = () => {
                 name="Thu nhập"
                 className="mt-10"
               />
-              <Line
-                type="monotone"
-                dataKey="expense"
-                stroke="#8884d8"
-                strokeWidth={3}
-                name="Chi phí"
-              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -225,7 +199,7 @@ const ThongKe = () => {
             <div>Xếp hạng doanh thu các shop</div>
           </div>
           <div className="px-6 w-full">
-            {shop.map((s, index) => (
+            {sortedShop.map((s, index) => (
               <div
                 key={s.id}
                 className="flex items-center justify-between mb-4"

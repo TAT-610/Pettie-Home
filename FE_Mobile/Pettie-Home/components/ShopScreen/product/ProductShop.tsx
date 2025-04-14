@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-    View, Text, StyleSheet, FlatList, TouchableOpacity,
-    ScrollView, Dimensions, Image, Modal
-} from "react-native";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { Products, Profile } from "@/services/types";
-import { getAllProductsByShop, getAllShops } from "@/services/api";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { getProductsByShop, deleteProduct } from "@/services/shop/apiproduct";
+import { GestureHandlerRootView, Swipeable } from "react-native-gesture-handler";
 
 interface Product {
     id: string;
@@ -14,120 +11,87 @@ interface Product {
     price: string;
     quantity: number;
     status: string;
-    image: string;
+    imageUrl: string;
 }
-
-const productsMock: Product[] = [
-    {
-        id: "1",
-        name: "Cát đậu nành Cature cho mèo 2.8kg",
-        price: "232.000đ",
-        quantity: 10,
-        status: "Đang hoạt động",
-        image: "https://paddy.vn/cdn/shop/files/Thi_tk_ch_acoten_2.png?v=1690719510",
-    },
-    {
-        id: "2",
-        name: "Pate mèo kucinta gói 80g",
-        price: "12.000đ",
-        quantity: 0,
-        status: "Hết hàng",
-        image: "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
-    },
-    {
-        id: "3",
-        name: "Bánh quy cho chó",
-        price: "135.000đ",
-        quantity: 5,
-        status: "Đang hoạt động",
-        image: "https://paddy.vn/cdn/shop/files/snack-cho-cho-banh-quy-doggyman_5.jpg?v=1732863422",
-    },
-    {
-        id: "4",
-        name: "Cây cào móng chó mèo",
-        price: "305.000đ",
-        quantity: 0,
-        status: "Đang hoạt động",
-        image: "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
-    },
-];
 
 const tabs = ["Đang hoạt động", "Hết hàng", "Đang xét duyệt", "Không thành công"];
 
-export default function ProductShop({ shopId, id }: { shopId: string; id: Profile }) {
+export default function ProductShop({ shopId }: { shopId: string }) {
     const [activeTab, setActiveTab] = useState<string>(tabs[0]);
-    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-    const [isMenuVisible, setMenuVisible] = useState<boolean>(false);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
     const router = useRouter();
 
-    // const [products, setProducts] = useState<Products[]>([]);
+    useFocusEffect(
+        useCallback(() => {
+            const fetchProducts = async () => {
+                try {
+                    const productData = await getProductsByShop(1, 100);
+                    const formattedProducts = productData.map((product: any) => ({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        quantity: product.quantity,
+                        status: "Đang hoạt động",
+                        imageUrl: product.imageUrl || product.imageFileName,
+                    }));
+                    setProducts(formattedProducts);
+                } catch (error) {
+                    console.error("Lỗi khi lấy sản phẩm:", error);
+                }
+            };
 
+            fetchProducts();
+        }, [])
+    );
 
-    // useEffect(() => {
-    //     console.log("Goi api getAllShop");
-    //     const fetchAllShops = async () => {
-    //       try {
-    //         const shopsData = await getAllShops();
-    //         console.log("ShopData", shopsData);  // Check the data received
-    //       } catch (error) {
-    //         console.error("Error fetching shops:", error);
-    //       }
-    //     };
-    //     fetchAllShops();
-    //   }, []);
-
-    //   useEffect(() => {
-    //     console.log("Goi api getAllProduct");
-    //     const fetchAllProductsByShop = async () => {
-    //       try {
-    //         const productsData = await getAllProductsByShop(shopId,id);
-    //         console.log("productsData: ", productsData);  // Check the data received
-    //         setProducts(productsData); // Lưu dữ liệu sản phẩm vào state
-    //         filterProducts(activeTab, productsData); // Lọc sản phẩm theo tab hiện tại
-    //       } catch (error) {
-    //         console.error("Error fetching product:", error);
-    //       }
-    //     };
-    //     fetchAllProductsByShop();
-    //   }, [shopId, id]);
-
-    // useEffect(() => {
-    //     filterProducts(activeTab, products);
-    // }, [activeTab, products]);
-
-    // const filterProducts = (status: string, products: Products[]) => {
-    //     const filtered = products.filter(product => product.status === status);
-    //     setFilteredProducts(filtered);
-    // };
-
-
-    useEffect(() => {
-        filterProducts(activeTab);
-    }, [activeTab]);
-
-    const filterProducts = (status: string) => {
-        const filtered = productsMock.filter(product => product.status === status);
-        setFilteredProducts(filtered);
-    };
+    const filteredProducts = useMemo(
+        () => products.filter((product) => product.status === activeTab),
+        [products, activeTab]
+    );
 
     const handleAddProduct = useCallback(() => {
         router.push(`/ProductShop/addproduct`);
     }, [router]);
 
-    const handleEditProduct = useCallback((productId: string) => {
-        router.push(`/ProductShop/[editproduct]?id=${productId}`);
+    const handleEditProduct = useCallback((id: string) => {
+        router.push(`/ProductShop/[editproduct]?id=${id}`);
     }, [router]);
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.headerContainer}>
-                <Text style={styles.header}>Sản phẩm</Text>
-                <TouchableOpacity style={styles.addButton} onPress={handleAddProduct}>
-                    <Text ><Ionicons name="add-circle" size={35} color="#fff" /></Text>
-                </TouchableOpacity>
-            </View>
+    const confirmDeleteProduct = (id: string) => {
+        setDeleteProductId(id);
+    };
 
-            <View style={styles.stickyHeader}>
+    const handleDeleteProduct = async () => {
+        if (deleteProductId) {
+            try {
+                await deleteProduct(deleteProductId);
+                setProducts(products.filter((product) => product.id !== deleteProductId));
+                setDeleteProductId(null);
+            } catch (error) {
+                console.error("Lỗi khi xóa sản phẩm:", error);
+            }
+        }
+    };
+
+    const renderRightActions = (id: string) => (
+        <View style={styles.deleteContainer}>
+            <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDeleteProduct(id)}>
+                <AntDesign name="delete" size={24} color="white" />
+            </TouchableOpacity>
+        </View>
+    );
+
+    return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <View style={styles.container}>
+                <View style={styles.headerContainer}>
+                    <Text style={styles.header}>Sản phẩm</Text>
+                    <TouchableOpacity style={styles.addButton} onPress={handleAddProduct}>
+                        <Ionicons name="add-circle" size={35} color="#fff" />
+                    </TouchableOpacity>
+                </View>
+
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsContainer}>
                     {tabs.map((tab) => (
                         <TouchableOpacity
@@ -139,110 +103,126 @@ export default function ProductShop({ shopId, id }: { shopId: string; id: Profil
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
-                <TouchableOpacity onPress={() => setMenuVisible(true)}>
-                    <Text style={styles.menuTrigger}><AntDesign name="filter" size={24} color="#fff" /></Text>
-                </TouchableOpacity>
-            </View>
 
-            {/* Danh sách dịch vụ */}
-            <View style={styles.listContainer}>
                 <FlatList
+                    style={{ padding: 5 }}
                     data={filteredProducts}
-                    keyExtractor={(item) => item.id.toString()}
+                    keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
-                        <View style={styles.card}>
-                            <Image source={{ uri: item.image }} style={styles.image} />
-                            <View style={styles.details}>
-                                <Text style={styles.name}>{item.name}</Text>
-                                <Text style={styles.price}>Giá: {item.price}.000đ</Text>
+                        <Swipeable renderRightActions={() => renderRightActions(item.id)}>
+                            <View style={styles.card}>
+                                <Image
+                                    source={{ uri: item.imageUrl ? `https://pettiehome.online/web/${item.imageUrl}` : 'default-image-url.jpg' }}
+                                    style={styles.image}
+                                />
+                                <View style={styles.details}>
+                                    <Text style={styles.name}>{item.name}</Text>
+                                    <Text style={styles.price}>Giá: {item.price}đ</Text>
+                                </View>
+                                <TouchableOpacity style={styles.actionButton} onPress={() => handleEditProduct(item.id)}>
+                                    <AntDesign name="edit" size={20} color="white" />
+                                </TouchableOpacity>
                             </View>
-                            <TouchableOpacity
-                                style={styles.actionButton}
-                                onPress={() => handleEditProduct(item.id)} // Pass productId here
-                            >
-                                <AntDesign name="edit" size={20} color="white" />
-                            </TouchableOpacity>
-                        </View>
+                        </Swipeable>
                     )}
                 />
-            </View>
 
-            <Modal
-                visible={isMenuVisible}
-                transparent
-                animationType="slide"
-                onRequestClose={() => setMenuVisible(false)}
-            >
-                <TouchableOpacity style={styles.modalOverlay} onPress={() => setMenuVisible(false)} />
-                <View style={styles.modalContainer}>
-                    {tabs.map((tab) => (
-                        <TouchableOpacity
-                            key={tab}
-                            onPress={() => {
-                                setActiveTab(tab);
-                                setMenuVisible(false);
-                            }}
-                            style={[styles.modalOption, activeTab === tab && styles.activeModalOption]}
-                        >
-                            <Text style={[styles.modalOptionText, activeTab === tab && styles.activeModalOptionText]}>
-                                {tab}
+                <Modal
+                    visible={!!deleteProductId}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => setDeleteProductId(null)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContainer}>
+                            <Text style={styles.modalText}>
+                                Bạn có chắc muốn xóa sản phẩm này?
                             </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </Modal>
-        </View>
+                            <View style={styles.buttonContainer}>
+                                <TouchableOpacity onPress={() => setDeleteProductId(null)} style={styles.cancelButton}>
+                                    <Text style={styles.buttonText}>Hủy</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={handleDeleteProduct} style={styles.deleteButton}>
+                                    <Text style={styles.buttonText}>Xóa</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+
+            </View>
+        </GestureHandlerRootView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#e9f1ff" },
+    container: { flex: 1, backgroundColor: "#e9f1ff", paddingBottom: 20 },
     headerContainer: { flexDirection: "row", justifyContent: "space-between", padding: 15, paddingTop: 40, backgroundColor: "#699BF4" },
     header: { fontSize: 22, fontWeight: "bold", padding: 12, color: "#fff" },
     addButton: { padding: 4 },
-    stickyHeader: { flexDirection: "row", justifyContent: "space-between", padding: 10, backgroundColor: "#699BF4", marginBottom: 10 },
-    tabsContainer: { flexDirection: "row" },
+    tabsContainer: { flexDirection: "row", padding: 10, backgroundColor: "#699BF4", marginBottom: 10 },
     tab: { padding: 10, borderRadius: 20, backgroundColor: "#fff", marginHorizontal: 5 },
     activeTab: { backgroundColor: "#ed7c44" },
     tabText: { color: "#555" },
     activeTabText: { color: "#fff" },
-    menuTrigger: { padding: 5 },
-    list: {
-        flexDirection: "row",
-        paddingVertical: 12,
-        paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
-        backgroundColor: "e9f1ff",
-    },
-    listContainer: {
-        paddingHorizontal: 5,
-        marginBottom: 10,
-    },
-    card: {
+    card: { flexDirection: "row", alignItems: "center", padding: 12, borderBottomWidth: 1, borderBottomColor: "#ddd", backgroundColor: "white" },
+    image: { width: 80, height: 80, borderRadius: 10 },
+    details: { flex: 1, marginLeft: 15 },
+    name: { fontSize: 16, fontWeight: "500", marginBottom: 5 },
+    price: { fontSize: 13, color: "#ed7c44" },
+    actionButton: { padding: 6, backgroundColor: "#ed7c44", borderRadius: 20 },
+    modalOverlay: {
         flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)", // Làm mờ nền
+        justifyContent: "center",
+        alignItems: "center",
+      },
+      modalContainer: {
+        width: "80%", // Độ rộng modal
+        backgroundColor: "#fff",
+        borderRadius: 10,
+        padding: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      modalText: {
+        fontSize: 18,
+        marginBottom: 20,
+        textAlign: "center",
+        fontWeight: "bold",
+      },
+      buttonContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
+        width: "100%",
+      },
+      cancelButton: {
+        flex: 1,
+        padding: 10,
+        backgroundColor: "#ccc",
+        borderRadius: 5,
         alignItems: "center",
-        paddingVertical: 12,
-        paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: "#ddd",
-        backgroundColor: "white"
-    },
-    image: { width: 80, height: 80, borderRadius: 10 },
-    details: {
-        flex: 1, marginLeft: 15,
-        marginBottom: 27
-    },
-    name: { fontSize: 16, fontWeight: "medium", marginBottom: 5 },
-    price: { fontSize: 13, color: "#ed7c44", marginBottom: 10 },
-
-    actionButton: { padding: 6, backgroundColor: "#ed7c44", borderRadius: 20, },
-    modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)" },
-    modalContainer: { backgroundColor: "#fff", padding: 20, borderRadius: 10, position: "absolute", bottom: 0, width: "100%" },
-    modalOption: { padding: 15 },
-    activeModalOption: { backgroundColor: "#ed7c44" },
-    modalOptionText: { textAlign: "center" },
-    activeModalOptionText: { color: "#fff" },
+        marginRight: 10,
+      },
+      deleteButton: {
+        flex: 1,
+        backgroundColor: "red",
+        borderRadius: 5,
+        alignItems: "center",
+        paddingTop: 40,
+        width: 60, // Tăng kích thước chiều rộng
+        height: 60,
+      },
+      buttonText: {
+        color: "#fff",
+        fontWeight: "bold",
+      },
+      deleteContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+      },
 });
+

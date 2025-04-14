@@ -8,27 +8,40 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { AntDesign, Feather } from "@expo/vector-icons"; // Import icon
-
-import logo from "../../assets/images/pay.jpg";
+import QRCode from "react-native-qrcode-svg";
+import { getOrderByCodeNumber } from "@/services/user/order"; // Import hàm getOrderByCodeNumber
 
 const Payment = () => {
-  const { address } = useLocalSearchParams();
+  const { qrCode, orderCode } = useLocalSearchParams();
   const router = useRouter();
 
   // Trạng thái modal
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [orderData, setOrderData] = useState<any>(null); // State để lưu thông tin đơn hàng
 
   // Thông tin đơn hàng mẫu
-  const customerName = "Trần Ánh Tuyết";
-  const phoneNumber = "0886133779";
-  const defaultAddress =
-    "Tòa Bs16, 88 Phước Thiện, Khu phố 29, Quận 9, Hồ Chí Minh";
-  const shippingAddress = address || defaultAddress;
-  const orderTotal = 100 + 2 * 10 + 220 + 25; // Tổng đơn hàng + phí ship
+  const customerName = "Lê Như Ngọc";
+
+  // Tổng đơn hàng + phí ship
+
+  // Hàm gọi để lấy thông tin đơn hàng
+  const fetchOrderData = async () => {
+    try {
+      const data = await getOrderByCodeNumber(orderCode as string);
+      console.log("Order Data:", data); // Log dữ liệu đơn hàng
+      setOrderData(data); // Lưu thông tin đơn hàng vào state
+    } catch (error) {
+      console.error("Error fetching order data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrderData(); // Gọi hàm khi component được mount
+  }, [orderCode]);
 
   // Hàm xử lý xác nhận thanh toán
   const handlePayment = () => {
@@ -40,37 +53,39 @@ const Payment = () => {
     }, 4000); // Chạy sau 4 giây
   };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
   return (
     <View style={styles.container}>
       {/* Thanh điều hướng */}
       <View style={styles.navigation}>
-        <AntDesign
-          name="arrowleft"
-          size={28}
-          color="white"
-          onPress={() => router.push("/Order/OrderCustomer")}
-          style={styles.backButton}
-        />
-        <Text style={styles.textpay}>Quay lại</Text>
+        <Text style={styles.textpay}>Xác nhận thanh toán</Text>
       </View>
 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <Text style={styles.title}>Thông tin đơn hàng</Text>
         <View style={styles.infoBox}>
-          <Text style={styles.label}>Tên khách hàng:</Text>
-          <Text style={styles.value}>{customerName}</Text>
+          <Text style={styles.label}>Mã đơn hàng:</Text>
+          <Text style={styles.value}>{orderCode}</Text>
         </View>
         <View style={styles.infoBox}>
-          <Text style={styles.label}>Số điện thoại:</Text>
-          <Text style={styles.value}>{phoneNumber}</Text>
+          <Text style={styles.label}>Tên người nhận:</Text>
+          <Text style={styles.value}>{customerName}</Text>
         </View>
 
         <View style={styles.infoBox}>
           <Text style={styles.label}>Tổng giá trị đơn hàng:</Text>
-          <Text style={styles.value}>{orderTotal}.000đ</Text>
+          <Text style={styles.value}>
+            {orderData ? formatCurrency(orderData.totalAmount) : "Đang tải..."}
+          </Text>
         </View>
-
-        <Image source={logo} style={styles.logo} />
+        <View style={styles.QRCode}>
+          <QRCode value={qrCode as string} size={200} />
+        </View>
 
         <TouchableOpacity style={styles.confirmButton} onPress={handlePayment}>
           <Text style={styles.buttonText}>Xác nhận đã thanh toán</Text>
@@ -120,7 +135,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 27,
     backgroundColor: "#699BF4",
-
+    marginBottom: 20,
     paddingVertical: 15,
     paddingHorizontal: 20,
   },
@@ -130,7 +145,10 @@ const styles = StyleSheet.create({
   textpay: {
     fontSize: 18,
     fontWeight: "bold",
+    marginTop: 10,
     color: "white",
+    textAlign: "center",
+    marginHorizontal: "auto",
   },
   title: {
     marginTop: 20,
@@ -208,5 +226,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 8,
     marginTop: 10,
+  },
+  QRCode: {
+    marginHorizontal: "auto",
   },
 });

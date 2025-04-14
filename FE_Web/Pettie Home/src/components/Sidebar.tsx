@@ -40,6 +40,11 @@ const SidebarData: SidebarDataType[] = [
       },
     ],
   },
+  {
+    icon: FaStore,
+    heading: "Danh mục sản phẩm",
+    href: "/admin/danhmuc",
+  },
 ];
 
 const Sidebar = () => {

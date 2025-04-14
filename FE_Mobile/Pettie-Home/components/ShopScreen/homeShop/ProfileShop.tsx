@@ -1,34 +1,33 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Feather, FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { getProfileById } from '../../../services/api';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Profile } from '@/services/types';
+import { FontAwesome, FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getShopAccount } from '@/services/shop/apiprofile';
 
 const ProfileShop = () => {
   const router = useRouter();
-  const { id } = useLocalSearchParams(); // Lấy id từ route params
-  console.log("Id in ProfileShop", id);
+  const [profile, setProfile] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const profileId = Array.isArray(id) ? id[0] : id; // Đảm bảo id là string
-  const [profile, setProfile] = useState<Profile | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfile = async () => {
+        try {
+          const shopData = await getShopAccount();
+          console.log("shopData in ProfileShop nef", shopData);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      // if (!profileId) return;
-      try {
-        console.log("Fetching profile with ID:", profileId); // Debug log
-        const data = await getProfileById(profileId);
-        console.log("Profile data received:", data); // Kiểm tra dữ liệu
-        setProfile(data);
-      } catch (error) {
-        console.error("Lỗi khi lấy hồ sơ:", error);
-      }
-    };
+          setProfile(shopData);
+        } catch (error) {
+          console.error("Lỗi khi lấy thông tin tài khoản:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchProfile();
 
-    fetchData();
-  }, [profileId]);
+    }, [])
+  )
 
 
   if (!profile) {
@@ -37,8 +36,8 @@ const ProfileShop = () => {
 
   const handleLogout = async () => {
     try {
-      await AsyncStorage.removeItem('userId'); // Xóa ID người dùng khỏi AsyncStorage
-      console.log("Đã logout thành công!"); // Ghi log khi logout thành công
+      await AsyncStorage.removeItem('access_token');
+      await AsyncStorage.removeItem('id_token');
       router.push('/Auths/login');
     } catch (error) {
       console.error("Lỗi khi đăng xuất:", error);
@@ -46,22 +45,20 @@ const ProfileShop = () => {
   };
 
   const handleEditProfile = () => {
-    console.log("navigate editprofile");
-    
     if (profile?.id) {
-      router.push(`/MyShop/editProfile/[editprofileShop]?id=${profile.id}`);
+      // encodeURIComponent giúp tránh lỗi khi truyền JSON qua URL.
+      router.push(`/MyShop/editProfile/[editprofileShop]?profile=${encodeURIComponent(JSON.stringify(profile))}`);
     } else {
       console.error("Không có ID để chuyển trang");
     }
   };
-// anh sua lai cau truc thu muc o MyShop, noi na`o ma su dung 2 th` do la phai import lai
+  // anh sua lai cau truc thu muc o MyShop, noi na`o ma su dung 2 th` do la phai import lai
   const handleWallet = () => {
-    console.log("Navigating to wallet with id:", profileId);
     router.push(`/MyShop/Wallet/[walletshop]?id=${profile.id}`);
   };
   // tab doanh thu đó là component nào e
   const stats = [
-    { label: 'Doanh thu', value: '20.250.000đ' },
+    { label: 'Doanh thu', value: '9.250.000đ' },
     { label: 'Đơn hàng', value: '14' },
     { label: 'Khách truy cập', value: '19' },
   ];
@@ -71,20 +68,24 @@ const ProfileShop = () => {
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <Image
-            source={{ uri: profile.image || 'https://example.com/default-avatar.png' }}
+            source={{
+              uri: profile.imageUrl
+                ? `https://pettiehome.online/web/${profile.imageUrl}`
+                : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaZPYOSQUJW4zOM9FTxASvMzRDAUaVmJCGFQ&s'
+            }}
             style={styles.avatar}
           />
           <View>
-            <Text style={styles.shopName}>{profile.fullname}</Text>
+            <Text style={styles.shopName}>{profile.name}</Text>
             <View style={styles.ratingContainer}>
               <FontAwesome name="star" size={16} color="#FFD700" />
               <Text style={styles.rating}>{profile.rating || "5.0"}</Text>
             </View>
           </View>
         </View>
-        <TouchableOpacity style={styles.notificationIcon}>
+        <View style={styles.notificationIcon}>
           <FontAwesome name="bell" size={20} color="#fff" />
-        </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.statsContainer}>
@@ -99,68 +100,39 @@ const ProfileShop = () => {
         </View>
       </View>
 
-      {/* Menu */}
-      <TouchableOpacity style={styles.menuItem} >
-        <View style={styles.menuItemLeft}>
-          <FontAwesome name="shopping-cart" size={20} color="#ed7c44" />
-          <Text style={styles.menuText}>Thông tin đơn hàng</Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.menuItem} >
-        <View style={styles.menuItemLeft}>
-          <Ionicons name="add-circle" size={20} color="#ed7c44" />
-          <Text style={styles.menuText}>Thêm sản phẩm</Text>
-        </View>
-      </TouchableOpacity>
-
       <TouchableOpacity style={styles.menuItem} onPress={handleWallet}>
         <View style={styles.menuItemLeft}>
           <FontAwesome5 name="money-bill-wave" size={19} style={{ marginRight: -2 }} color="#ed7c44" />
           <Text style={styles.menuText}>Doanh thu</Text>
         </View>
-        <Text style={styles.menuValue}>20.250.000 đ</Text>
+        <Text style={styles.menuValue}>9.250.000 đ</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.menuItem} >
-        <View style={styles.menuItemLeft}>
-          <Ionicons name="storefront-sharp" size={20} color="#ed7c44" />
-          <Text style={styles.menuText}>Đăng ký mở cửa hàng</Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.menuItem}>
+      <View style={styles.menuItem}>
         <View style={styles.menuItemLeft}>
           <FontAwesome name="question-circle-o" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Hỗ trợ</Text>
         </View>
-      </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity style={styles.menuItem} >
+      <View style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
           <FontAwesome name="cogs" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Cài đặt</Text>
         </View>
-      </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity style={styles.menuItem} >
+      <View style={styles.menuItem} >
         <View style={styles.menuItemLeft}>
           <FontAwesome name="file-text" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Điều khoản & Chính sách</Text>
         </View>
-      </TouchableOpacity>
+      </View>
 
       <TouchableOpacity style={styles.menuItem} onPress={handleEditProfile}>
         <View style={styles.menuItemLeft}>
           <FontAwesome name="edit" size={20} color="#ed7c44" />
           <Text style={styles.menuText}>Chỉnh sửa thông tin</Text>
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.menuItem} >
-        <View style={styles.menuItemLeft}>
-          <FontAwesome5 name="briefcase-medical" size={20} color="#ed7c44" />
-          <Text style={styles.menuText}>Thêm dịch vụ</Text>
         </View>
       </TouchableOpacity>
 
@@ -190,6 +162,7 @@ const styles = StyleSheet.create({
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 25
   },
   avatar: {
     width: 90,

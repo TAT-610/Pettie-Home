@@ -7,6 +7,8 @@ import NguoiDung from "../pages/NguoiDung";
 import ThongKe from "../pages/ThongKe";
 import GiaoDich from "../pages/GiaoDich";
 import DetailShop from "../pages/DetailShop";
+import Danhmuc from "../pages/Danhmuc";
+
 export default function AdminRouter() {
   return (
     <div className="flex h-screen overflow-hidden">
@@ -18,7 +20,8 @@ export default function AdminRouter() {
           <Route path="cuahang" element={<CuaHang />} />
           <Route path="xetduyetCuahang" element={<XetduyetCuaHang />} />
           <Route path="giaodich" element={<GiaoDich />} />
-          <Route path={`cuahang/detailshop/:id`} element={<DetailShop />} />
+          <Route path="cuahang/detailshop" element={<DetailShop />} />
+          <Route path="danhmuc" element={<Danhmuc />} />
         </Routes>
       </div>
     </div>

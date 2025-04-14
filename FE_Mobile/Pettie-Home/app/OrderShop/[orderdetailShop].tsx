@@ -1,203 +1,311 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  Dimensions,
-  Image,
-} from "react-native";
-import { useRouter } from "expo-router";
+import React, { useState, useEffect } from "react";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Modal, Dimensions, Image, Alert } from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { AntDesign, Entypo } from "@expo/vector-icons";
+import { getOrderDetailByCode, updateOrderStatus } from "@/services/shop/apiOrder";
+import { Orders } from "@/services/types";
 
 const statusSteps = [
-  "Chờ ngày hẹn",
-  "Đến cuộc hẹn",
-  "Đang tiến hành",
-  "Đã hoàn thành",
+  "Pending",
+  "AwaitingSchedule",
+  "InProgress",
+  "Completed",
+  "Canceled",
 ];
 
-const orderDetails = {
-  orderId: "#1009",
-  status: "Đang tiến hành",
-  time: "27/01/2024 - 23:07:42",
-  scheduledTime: "28/01/2024 - 10:00:00",
-  items: [
-    {
-      id: "1",
-      name: "Cắt tỉa lông (Chó/Mèo) <3kg ",
-      price: 420000,
-      quantity: 1,
-      image: "",
-    },
-    {
-      id: "2",
-      name: "Tạo hình đặc biệt (Theo yêu cầu) ",
-      price: 120000,
-      quantity: 3,
-      image: "",
-    },
-    {
-      id: "3",
-      name: "Bánh quy cho chó ",
-      price: 32000,
-      quantity: 4,
-      image:
-        "https://paddy.vn/cdn/shop/files/snack-cho-cho-banh-quy-doggyman_5.jpg?v=1732863422",
-    },
-    {
-      id: "4",
-      name: "Pate mèo kucinta gói 80g ",
-      price: 32000,
-      quantity: 4,
-      image:
-        "https://paddy.vn/cdn/shop/files/z6067259275067_d00c41622820e9fd53e75b4756f44d47.jpg?v=1732539520",
-    },
-    {
-      id: "5",
-      name: "Cát đậu nành Cature cho mèo 2.8kg ",
-      price: 32000,
-      quantity: 4,
-      image:
-        "https://paddy.vn/cdn/shop/files/6_ddd891b4-7553-4918-9472-44b03347f9ad.webp?v=1697452539",
-    },
-  ],
-  subtotal: 925000,
-  shipping: 15000,
-  total: 935000,
-  address: "Đường 3/2, phường Long Thạnh Mỹ, Quận 9, HCM",
-  paymentMethod: "Tiền mặt",
-  paymentTime: "28/01/2024 - 10:05:00",
-  customerName: "Nguyễn Văn A",
-  customerPhone: "0123456789",
-  customerNote: "Vui lòng gọi điện trước khi đến để xác nhận lịch hẹn.",
+const mapStatusToText = (status: string) => {
+  switch (status) {
+    case "Pending":
+      return "Chờ xác nhận";
+    case "AwaitingSchedule":
+      return "Chờ ngày hẹn";
+    case "InProgress":
+      return "Đang diễn ra";
+    case "Completed":
+      return "Đã hoàn thành";
+    case "Canceled":
+      return "Đã hủy";
+    default:
+      return status;
+  }
+};
+
+// Hàm dịch phương thức thanh toán
+const mapPaymentMethodToText = (method: string) => {
+  switch (method) {
+    case "Cash":
+      return "Tiền mặt";
+    case "BankTransfer":
+      return "Chuyển khoản";
+    default:
+      return "Tiền mặt"; // Mặc định là tiền mặt nếu không khớp
+  }
+};
+
+// Hàm dịch trạng thái thanh toán
+const mapPaymentStatusToText = (status: string) => {
+  switch (status) {
+    case "Pending":
+      return "Chờ thanh toán";
+    case "Paid":
+      return "Đã thanh toán";
+    case "Failed":
+      return "Thanh toán thất bại";
+    default:
+      return status || "Chưa thanh toán";
+  }
 };
 
 export default function OrderDetails() {
   const router = useRouter();
-  const [order, setOrder] = useState(orderDetails);
+  const [order, setOrder] = useState<Orders | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const { orderdetailShop } = useLocalSearchParams();
+
+  useEffect(() => {
+    const fetchOrderDetail = async () => {
+      try {
+        if (!orderdetailShop) {
+          throw new Error("Mã đơn hàng không được cung cấp");
+        }
+        setLoading(true);
+        const orderDetail = await getOrderDetailByCode(orderdetailShop as string);
+        if (!orderDetail) {
+          throw new Error("Không tìm thấy đơn hàng");
+        }
+        setOrder(orderDetail);
+      } catch (error: any) {
+        console.error("Error fetching order details:", error);
+        Alert.alert("Lỗi", error.message || "Không thể tải thông tin đơn hàng", [
+          { text: "OK", onPress: () => router.back() },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrderDetail();
+  }, [orderdetailShop, router]);
+
+  const handleStatusChange = async (newStatus: string) => {
+    try {
+      if (!order) return;
+
+      const updatedOrder = await updateOrderStatus(
+        order.id,
+        newStatus as "Pending" | "AwaitingSchedule" | "InProgress" | "Completed" | "Canceled"
+      );
+      setOrder(updatedOrder);
+      Alert.alert("Thành công", "Cập nhật trạng thái thành công.");
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      Alert.alert("Lỗi", "Không thể cập nhật trạng thái.");
+    } finally {
+      setIsModalVisible(false);
+    }
+  };
+
+  const showStatusChangePopup = () => {
+    if (!order) return;
+
+    const currentIndex = statusSteps.indexOf(order.status);
+    if (currentIndex < statusSteps.length - 1) {
+      setIsModalVisible(true);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Đang tải thông tin đơn hàng...</Text>
+      </View>
+    );
+  }
+
+  if (!order) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Không tìm thấy thông tin đơn hàng.</Text>
+      </View>
+    );
+  }
+
+  const orderDetails = Array.isArray(order.orderDetails) ? order.orderDetails : [];
+  const visibleOrderDetails = isExpanded ? orderDetails : orderDetails.slice(0, 2);
+  const shouldShowToggle = orderDetails.length > 2;
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.headerContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <AntDesign name="left" size={24} color="#fff" />
+          <Text style={styles.header}>Thông tin đơn hàng</Text>
         </TouchableOpacity>
-        <Text style={styles.header}>Thông tin đơn hàng</Text>
       </View>
 
-      <View style={{ padding: 10 }}>
-        <Text style={styles.statusOrder}>Thông tin lịch hẹn</Text>
-        <View style={styles.card}>
-          <View style={styles.headerCard}>
-            <Text style={styles.label}>Mã đơn hàng:</Text>
-            <Text style={styles.value}>{orderDetails.orderId}</Text>
-            <Text style={styles.label}>Thời gian đã tạo đơn:</Text>
-            <Text style={styles.value}>{orderDetails.time}</Text>
-          </View>
-          <View style={styles.headerCard}>
-            <TouchableOpacity
-              onPress={() => {
-                const currentIndex = statusSteps.indexOf(order.status);
-                if (currentIndex < statusSteps.length - 1)
-                  setIsModalVisible(true);
-              }}
-            >
-              <View style={styles.status}>
-                <Entypo name="controller-record" size={24} color="#25923E" />
-                <Text style={styles.statusText}>{order.status}</Text>
+      <FlatList
+        data={[]}
+        keyExtractor={() => "header"}
+        ListHeaderComponent={
+          <>
+            <Text style={styles.statusOrder}>Thông tin lịch hẹn</Text>
+            <View style={styles.card}>
+              <View style={styles.headerCard}>
+                <Text style={styles.label}>Mã đơn hàng:</Text>
+                <Text style={styles.value}>{order.orderNumber}</Text>
+                <Text style={styles.label}>Thời gian đã tạo đơn:</Text>
+                <Text style={styles.value}>{new Date(order.appointmentDate).toLocaleString()}</Text>
               </View>
-            </TouchableOpacity>
-            <Text style={styles.label}>Thời gian hẹn:</Text>
-            <Text style={styles.value}>{orderDetails.scheduledTime}</Text>
-          </View>
-        </View>
+              <View style={styles.headerCard}>
+                <TouchableOpacity onPress={showStatusChangePopup}>
+                  <View style={styles.status}>
+                    <Entypo name="controller-record" size={24} color="#25923E" />
+                    <Text style={styles.statusText}>{mapStatusToText(order.status)}</Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
 
-        <View style={styles.cardinfo}>
-          <Text style={styles.sectionHeader}>Thông tin khách hàng</Text>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Tên khách hàng:</Text>
-            <Text style={styles.infoValue}>{orderDetails.customerName}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Số điện thoại:</Text>
-            <Text style={styles.infoValue}>{orderDetails.customerPhone}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Địa chỉ:</Text>
-            <Text style={styles.infoValue}>{orderDetails.address}</Text>
-          </View>
-        </View>
+            <View style={styles.cardinfo}>
+              <Text style={styles.sectionHeader}>Thông tin khách hàng</Text>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Tên khách hàng:</Text>
+                <Text style={styles.infoValue}>{order.buyerName}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Số điện thoại:</Text>
+                <Text style={styles.infoValue}>{order.buyerPhone}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Địa chỉ:</Text>
+                <Text style={styles.infoValue}>{order.buyerAddress}</Text>
+              </View>
+            </View>
 
-        <View style={styles.carddetail}>
-          <Text style={styles.sectionHeader}>Chi tiết đơn hàng</Text>
-          <FlatList
-            nestedScrollEnabled={true}
-            data={orderDetails.items}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.itemRow}>
-                <Image source={{ uri: item.image }} style={styles.image} />
-                <View style={styles.itemInfo}>
-                  <Text style={styles.itemText}>{item.name}</Text>
-                  <Text style={styles.itemPrice}>
-                    {item.price.toLocaleString()} đ
+            <View style={styles.carddetail}>
+              <Text style={styles.sectionHeader}>Chi tiết đơn hàng</Text>
+              <FlatList
+                nestedScrollEnabled={true}
+                data={visibleOrderDetails}
+                keyExtractor={(item) => item.code}
+                renderItem={({ item }) => {
+                  const isService = !!item.shopService;
+                  const isProduct = !!item.product;
+                  const imageUrl = isService
+                    ? `https://pettiehome.online/web/${item.shopService.imageUrl}`
+                    : isProduct
+                    ? `https://pettiehome.online/web/${item.product.image?.uri}`
+                    : "https://via.placeholder.com/60";
+
+                  return (
+                    <View style={styles.itemRow}>
+                      <View style={styles.itemInfo}>
+                        <Text style={styles.itemText}>
+                          {isService
+                            ? item.shopService.name
+                            : isProduct
+                            ? item.product.name
+                            : "Không có thông tin"}
+                        </Text>
+                      </View>
+                      <Text style={styles.quantity}>x{item.quantity}</Text>
+                    </View>
+                  );
+                }}
+              />
+              {shouldShowToggle && (
+                <TouchableOpacity
+                  onPress={() => setIsExpanded(!isExpanded)}
+                  style={styles.expandButton}
+                >
+                  <Text style={styles.expandButtonText}>
+                    {isExpanded ? "Thu gọn ▲" : "Xem thêm ▼"}
                   </Text>
-                </View>
-                <Text style={styles.quantity}>x {item.quantity}</Text>
+                </TouchableOpacity>
+              )}
+              <View style={styles.totalContainer}>
+                <Text style={styles.totalText}>Tổng đơn hàng:</Text>
+                <Text style={styles.totalAmount}>{order.totalAmount.toLocaleString()} đ</Text>
               </View>
-            )}
-          />
-          <View style={styles.totalContainer}>
-            <Text style={styles.totalText}>Tổng đơn hàng:</Text>
-            <Text style={styles.totalAmount}>
-              {orderDetails.subtotal.toLocaleString()} đ
+              <View style={styles.totalContainerFee}>
+                <Text style={styles.totalText}>Phí vận chuyển:</Text>
+                <Text style={styles.totalAmount}>{order.shippingFee.toLocaleString()} đ</Text>
+              </View>
+              <View style={styles.totalContainer}>
+                <Text style={styles.finalTotalText}>Tổng cộng:</Text>
+                <Text style={styles.finalTotalAmount}>{order.totalAmount.toLocaleString()} đ</Text>
+              </View>
+            </View>
+          </>
+        }
+        ListFooterComponent={
+          <>
+            <View style={styles.cardpayment}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.section}>Phương thức thanh toán</Text>
+                <Text style={styles.infoValue}>
+                  {mapPaymentMethodToText(order.paymentMethod)}
+                </Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Trạng thái thanh toán:</Text>
+                <Text style={styles.value}>
+                  {mapPaymentStatusToText(order.paymentStatus)}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.cardNote}>
+              <Text style={styles.sectionHeader}>Lưu ý của khách hàng</Text>
+              <Text style={styles.noteText}>{order.note || "Không có lưu ý."}</Text>
+            </View>
+          </>
+        }
+        renderItem={null}
+        contentContainerStyle={{ padding: 10, paddingTop: 110 }}
+      />
+
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Chuyển trạng thái</Text>
+            <Text style={styles.modalText}>
+              Bạn có chắc chắn muốn chuyển trạng thái đơn hàng?
             </Text>
-          </View>
-          <View style={styles.totalContainerFee}>
-            <Text style={styles.totalText}>Phí vận chuyển:</Text>
-            <Text style={styles.totalAmount}>
-              {orderDetails.shipping.toLocaleString()} đ
-            </Text>
-          </View>
-          <View style={styles.totalContainer}>
-            <Text style={styles.finalTotalText}>Tổng cộng:</Text>
-            <Text style={styles.finalTotalAmount}>
-              {orderDetails.total.toLocaleString()} đ
-            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalButtonCancel}
+                onPress={() => setIsModalVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>Hủy</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalButtonConfirm}
+                onPress={() => {
+                  if (!order) return;
+                  const currentIndex = statusSteps.indexOf(order.status);
+                  handleStatusChange(statusSteps[currentIndex + 1]);
+                }}
+              >
+                <Text style={styles.modalButtonText}>Xác nhận</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-
-        <View style={styles.cardpayment}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.section}>Phương thức thanh toán</Text>
-            <Text style={styles.infoValue}>{orderDetails.paymentMethod}</Text>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Thời gian đặt hàng:</Text>
-            <Text style={styles.value}>{orderDetails.time}</Text>
-            <Text style={styles.infoLabel}>Thời gian thanh toán:</Text>
-            <Text style={styles.value}>{orderDetails.paymentTime}</Text>
-          </View>
-        </View>
-
-        <View style={styles.cardNote}>
-          <Text style={styles.sectionHeader}>Lưu ý của khách hàng</Text>
-          <Text style={styles.noteText}>{orderDetails.customerNote}</Text>
-        </View>
-      </View>
-    </ScrollView>
+      </Modal>
+    </View>
   );
 }
 
+// Giữ nguyên phần styles như cũ
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -209,16 +317,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#699BF4",
     padding: 10,
-    paddingBottom: 30,
-    paddingTop: 30,
+    paddingBottom: 20,
+    paddingTop: 45,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    elevation: 10,
   },
   backButton: {
-    marginRight: 10,
+    flexDirection: "row",
   },
   header: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
+    marginLeft: 10,
   },
   statusOrder: {
     fontSize: 15,
@@ -261,9 +376,9 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   status: {
-    flexDirection: "row", // Căn theo hàng ngang
-    alignItems: "center", // Căn giữa icon và chữ
-    justifyContent: "center", // Căn giữa nội dung theo chiều ngang
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 13,
     borderRadius: 10,
     paddingVertical: 10,
@@ -277,7 +392,7 @@ const styles = StyleSheet.create({
     color: "#25923E",
     fontWeight: "bold",
     fontSize: 16,
-    marginLeft: 5, // Tạo khoảng cách giữa icon và chữ
+    marginLeft: 5,
   },
   carddetail: {
     backgroundColor: "#fff",
@@ -314,32 +429,22 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginBottom: 10,
-    flexWrap: "wrap",
-  },
-  image: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-    marginRight: 10,
+    alignItems: "center",
   },
   itemInfo: {
     flex: 1,
+    justifyContent: "center",
   },
   itemText: {
     fontSize: 16,
     fontWeight: "medium",
-    flexWrap: "wrap", // Cho phép xuống dòng
-    maxWidth: "90%",
-    marginBottom: 3,
+    flexWrap: "wrap",
+    maxWidth: "70%",
   },
   quantity: {
-    fontSize: 14,
-    color: "#777",
-  },
-  itemPrice: {
     fontSize: 16,
+    color: "#777",
     fontWeight: "bold",
-    color: "#ed7c44",
   },
   totalContainer: {
     flexDirection: "row",
@@ -420,5 +525,57 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
     marginTop: 10,
+  },
+  expandButton: {
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  expandButtonText: {
+    fontSize: 16,
+    color: "#699BF4",
+    fontWeight: "bold",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+  },
+  modalButtonCancel: {
+    padding: 10,
+    marginRight: 10,
+  },
+  modalButtonConfirm: {
+    padding: 10,
+    backgroundColor: "#25923E",
+    borderRadius: 5,
+  },
+  modalButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

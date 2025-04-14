@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -7,36 +8,136 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
-  SafeAreaView,
+  Dimensions,
+  Platform,
+  ScrollView,
 } from "react-native";
-import { ScrollView } from "react-native";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { registerUser } from "@/services/api";
+import { resendOtp, signUpShop, signUpUser } from "@/services/user/auth";
+import { ResendOtpType } from "@/services/types";
+import * as WebBrowser from "expo-web-browser";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import logo from "../../assets/images/login.png";
+const LoginImage = require('../../assets/images/login.png')
+
+
+const { width, height } = Dimensions.get("window");
+
+// Hàm kiểm tra thiết bị
+const isTablet = width >= 600; // Máy tính bảng thường có chiều rộng từ 600px trở lên
 
 export default function Register() {
   const router = useRouter();
-  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [shopName, setShopName] = useState("");
+  const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<"user" | "shop">("user"); // State lưu vai trò
+  const [address, setAddress] = useState("");
+  const [role, setRole] = useState<"user" | "shop">("user");
+  const [bankName, setBankName] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [bankAccountName, setBankAccountName] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
 
-  const handleRegister = async () => {
+  const openPrivacyPolicy = async () => {
     try {
-      const user = await registerUser(
-        username,
-        phoneNumber,
-        password,
-        confirmPassword,
-        role
-      );
-      Alert.alert("Đăng ký thành công", `Chào mừng ${user.userName}`);
-      router.push("/Auths/login");
+      await WebBrowser.openBrowserAsync("http://14.225.198.232:8080/api/v1/privacy-policy");
+    } catch (error) {
+      console.error("Error opening privacy policy:", error);
+      Alert.alert("Lỗi", "Không thể mở trang điều khoản. Vui lòng thử lại sau.");
+    }
+  };
+
+  const handleSignUpUser = async () => {
+    try {
+      if (!email || !password || !confirmPassword || !fullName || !phoneNumber) {
+        Alert.alert("Lỗi", "Vui lòng điền đầy đủ thông tin.");
+        return;
+      }
+
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(password)) {
+        Alert.alert(
+          "Lỗi",
+          "Mật khẩu phải chứa ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt."
+        );
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        Alert.alert("Lỗi", "Mật khẩu xác nhận không khớp.");
+        return;
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        Alert.alert("Lỗi", "Email không hợp lệ.");
+        return;
+      }
+
+      const phoneRegex = /^\d{10,}$/;
+      if (!phoneRegex.test(phoneNumber)) {
+        Alert.alert("Lỗi", "Số điện thoại không hợp lệ.");
+        return;
+      }
+
+      if (!acceptTerms) {
+        Alert.alert("Lỗi", "Vui lòng chấp nhận điều khoản và điều kiện để tiếp tục.");
+        return;
+      }
+
+      if (role === "shop") {
+        if (!shopName || !address || !bankName || !bankAccountNumber || !bankAccountName) {
+          Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin cửa hàng.");
+          return;
+        }
+      }
+
+      let requestData;
+
+      if (role === "user") {
+        requestData = {
+          fullName,
+          email,
+          phoneNumber,
+          password,
+        };
+        const response = await signUpUser(requestData);
+
+        if ("error" in response && response.error === "EmailNotVerified") {
+          await resendOtp({ email, type: ResendOtpType.ConfirmEmail });
+          Alert.alert("Mã OTP đã được gửi lại", "Vui lòng kiểm tra email của bạn.");
+          router.push(`/Auths/confirm?email=${encodeURIComponent(email)}`);
+          return;
+        }
+      } else {
+        requestData = {
+          email,
+          password,
+          shopName,
+          phone: phoneNumber,
+          address,
+          bankAccountNumber,
+          bankName,
+          bankAccountName,
+        };
+
+        const response = await signUpShop(requestData);
+
+        if ("error" in response && response.error === "EmailNotVerified") {
+          await resendOtp({ email, type: ResendOtpType.ConfirmEmail });
+          Alert.alert("Mã OTP đã được gửi lại", "Vui lòng kiểm tra email của bạn.");
+          router.push(`/Auths/confirm?email=${encodeURIComponent(email)}`);
+          return;
+        }
+      }
+
+      Alert.alert("Tiếp theo", "Tiếp tục xác thực OTP");
+      router.push(`/Auths/confirm?email=${encodeURIComponent(email)}`);
     } catch (error: any) {
-      Alert.alert("Lỗi", error.message || "Đăng ký thất bại");
+      console.error("Error signing up:", error);
+      Alert.alert("Lỗi", "Có lỗi xảy ra, vui lòng thử lại.");
     }
   };
 
@@ -47,16 +148,23 @@ export default function Register() {
     >
       <StatusBar hidden={true} />
 
-      <Image source={logo} style={styles.logo} />
+      {/* Logo chiếm toàn bộ chiều rộng và phần trên của màn hình */}
+      <Image source={LoginImage} style={styles.logo} />
 
       <Text style={styles.title}>Đăng ký</Text>
 
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="UserName"
-          value={username}
-          onChangeText={setUsername}
+          placeholder="Họ và tên"
+          value={fullName}
+          onChangeText={setFullName}
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
         />
         <TextInput
           style={styles.input}
@@ -79,12 +187,45 @@ export default function Register() {
           value={confirmPassword}
           onChangeText={setConfirmPassword}
         />
+
+        {role === "shop" && (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Tên cửa hàng"
+              value={shopName}
+              onChangeText={setShopName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Địa chỉ cửa hàng"
+              value={address}
+              onChangeText={setAddress}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Tên ngân hàng"
+              value={bankName}
+              onChangeText={setBankName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Số tài khoản ngân hàng"
+              keyboardType="numeric"
+              value={bankAccountNumber}
+              onChangeText={setBankAccountNumber}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Tên chủ tài khoản"
+              value={bankAccountName}
+              onChangeText={setBankAccountName}
+            />
+          </>
+        )}
       </View>
 
-      {/* Chọn vai trò bằng Ionicons */}
-
       <View style={styles.roleContainer}>
-        {/* Người dùng */}
         <TouchableOpacity
           style={styles.radioOption}
           onPress={() => setRole("user")}
@@ -97,7 +238,6 @@ export default function Register() {
           <Text style={styles.radioText}>Người dùng</Text>
         </TouchableOpacity>
 
-        {/* Cửa hàng */}
         <TouchableOpacity
           style={styles.radioOption}
           onPress={() => setRole("shop")}
@@ -111,59 +251,105 @@ export default function Register() {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+      <View style={styles.termsContainer}>
+        <TouchableOpacity
+          style={styles.checkboxContainer}
+          onPress={() => setAcceptTerms(!acceptTerms)}
+        >
+          <Ionicons
+            name={acceptTerms ? "checkbox" : "square-outline"}
+            size={24}
+            color={acceptTerms ? "#ed7c44" : "#666"}
+          />
+          <Text style={styles.termsText}>
+            Tôi đồng ý với{" "}
+            <Text style={styles.termsLink} onPress={openPrivacyPolicy}>
+              điều khoản và điều kiện
+            </Text>
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity 
+        style={[
+          styles.registerButton, 
+          !acceptTerms && styles.disabledButton
+        ]} 
+        onPress={handleSignUpUser}
+        disabled={!acceptTerms}
+      >
         <Text style={styles.registerText}>Đăng ký</Text>
       </TouchableOpacity>
+
+      <Text style={styles.loginText}>
+        Đã có tài khoản!{" "}
+        <Text
+          style={styles.registerLink}
+          onPress={() => router.push("/Auths/login")}
+        >
+          Đăng nhập
+        </Text>
+      </Text>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "white",
-    flex: 1,
-  },
-  logo: { marginLeft: 1, width: "100%", height: 350 },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  inputContainer: {
-    width: "100%",
-    marginBottom: 10,
-    alignItems: "center",
-  },
+  container: { backgroundColor: "white", flex: 1, marginBottom: 30 },
+  logo: { marginLeft: 1, width: "100%", height: 430 },
+  title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
+  inputContainer: { width: "100%", marginBottom: 10, alignItems: "center" },
   input: {
-    height: 50,
+    height: isTablet ? height * 0.07 : height * 0.06,
     width: "85%",
     borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
     backgroundColor: "#fff",
-    marginBottom: 10,
-    fontWeight: "600",
-    fontSize: 16,
+    marginBottom: isTablet ? height * 0.02 : height * 0.015,
+    fontSize: isTablet ? width * 0.04 : width * 0.045,
   },
   roleContainer: {
-    marginBottom: 20,
+    marginBottom: isTablet ? height * 0.03 : height * 0.02,
     paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-evenly",
   },
-  roleTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
   radioOption: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  radioText: { fontSize: 16, marginLeft: 10 },
+  radioText: { fontSize: isTablet ? width * 0.04 : width * 0.045, marginLeft: 10 },
+  termsContainer: {
+    width: "85%",
+    alignSelf: "center",
+    marginBottom: isTablet ? height * 0.03 : height * 0.02,
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  termsText: {
+    marginLeft: 10,
+    fontSize: isTablet ? width * 0.035 : width * 0.04,
+    flexShrink: 1,
+  },
+  termsLink: {
+    color: "#ed7c44",
+    textDecorationLine: "underline",
+    fontWeight: "bold",
+  },
   registerButton: {
     backgroundColor: "#ed7c44",
-    paddingVertical: 12,
+    paddingVertical: isTablet ? height * 0.02 : height * 0.015,
     borderRadius: 8,
     alignItems: "center",
     width: "85%",
     alignSelf: "center",
-    marginBottom: 70,
+    marginBottom: 5,
   },
-  registerText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
+  disabledButton: {
+    backgroundColor: "#cccccc",
+  },
+  registerText: { color: "#fff", fontSize: isTablet ? width * 0.045 : width * 0.05, fontWeight: "bold" },
+  loginText: { textAlign: "center", marginTop: isTablet ? height * 0.03 : height * 0.02, fontSize: isTablet ? width * 0.035 : width * 0.04, marginBottom: 20 },
+  registerLink: { fontWeight: "bold", color: "#000" },
 });
