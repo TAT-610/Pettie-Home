@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaChartBar, FaUsers, FaStore, FaSignOutAlt } from "react-icons/fa";
 import { FaMoneyBillTransfer } from "react-icons/fa6";
-
+import Logo from "../assets/logotest.png";
 import { TbShoppingCartCopy } from "react-icons/tb";
 import { useNavigate } from "react-router-dom";
 
@@ -58,7 +58,7 @@ const Sidebar = () => {
 
   const handleNavigation = (href: string) => {
     setActive(href);
-    navigate(href); // Navigate to the clicked page
+    window.location.href = href; // Navigate to the clicked page
   };
 
   const handleLogout = () => {
@@ -69,7 +69,7 @@ const Sidebar = () => {
     <div className="w-64 h-screen bg-[#699BF4] shadow-lg flex flex-col">
       {/* Logo Section */}
       <div className="mx-auto px-6 mt-12">
-        <img src="/src/assets/logotest.png" alt="Logo" className="w-45 h-20" />
+        <img src={Logo} alt="Logo" className="w-45 h-20" />
       </div>
 
       {/* Navigation Section */}
