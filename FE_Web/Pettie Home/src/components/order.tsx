@@ -1,4 +1,4 @@
-const Orders = [
+export const Orders = [
   {
     id_customer: "8834b3cb-a3d2-4e07-aad6-c5a669037b67",
     id: 5281,

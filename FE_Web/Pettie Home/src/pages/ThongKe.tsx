@@ -199,7 +199,7 @@ const ThongKe = () => {
             <div>Xếp hạng doanh thu các shop</div>
           </div>
           <div className="px-6 w-full">
-            {sortedShop.map((s, index) => (
+            {sortedShop.map((s) => (
               <div
                 key={s.id}
                 className="flex items-center justify-between mb-4"

@@ -5,7 +5,7 @@ import { orders } from "../components/data";
 import { FaCircle } from "react-icons/fa";
 
 interface Order {
-  orderId: string;
+  orderId: number;
   shopName: string;
   buyerName: string;
   totalAmount: number;
@@ -19,22 +19,21 @@ export default function GiaoDich() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState("orders"); // Active tab: "orders", "waiting", "paid"
   const [currentPageOrders, setCurrentPageOrders] = useState(1);
-  const [currentPageWithdrawals, setCurrentPageWithdrawals] = useState(1);
 
   const rowsPerPage = 10;
 
   const [giaoDichData, setGiaoDichData] = useState(withdrawalRequests);
 
-  const statusMap: Record<number, { label: string; color: string }> = {
-    1: { label: "Chờ thanh toán", color: "bg-orange-200 text-orange-700" },
-    3: { label: "Đã thanh toán", color: "bg-green-200 text-green-700" },
-  };
+  // const statusMap: Record<number, { label: string; color: string }> = {
+  //   1: { label: "Chờ thanh toán", color: "bg-orange-200 text-orange-700" },
+  //   3: { label: "Đã thanh toán", color: "bg-green-200 text-green-700" },
+  // };
 
   // Mở modal xác nhận
-  const openModal = (id: number) => {
-    setSelectedId(id);
-    setModalOpen(true);
-  };
+  // const openModal = (id: number) => {
+  //   setSelectedId(id);
+  //   setModalOpen(true);
+  // };
 
   // Đóng modal
   const closeModal = () => {
@@ -42,9 +41,20 @@ export default function GiaoDich() {
     setSelectedId(null);
   };
 
+  // Helper function to format currency
+  // const formatCurrency = (amount: number) => {
+  //   return `${amount.toLocaleString("vi-VN")} VND`;
+  // };
+
   // Xác nhận chuyển từ "Chờ thanh toán" → "Đã thanh toán"
   const confirmTransfer = () => {
     if (selectedId !== null) {
+      const exists = giaoDichData.some((item) => item.id === selectedId);
+      if (!exists) {
+        alert("Lỗi: Không tìm thấy giao dịch.");
+        closeModal();
+        return;
+      }
       setGiaoDichData((prevData) =>
         prevData.map((item) =>
           item.id === selectedId
@@ -80,30 +90,45 @@ export default function GiaoDich() {
   );
 
   const handlePageChangeOrders = (page: number) => {
-    if (page >= 1 && page <= totalPagesOrders) {
-      setCurrentPageOrders(page);
-    }
+    setCurrentPageOrders((prev) =>
+      page >= 1 && page <= totalPagesOrders ? page : prev
+    );
   };
 
-  // Pagination logic for withdrawal requests
-  const filteredWithdrawals = giaoDichData.filter((item: any) => {
-    if (activeTab === "waiting") return item.status === 1;
-    if (activeTab === "paid") return item.status === 3;
-    return true;
-  });
-
-  const totalPagesWithdrawals = Math.ceil(
-    filteredWithdrawals.length / rowsPerPage
-  );
-  const paginatedWithdrawals = filteredWithdrawals.slice(
-    (currentPageWithdrawals - 1) * rowsPerPage,
-    currentPageWithdrawals * rowsPerPage
-  );
-
-  const handlePageChangeWithdrawals = (page: number) => {
-    if (page >= 1 && page <= totalPagesWithdrawals) {
-      setCurrentPageWithdrawals(page);
+  const renderModalContent = () => {
+    const selectedShop = giaoDichData.find((shop) => shop.id === selectedId);
+    if (!selectedShop) {
+      return (
+        <p className="text-lg font-semibold text-red-500">
+          Lỗi: Không tìm thấy giao dịch.
+        </p>
+      );
     }
+    return (
+      <>
+        <p className="text-lg font-medium font-sans mb-4">
+          Bạn xác nhận thanh toán cho{" "}
+          <span className="font-medium text-blue-600">
+            {selectedShop.shopName}
+          </span>
+          ?
+        </p>
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={closeModal}
+            className="px-4 py-2 bg-gray-300 rounded"
+          >
+            Hủy
+          </button>
+          <button
+            onClick={confirmTransfer}
+            className="px-4 py-2 bg-blue-500 text-white rounded"
+          >
+            Xác nhận
+          </button>
+        </div>
+      </>
+    );
   };
 
   return (
@@ -125,14 +150,8 @@ export default function GiaoDich() {
           <div className="w-11 h-11 rounded-full bg-slate-200 flex items-center justify-center">
             <FaBell className="text-[#ed7c44] text-2xl" />
           </div>
-          <img
-            src="https://scontent.fsgn21-1.fna.fbcdn.net/v/t39.30808-6/298262371_1454849461693251_7497615639064788636_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHIS2EWfaEKXzDZN0jYlSa5rE-BrKfZH_-sT4Gsp9kf_0yR1gdYdCUsbKDvfISZx7Tmz5fKhyZYpTW7EYSTyhUM&_nc_ohc=oKNrHcCyEEwQ7kNvwEYANdJ&_nc_oc=AdmQgdpbKKkqwhnmBVfrem5GYsTrTkeX_aaVMMCRf11BGoUENmcUavw1XP3jqm9W2yj0391_nEomItzS0m0qswyP&_nc_zt=23&_nc_ht=scontent.fsgn21-1.fna&_nc_gid=Ub_Y7GE4-TFhUTmIKFaG8Q&oh=00_AfFR4OtBAp141CE8PN_hpAvVxQON-rPEqECLX4CI8eTsxA&oe=67F9E97E"
-            alt="User Avatar"
-            className="w-11 h-11 rounded-full"
-          />
         </div>
       </div>
-
       {/* Tabs */}
       <div className="flex space-x-4 px-8 mb-3">
         <button
@@ -149,7 +168,6 @@ export default function GiaoDich() {
         <button
           onClick={() => {
             setActiveTab("waiting");
-            setCurrentPageWithdrawals(1);
           }}
           className={`px-4 py-1.5 rounded ${
             activeTab === "waiting"
@@ -162,7 +180,6 @@ export default function GiaoDich() {
         <button
           onClick={() => {
             setActiveTab("paid");
-            setCurrentPageWithdrawals(1);
           }}
           className={`px-4 py-1.5 rounded ${
             activeTab === "paid"
@@ -173,7 +190,6 @@ export default function GiaoDich() {
           Đã thanh toán
         </button>
       </div>
-
       {/* Orders Table */}
       {activeTab === "orders" && (
         <div className="overflow-x-auto bg-white shadow-md rounded-lg mx-10">
@@ -259,151 +275,11 @@ export default function GiaoDich() {
           {">"}
         </button>
       </div>
-      {/* Withdrawals Table */}
-      {activeTab !== "orders" && (
-        <div className="overflow-x-auto bg-white shadow-md rounded-lg mx-10">
-          <table className="w-full text-sm text-left text-gray-500">
-            <thead className="bg-[#699BF4] text-white uppercase text-xs">
-              <tr>
-                <th className="px-4 py-3">ID</th>
-                <th className="px-3 py-3">Tên cửa hàng</th>
-                <th className="px-3 py-3">Số tiền rút</th>
-                <th className="px-3 py-3">Ngân hàng</th>
-                <th className="px-3 py-3">Số tài khoản</th>
-                <th className="px-3 py-3">Trạng thái</th>
-                <th className="px-3 py-3">Thời gian thanh toán</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedWithdrawals.map(
-                (withdrawal: {
-                  id: number;
-                  shopName: string;
-                  amount: number;
-                  bankName: string;
-                  accountNumber: string;
-                  status: number;
-                  paymentTime?: string;
-                }) => (
-                  <tr
-                    key={withdrawal.id}
-                    className="border-b hover:bg-gray-100"
-                  >
-                    <td className="px-4 py-4">{withdrawal.id}</td>
-                    <td className="px-3 py-4">{withdrawal.shopName}</td>
-                    <td className="px-3 py-4">{withdrawal.amount}</td>
-                    <td className="px-3 py-4">{withdrawal.bankName}</td>
-                    <td className="px-3 py-4">{withdrawal.accountNumber}</td>
-                    <td className="px-3 py-4">
-                      <button
-                        onClick={() =>
-                          withdrawal.status === 1
-                            ? openModal(withdrawal.id)
-                            : null
-                        }
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          statusMap[withdrawal.status].color
-                        } ${
-                          withdrawal.status === 3
-                            ? "cursor-default"
-                            : "hover:opacity-80"
-                        }`}
-                        disabled={withdrawal.status === 3}
-                      >
-                        {statusMap[withdrawal.status].label}
-                      </button>
-                    </td>
-                    <td className="px-3 py-4">
-                      {withdrawal.paymentTime ? withdrawal.paymentTime : "__"}
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
-          {/* Pagination for withdrawals */}
-          <div className="flex justify-center items-center mt-4">
-            <button
-              onClick={() =>
-                handlePageChangeWithdrawals(currentPageWithdrawals - 1)
-              }
-              className={`px-3 py-1 mx-1 rounded ${
-                currentPageWithdrawals === 1
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-gray-200"
-              }`}
-              disabled={currentPageWithdrawals === 1}
-            >
-              Previous
-            </button>
-            {Array.from({ length: totalPagesWithdrawals }, (_, index) => (
-              <button
-                key={index}
-                onClick={() => handlePageChangeWithdrawals(index + 1)}
-                className={`px-3 py-1 mx-1 rounded ${
-                  currentPageWithdrawals === index + 1
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-200 text-gray-700"
-                }`}
-              >
-                {index + 1}
-              </button>
-            ))}
-            <button
-              onClick={() =>
-                handlePageChangeWithdrawals(currentPageWithdrawals + 1)
-              }
-              className={`px-3 py-1 mx-1 rounded ${
-                currentPageWithdrawals === totalPagesWithdrawals
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-gray-200"
-              }`}
-              disabled={currentPageWithdrawals === totalPagesWithdrawals}
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Modal xác nhận */}
       {modalOpen && selectedId !== null && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30">
           <div className="bg-white p-6 rounded-lg shadow-lg">
-            {(() => {
-              const selectedShop = giaoDichData.find(
-                (shop) => shop.id === selectedId
-              );
-              return selectedShop ? (
-                <>
-                  <p className="text-lg font-medium font-sans mb-4">
-                    Bạn xác nhận thanh toán cho{" "}
-                    <span className="font-medium text-blue-600">
-                      {selectedShop.shopName}
-                    </span>
-                    ?
-                  </p>
-                  <div className="flex justify-end space-x-3">
-                    <button
-                      onClick={closeModal}
-                      className="px-4 py-2 bg-gray-300 rounded"
-                    >
-                      Hủy
-                    </button>
-                    <button
-                      onClick={confirmTransfer}
-                      className="px-4 py-2 bg-blue-500 text-white rounded"
-                    >
-                      Xác nhận
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <p className="text-lg font-semibold text-red-500">
-                  Lỗi: Không tìm thấy giao dịch.
-                </p>
-              );
-            })()}
+            {renderModalContent()}
           </div>
         </div>
       )}

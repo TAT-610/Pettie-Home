@@ -70,8 +70,9 @@ export default function Login() {
           <button
             className="px-5 py-3 bg-[#ed7c44] text-white text-base font-semibold rounded-full hover:bg-[#ff8c57] transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
             onClick={handleLogin}
+            disabled={loading}
           >
-            Đăng nhập
+            {loading ? "Đang xử lý..." : "Đăng nhập"}
           </button>
         </div>
       </div>

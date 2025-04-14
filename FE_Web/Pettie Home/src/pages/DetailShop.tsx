@@ -19,7 +19,7 @@ export interface Store {
 }
 interface Order {
   id: number;
-  id_customer: number;
+  id_customer: string;
   name: string;
   phone: string;
   price: number;

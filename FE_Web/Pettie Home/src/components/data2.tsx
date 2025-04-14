@@ -2,7 +2,7 @@ export const withdrawalRequests = [
   {
     id: 1,
     shopName: "Chuyện Kể Nhà Bụp",
-    amount: "310.000 VND",
+    amount: 310000, // Changed to numeric value
     bankName: "Vietcombank",
     accountNumber: "123456789",
     status: 1, // Chờ thanh toán
@@ -11,7 +11,7 @@ export const withdrawalRequests = [
   {
     id: 2,
     shopName: "MiuGauu",
-    amount: "100.000 VND",
+    amount: 100000, // Changed to numeric value
     bankName: "Sacombank",
     accountNumber: "987654321",
     status: 3, // Đã thanh toán
@@ -20,7 +20,7 @@ export const withdrawalRequests = [
   {
     id: 3,
     shopName: "SaBiRoo",
-    amount: "210.000 VND",
+    amount: 210000, // Changed to numeric value
     bankName: "Sacombank",
     accountNumber: "567890123",
     status: 1, // Chờ thanh toán
@@ -29,7 +29,7 @@ export const withdrawalRequests = [
   {
     id: 4,
     shopName: "Pet Want",
-    amount: "150.000 VND",
+    amount: 150000, // Changed to numeric value
     bankName: "Techcombank",
     accountNumber: "654321987",
     status: 3, // Đã thanh toán
