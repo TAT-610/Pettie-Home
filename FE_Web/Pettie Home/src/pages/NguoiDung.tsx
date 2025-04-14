@@ -6,7 +6,7 @@ type User = {
   id: string;
   email: string;
   emailConfirmed?: boolean;
-  fullName: string;
+  name: string;
   phone: string | null;
   isEnabled?: boolean;
   isLockedOut?: boolean;
@@ -119,7 +119,7 @@ const NguoiDung = () => {
                 <tr key={user.id} className="bg-white border-b">
                   <td className="px-4 py-2.5">{user.id}</td>
                   <td className="px-4 py-2.5">{user.email}</td>
-                  <td className="px-4 py-2.5">{user.fullname}</td>
+                  <td className="px-4 py-2.5">{user.name}</td>
                   <td className="px-4 py-2.5">{user.phone ?? "_"}</td>
                   <td className="px-4 py-2.5">{user.role}</td>
                   <td className="px-4 py-2.5">
