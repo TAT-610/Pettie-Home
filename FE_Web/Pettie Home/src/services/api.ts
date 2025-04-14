@@ -3,11 +3,15 @@ import axios from "axios";
 const BASE_URL_1 = "http://14.225.198.232:8080";
 const BASE_URL_2 = "http://14.225.198.232:8080/api/v1";
 
-export const loginUser = async (username: string, password: string): Promise<any> => {
+export const loginUser = async (username: string, password: string): Promise<{ accessToken: string; userData: any }> => {
   console.log("Login with username:", username, "Password:", password);
 
   try {
-    const response = await axios.post(
+    interface LoginResponse {
+      access_token: string;
+    }
+
+    const response = await axios.post<LoginResponse>(
       `${BASE_URL_1}/connect/token`,
       new URLSearchParams({
         username,
@@ -26,22 +30,19 @@ export const loginUser = async (username: string, password: string): Promise<any
     const accessToken = response.data.access_token;
     if (!accessToken) throw new Error("Không nhận được access token");
 
-    localStorage.setItem("access_token", accessToken); // Lưu token vào localStorage
+    localStorage.setItem("access_token", accessToken);
 
-    // Gọi API lấy thông tin người dùng
     const userData = await getUserAccount();
-    localStorage.setItem("user_info", JSON.stringify(userData)); // Lưu thông tin user vào localStorage
+    localStorage.setItem("user_info", JSON.stringify(userData));
 
-    return { accessToken, userData }; // Trả về cả token và thông tin user
+    return { accessToken, userData };
   } catch (error) {
     console.error("Lỗi đăng nhập:", error);
     throw error;
   }
 };
 
-
-// Hàm lấy thông tin người dùng
-export const getUserAccount = async () => {
+export const getUserAccount = async (): Promise<any> => {
   try {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
@@ -49,7 +50,7 @@ export const getUserAccount = async () => {
       throw new Error("Access token không hợp lệ");
     }
 
-    const response = await axios.get(`${BASE_URL_2}/account/users/me`, {
+    const response = await axios.get<any>(`${BASE_URL_2}/account/users/me`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
@@ -64,8 +65,6 @@ export const getUserAccount = async () => {
   }
 };
 
-
-// Hàm lấy danh sách tất cả người dùng
 export const getAllUser = async (page = 1, pageSize = 10): Promise<any[]> => {
   const accessToken = localStorage.getItem("access_token");
   if (!accessToken) {
@@ -74,7 +73,13 @@ export const getAllUser = async (page = 1, pageSize = 10): Promise<any[]> => {
   }
 
   try {
-    const response = await axios.get(
+    interface GetAllUserResponse {
+      data: {
+        items: any[];
+      };
+    }
+
+    const response = await axios.get<GetAllUserResponse>(
       `${BASE_URL_2}/account/users?pageNumber=${Math.max(1, page)}&pageSize=${Math.max(1, pageSize)}`,
       {
         headers: {
