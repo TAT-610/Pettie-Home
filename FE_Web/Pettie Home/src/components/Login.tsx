@@ -42,11 +42,7 @@ export default function Login() {
       {/* <div className="flex flex-col items-center text-center max-w-md w-full"> */}
       {/* Logo */}
       <div className="w-2/3 flex flex-col items-center justify-center pb-20">
-        <img
-          src="src/assets/logotest.png"
-          alt="LogoLogo"
-          className="w-56 h-auto  "
-        />
+        <img src="./logotest.png" alt="LogoLogo" className="w-56 h-auto  " />
         <div className="text-white text-lg font-semibold font-roboto">
           Tiện Lợi Cho Bạn, Thoải Mái Cho Pet
         </div>
@@ -75,7 +71,7 @@ export default function Login() {
           </button>
         </div>
       </div>
-      <img src="src/assets/bg.jpg" alt="LogoLogo" className="w-auto h-auto " />
+      <img src="./bg.jpg" alt="LogoLogo" className="w-auto h-auto " />
     </div>
   );
 }
