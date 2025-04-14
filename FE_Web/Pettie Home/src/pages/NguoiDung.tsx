@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
-import { User as UserData } from "../components/data3";
+import { User } from "../components/data3";
 
 type User = {
   id: string;
@@ -26,12 +26,15 @@ const NguoiDung = () => {
 
   useEffect(() => {
     const fetchUsers = (searchQuery = "") => {
-      const filtered = UserData.filter(
+      const filtered = User.filter(
         (user) =>
           user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
           user.fullname.toLowerCase().includes(searchQuery.toLowerCase()) ||
           (user.phone && user.phone.includes(searchQuery))
-      );
+      ).map((user) => ({
+        ...user,
+        role: Array.isArray(user.role) ? user.role : [user.role], // Ensure role is an array
+      }));
       setFilteredUsers(filtered);
     };
 

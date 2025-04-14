@@ -3,12 +3,18 @@ import axios from "axios";
 const BASE_URL = "http://14.225.198.232:8080/api/v1";
 
 // Lấy danh sách danh mục
-export const getAllCategories = async (): Promise<any[]> => {
+interface Category {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export const getAllCategories = async (): Promise<Category[]> => {
   const accessToken = localStorage.getItem("access_token");
   if (!accessToken) throw new Error("Chưa có access_token");
 
   try {
-    const response = await axios.get(`${BASE_URL}/categories`, {
+    const response = await axios.get<{ data: { items: Category[] } }>(`${BASE_URL}/categories`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },

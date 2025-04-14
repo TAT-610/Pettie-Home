@@ -15,7 +15,12 @@ export const loginUser = async (username: string, password: string): Promise<{ a
   console.log("Login with username:", username, "Password:", password);
 
   try {
-    const response = await axios.post(
+    interface LoginResponse {
+      access_token: string;
+      // Add other fields if needed
+    }
+
+    const response = await axios.post<LoginResponse>(
       `${BASE_URL_1}/connect/token`,
       new URLSearchParams({
         username,
@@ -47,9 +52,8 @@ export const loginUser = async (username: string, password: string): Promise<{ a
   }
 };
 
-
 // Hàm lấy thông tin người dùng
-export const getUserAccount = async () => {
+export const getUserAccount = async (): Promise<UserData> => {
   try {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
@@ -57,7 +61,7 @@ export const getUserAccount = async () => {
       throw new Error("Access token không hợp lệ");
     }
 
-    const response = await axios.get(`${BASE_URL_2}/account/users/me`, {
+    const response = await axios.get<UserData>(`${BASE_URL_2}/account/users/me`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
@@ -65,16 +69,15 @@ export const getUserAccount = async () => {
     });
 
     console.log("User Data:", response.data);
-    return response.data;
+    return response.data; // Ensure response.data matches UserData
   } catch (error) {
     console.error("Lỗi lấy thông tin user:", error);
     throw error;
   }
 };
 
-
 // Hàm lấy danh sách tất cả người dùng
-export const getAllUser = async (page = 1, pageSize = 10): Promise<[]> => {
+export const getAllUser = async (page = 1, pageSize = 10): Promise<UserData[]> => {
   const accessToken = localStorage.getItem("access_token");
   if (!accessToken) {
     console.error("Lỗi: Chưa có access_token");
@@ -82,7 +85,13 @@ export const getAllUser = async (page = 1, pageSize = 10): Promise<[]> => {
   }
 
   try {
-    const response = await axios.get(
+    interface GetAllUserResponse {
+      data: {
+        items: UserData[];
+      };
+    }
+
+    const response = await axios.get<GetAllUserResponse>(
       `${BASE_URL_2}/account/users?pageNumber=${Math.max(1, page)}&pageSize=${Math.max(1, pageSize)}`,
       {
         headers: {
