@@ -58,7 +58,7 @@ const Sidebar = () => {
 
   const handleNavigation = (href: string) => {
     setActive(href);
-    window.location.href = href; // Navigate to the clicked page
+    navigate(href); // Navigate to the clicked page
   };
 
   const handleLogout = () => {
