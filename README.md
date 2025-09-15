@@ -31,7 +31,7 @@ It connects pet owners with nearby pet shops, spas, veterinary clinics, and pet 
 ## 🖼️ Application Screenshots
 
 ### 🔑 Login Screen
-<img width="472" height="1024" alt="image" src="https://github.com/user-attachments/assets/b80df239-9a87-43e1-8d85-c7886b8e562c" />
+<img width="200" height="520" alt="image" src="https://github.com/user-attachments/assets/b80df239-9a87-43e1-8d85-c7886b8e562c" />
 
 ### 🏠 Home Page
 <img width="472" height="1024" alt="image" src="https://github.com/user-attachments/assets/d107a732-3156-4d89-9904-aa9b8af8acf3" />
